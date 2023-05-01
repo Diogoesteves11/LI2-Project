@@ -10,7 +10,7 @@
 
 
 void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
-
+ 
 }
 
 void do_movement_action(STATE *st, int dx, int dy) {
