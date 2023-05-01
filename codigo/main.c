@@ -9,6 +9,9 @@
 #include "mapa.c"
 
 
+void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
+
+}
 
 void do_movement_action(STATE *st, int dx, int dy) {
 	int nextX = st->playerX + dx;
@@ -83,6 +86,7 @@ int main() {
 		mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
 		attron(COLOR_PAIR(COLOR_GREEN));
 		move(st.playerX, st.playerY);
+		draw_light(&st,&map);
 		update(&st);
 	}
 
