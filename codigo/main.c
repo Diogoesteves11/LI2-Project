@@ -77,10 +77,10 @@ int main() {
 	intrflush(stdscr, false);
 	keypad(stdscr, true);
 
-	init_pair(1, COLOR_WHITE, COLOR_BLACK);
-    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(4, COLOR_BLUE, COLOR_BLACK);
-	init_pair(2, COLOR_GREEN, COLOR_BLACK);
+	init_pair(WALL_ILUMINATED, COLOR_WHITE, COLOR_BLACK);
+    init_pair(LIGHT, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
+	init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
