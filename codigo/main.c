@@ -8,10 +8,18 @@
 #include "mapa.h"
 #include "mapa.c"
 
+#define BACKGROUND 0
+#define WALL_ILUMINATED 1
+#define PLAYER 2
+#define LIGHT 3
+#define SCORE 4       // definem-se numeros para a definição das cores dos diferentes elementos do jogo
 
+/*
 void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
  
 }
+
+*/
 
 void do_movement_action(STATE *st, int dx, int dy) {
 	int nextX = st->playerX + dx;
@@ -69,10 +77,10 @@ int main() {
 	intrflush(stdscr, false);
 	keypad(stdscr, true);
 
-	init_pair(COLOR_WHITE, COLOR_WHITE, COLOR_BLACK);
-    init_pair(COLOR_YELLOW, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(COLOR_BLUE, COLOR_BLUE, COLOR_BLACK);
-	init_pair(COLOR_GREEN, COLOR_GREEN, COLOR_BLACK);
+	init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(4, COLOR_BLUE, COLOR_BLACK);
+	init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
@@ -80,16 +88,16 @@ int main() {
 	
 	while(1) {
 		move(nrows - 1, 0);
-		attron(COLOR_PAIR(COLOR_BLUE));
+		attron(COLOR_PAIR(4));
 		printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
-		attroff(COLOR_PAIR(COLOR_BLUE));
+		attroff(COLOR_PAIR(4));
 
-		attron(COLOR_PAIR(COLOR_GREEN));
+		attron(COLOR_PAIR(2));
 		mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
-		attroff(COLOR_PAIR(COLOR_GREEN));
+		attroff(COLOR_PAIR(2));
 
 		move(st.playerX, st.playerY);
-		draw_light(&st,&map);
+		//draw_light(&st,&map);
 		update(&st);
 	}
 
