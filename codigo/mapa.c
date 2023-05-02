@@ -57,7 +57,7 @@ void draw_map(STATE *s, MAPA *map) {
         }
     }
 // Verifica cada posição em um quadrado 5x5 centrado e transforma em parede se não houver nenhuma parede vizinha
-// faz se 7 passagens para um resultado mais polido
+// faz se 7 passagens para um resultado mais redondo
 for(int d = 0; d < 7; d++){
  for (int i = 2; i < map->x - 2; i++) {
     for (int j = 2; j < map->y - 2; j++) {
