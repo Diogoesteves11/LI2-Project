@@ -70,8 +70,9 @@ int main() {
 	keypad(stdscr, true);
 
 	init_pair(COLOR_WHITE, COLOR_WHITE, COLOR_BLACK);
-        init_pair(COLOR_YELLOW, COLOR_YELLOW, COLOR_BLACK);
-        init_pair(COLOR_BLUE, COLOR_BLUE, COLOR_BLACK);
+    init_pair(COLOR_YELLOW, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(COLOR_BLUE, COLOR_BLUE, COLOR_BLACK);
+	init_pair(COLOR_GREEN, COLOR_GREEN, COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
@@ -82,9 +83,11 @@ int main() {
 		attron(COLOR_PAIR(COLOR_BLUE));
 		printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
 		attroff(COLOR_PAIR(COLOR_BLUE));
-		attron(COLOR_PAIR(COLOR_WHITE));
-		mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
+
 		attron(COLOR_PAIR(COLOR_GREEN));
+		mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
+		attroff(COLOR_PAIR(COLOR_GREEN));
+
 		move(st.playerX, st.playerY);
 		draw_light(&st,&map);
 		update(&st);

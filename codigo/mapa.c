@@ -12,31 +12,43 @@ void draw_map(STATE *s, MAPA *map) {
     s->playerY = 10;
     int casas_totais = ((map->x) * (map->y)) - 2 * (map->x + map->y);
 
+    start_color();
+    init_pair(0,COLOR_BLACK,COLOR_BLACK); // Cor preta iniciada
+    init_pair(COLOR_BLUE, COLOR_BLUE, COLOR_BLACK);
+
     for (int i = 0; i < casas_totais * 0.4; i++) {
         int x1 = rand() % (map->x - 2) + 1;
         int y1 = rand() % (map->y - 1);
         map->matriz[x1][y1] = '#';
+        attron(COLOR_PAIR(COLOR_BLUE));  // Cor preta aplicada às paredes, para que estas estejam "sem iluminação"
         mvaddch(y1, x1, map->matriz[x1][y1]);
+        attroff(COLOR_PAIR(COLOR_BLUE));
     }
 
     // Adiciona paredes nas bordas do mapa
     for (int i = 0; i < map->x; i++) {
         map->matriz[i][0] = '#'; // Parede superior
         map->matriz[i][map->y - 2] = '#'; // Parede inferior (uma linha acima da última)
+        attron(COLOR_PAIR(COLOR_BLUE));
         mvaddch(0, i, map->matriz[i][0]);
         mvaddch(map->y - 2, i, map->matriz[i][map->y - 2]);
+        attroff(COLOR_PAIR(COLOR_BLUE));
     }
     for (int i = 0; i < map->y - 1; i++) {
         map->matriz[0][i] = '#'; // Parede esquerda
         map->matriz[map->x - 1][i] = '#'; // Parede direita
+        attron(COLOR_PAIR(COLOR_BLUE));
         mvaddch(i, 0, map->matriz[0][i]);
         mvaddch(i, map->x - 1, map->matriz[map->x - 1][i]);
+        attroff(COLOR_PAIR(COLOR_BLUE));
     }
 
     // Limpa a última linha (linha inferior)
     for (int i = 1; i < map->x - 1; i++) {
         map->matriz[i][map->y - 1] = ' '; // Deixa a célula vazia
+        attron(COLOR_PAIR(COLOR_BLUE));
         mvaddch(map->y - 1, i, map->matriz[i][map->y - 1]);
+        attroff(COLOR_PAIR(COLOR_BLUE));
     }
 
     // Transforma todas as posições em paredes
@@ -52,7 +64,9 @@ void draw_map(STATE *s, MAPA *map) {
             }
             if (count >= 5) {
                 map->matriz[i][j] = '#';
+                attron(COLOR_PAIR(COLOR_BLUE));
                 mvaddch(j, i, map->matriz[i][j]);
+                attroff(COLOR_PAIR(COLOR_BLUE));
             }
         }
     }
@@ -71,7 +85,9 @@ for(int d = 0; d < 7; d++){
         }
         if (count == 0) {
             map->matriz[i][j] = '#';
+            attron(COLOR_PAIR(COLOR_BLUE));
             mvaddch(j, i, map->matriz[i][j]);
+            attroff(COLOR_PAIR(COLOR_BLUE));
         }
     }
 }
