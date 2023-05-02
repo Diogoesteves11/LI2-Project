@@ -20,7 +20,7 @@ void draw_map(STATE *s, MAPA *map) {
         int x1 = rand() % (map->x - 2) + 1;
         int y1 = rand() % (map->y - 1);
         map->matriz[x1][y1] = '#';
-        attron(COLOR_PAIR(COLOR_BLUE));  // Cor preta aplicada às paredes, para que estas estejam "sem iluminação"
+        attron(COLOR_PAIR(COLOR_BLUE));  // Cor preta aplicada às paredes, para que estas estejam "sem iluminação".
         mvaddch(y1, x1, map->matriz[x1][y1]);
         attroff(COLOR_PAIR(COLOR_BLUE));
     }
