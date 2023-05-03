@@ -87,7 +87,7 @@ int main() {
     init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
 	init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
 	init_pair(BACKGROUND, COLOR_BLACK,COLOR_BLACK);
-	init_pair(WALL_BASE, COLOR_BLACK, COLOR_BLACK);
+	init_pair(WALL_BASE, COLOR_BLUE, COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
