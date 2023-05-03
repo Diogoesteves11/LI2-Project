@@ -15,19 +15,29 @@
 #define SCORE 4 
 #define WALL_BASE 5     // definem-se numeros para a definição das cores dos diferentes elementos do jogo
 
-/*
+
 void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
- 
+  int centerX = s->playerY;  
+    int centerY = s->playerX; 
+    char test = '#';
+
+    for (int x = centerY - 2; x <= centerY + 2; x++) {
+        for (int y = centerX - 2; y <= centerX + 2; y++) {
+            if ((mvinch(x,y) & A_CHARTEXT) == test) {
+                attron(COLOR_PAIR(WALL_ILUMINATED));
+                mvaddch(x, y, '#');
+                attroff(COLOR_PAIR(WALL_ILUMINATED));
+                }
+        }
+    }
 }
 
-NOTAS: A MOVIMENTAÇÃO DO JOGADOR DEIXOU DE FUNCIONAR DEVIDO À COR DAS PAREDES!!!!!
-
-*/
 
 void do_movement_action(STATE *st, int dx, int dy) {
 	int nextX = st->playerX + dx;
     int nextY = st->playerY + dy; 
-    if (mvinch(nextX, nextY) == '#'){
+	char test = '#';
+    if ((mvinch(nextX, nextY) && A_CHARTEXT) == test){
      return;
 	} 
     st->playerX = nextX;
@@ -87,7 +97,7 @@ int main() {
     init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
 	init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
 	init_pair(BACKGROUND, COLOR_BLACK,COLOR_BLACK);
-	init_pair(WALL_BASE, COLOR_BLUE, COLOR_BLACK);
+	init_pair(WALL_BASE, COLOR_BLACK, COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
@@ -105,9 +115,9 @@ int main() {
 		attron(COLOR_PAIR(2));
 		mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
 		attroff(COLOR_PAIR(2));
+		draw_light(&st,&map);
 
 		move(st.playerX, st.playerY);
-		//draw_light(&st,&map);
 		update(&st);
 	}
 
