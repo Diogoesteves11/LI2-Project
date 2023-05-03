@@ -12,19 +12,24 @@
 #define WALL_ILUMINATED 1
 #define PLAYER 2
 #define LIGHT 3
-#define SCORE 4       // definem-se numeros para a definição das cores dos diferentes elementos do jogo
+#define SCORE 4 
+#define WALL_BASE 5     // definem-se numeros para a definição das cores dos diferentes elementos do jogo
 
 /*
 void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
  
 }
 
+NOTAS: A MOVIMENTAÇÃO DO JOGADOR DEIXOU DE FUNCIONAR DEVIDO À COR DAS PAREDES!!!!!
+
 */
 
 void do_movement_action(STATE *st, int dx, int dy) {
 	int nextX = st->playerX + dx;
     int nextY = st->playerY + dy; 
-    if (mvinch(nextX, nextY) == '#') return;
+    if (mvinch(nextX, nextY) == '#'){
+     return;
+	} 
     st->playerX = nextX;
     st->playerY = nextY;
 }
@@ -81,10 +86,15 @@ int main() {
     init_pair(LIGHT, COLOR_YELLOW, COLOR_BLACK);
     init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
 	init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
+	init_pair(BACKGROUND, COLOR_BLACK,COLOR_BLACK);
+	init_pair(WALL_BASE, COLOR_BLACK, COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
+	
+	attron(COLOR_PAIR(WALL_BASE));
 	draw_map(&st,&map);
+	attroff(COLOR_PAIR(WALL_BASE));
 	
 	while(1) {
 		move(nrows - 1, 0);
