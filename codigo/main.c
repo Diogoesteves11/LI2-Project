@@ -16,7 +16,6 @@
 #define WALL_BASE 5
 #define TRAP_COLOR 6     // definem-se numeros para a definição das cores dos diferentes elementos do jogo
 
-#define FPS 16.67 // 60 fps em ms
 
 int check_traps(int *x, int *y) {
 	char test = '*';
@@ -32,7 +31,7 @@ void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
     char test = '#';
 	char trap = '*';
 
-    for (int x = centerY - 3; x <= centerY + 3; x++) {
+    for (int x = centerY - 3; x <= centerY + 3; x++) {  // ILUMINA as paredes e traps
         for (int y = centerX - 3; y <= centerX + 3; y++) {
 			char testch = (mvinch(x,y) & A_CHARTEXT);
             if (testch == test) {
@@ -47,20 +46,8 @@ void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
 			}
         }
     }
-}
-/*
-void timer(int limit, int timerx, int timery)
-{
-	long int msec = 0, trigger = limit ; 
-	clock_t before = clock();
-	do {
-		clock_t difference = clock() - before;
-		msec = difference * 1000 / CLOCKS_PER_SEC;
-		refresh();
-	} while ( msec < trigger );
-}
-*/
 
+}
 
 void do_movement_action(STATE *st, int dx, int dy) {
 	int nextX = st->playerX + dx;
