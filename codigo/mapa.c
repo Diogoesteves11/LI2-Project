@@ -6,6 +6,7 @@
 
 #include "mapa.h"
 
+#define TRAP_PERCENTAGE 10
 
 void draw_map(STATE* s, MAPA* map) {
     s->playerX = 10;
@@ -95,4 +96,12 @@ for (int i = 1; i < map->x - 1; i++) {
     }
 }
 }
+for(int i = 1; i < map->y -1 ; i++) {
+        for(int j = 1; j < map->x -1; j++) {
+            char test = '#';
+            if((drand48() * 1000 < TRAP_PERCENTAGE) && ((mvinch(j,i) && A_CHARTEXT) != test)) {
+                mvaddch(i, j, '*'| A_BOLD);
+            } 
+        }
+    }
 }

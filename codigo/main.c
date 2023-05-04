@@ -13,14 +13,24 @@
 #define PLAYER 2
 #define LIGHT 3
 #define SCORE 4 
-#define WALL_BASE 5     // definem-se numeros para a definição das cores dos diferentes elementos do jogo
+#define WALL_BASE 5
+#define TRAP_COLOR 6     // definem-se numeros para a definição das cores dos diferentes elementos do jogo
 
 #define FPS 16.67 // 60 fps em ms
+
+int check_traps(STATE *s) {
+	char test = '^';
+    if ((mvinch(s->playerX, s->playerY) && A_CHARTEXT) == test) {
+        return 1;
+    }
+    return 0;
+}
 
 void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
   int centerX = s->playerY;  
     int centerY = s->playerX; 
     char test = '#';
+	char trap = '*';
 	char testch;
 
     for (int x = centerY - 3; x <= centerY + 3; x++) {
@@ -30,14 +40,19 @@ void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
                 attron(COLOR_PAIR(WALL_ILUMINATED));
                 mvaddch(x, y, '#');
                 attroff(COLOR_PAIR(WALL_ILUMINATED));
-                }
+            }
+			else if (testch == trap){
+				attron(COLOR_PAIR(TRAP_COLOR));
+                mvaddch(x, y, '*'| A_BOLD);
+                attroff(COLOR_PAIR(TRAP_COLOR));
+			}
         }
     }
 }
-
+/*
 void timer(int limit, int timerx, int timery)
 {
-	long int msec = 0, trigger = limit ; /* 1000ms */
+	long int msec = 0, trigger = limit ; 
 	clock_t before = clock();
 	do {
 		clock_t difference = clock() - before;
@@ -45,23 +60,27 @@ void timer(int limit, int timerx, int timery)
 		refresh();
 	} while ( msec < trigger );
 }
+*/
+
 
 void do_movement_action(STATE *st, int dx, int dy) {
 	int nextX = st->playerX + dx;
-    int nextY = st->playerY + dy; 
-    char test,testch;
+    int nextY = st->playerY + dy;
+	char test,testch;
     test = '#';
 	testch = (mvinch(nextX, nextY) & A_CHARTEXT);
+   
     if (testch == test){
      return;
-    } 
+    }
+	mvaddch(st->playerX, st->playerY, ' ');
     st->playerX = nextX;
     st->playerY = nextY;
+	
 }
 
 void update(STATE *st) {
 	int key = getch();
-	mvaddch(st->playerX, st->playerY, ' ');
 
 	switch(key) {
 		case KEY_A1:
@@ -89,6 +108,14 @@ void update(STATE *st) {
 		case 'd': do_movement_action(st, +0, +1); break;
 		case '\0': break;
 	}
+	if(check_traps(st)) {
+        mvprintw(0, 0, "You stepped on a trap and died!");
+        refresh();
+        sleep(2);
+        endwin();
+        exit(0);
+     }
+	
 		
 }
 
@@ -115,7 +142,8 @@ int main() {
     init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
 	init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
 	init_pair(BACKGROUND, COLOR_BLACK,COLOR_BLACK);
-	init_pair(WALL_BASE, COLOR_BLACK, COLOR_BLACK);
+	init_pair(WALL_BASE, COLOR_BLUE, COLOR_BLACK);
+	init_pair(TRAP_COLOR, COLOR_RED, COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
