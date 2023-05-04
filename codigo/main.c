@@ -18,25 +18,24 @@
 
 #define FPS 16.67 // 60 fps em ms
 
-int check_traps(STATE *s) {
-	char test = '^';
-    if ((mvinch(s->playerX, s->playerY) && A_CHARTEXT) == test) {
+int check_traps(int *x, int *y) {
+	char test = '*';
+    if ((mvinch(*x, *y) && A_CHARTEXT) == test) {
         return 1;
     }
     return 0;
 }
 
 void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
-  int centerX = s->playerY;  
+    int centerX = s->playerY;  
     int centerY = s->playerX; 
     char test = '#';
 	char trap = '*';
-	char testch;
 
     for (int x = centerY - 3; x <= centerY + 3; x++) {
         for (int y = centerX - 3; y <= centerX + 3; y++) {
-			testch = (mvinch(x,y) & A_CHARTEXT);
-            if (testch== test) {
+			char testch = (mvinch(x,y) & A_CHARTEXT);
+            if (testch == test) {
                 attron(COLOR_PAIR(WALL_ILUMINATED));
                 mvaddch(x, y, '#');
                 attroff(COLOR_PAIR(WALL_ILUMINATED));
@@ -69,10 +68,16 @@ void do_movement_action(STATE *st, int dx, int dy) {
 	char test,testch;
     test = '#';
 	testch = (mvinch(nextX, nextY) & A_CHARTEXT);
-   
     if (testch == test){
      return;
     }
+	else if(check_traps(&nextX,&nextY)) {
+        mvprintw(0, 0, "You stepped on a trap and died!");
+        refresh();
+        sleep(2);
+        endwin();
+        exit(0);
+     }
 	mvaddch(st->playerX, st->playerY, ' ');
     st->playerX = nextX;
     st->playerY = nextY;
@@ -107,16 +112,9 @@ void update(STATE *st) {
 		case 's': do_movement_action(st, +1, +0); break;
 		case 'd': do_movement_action(st, +0, +1); break;
 		case '\0': break;
+		default: break;
 	}
-	if(check_traps(st)) {
-        mvprintw(0, 0, "You stepped on a trap and died!");
-        refresh();
-        sleep(2);
-        endwin();
-        exit(0);
-     }
-	
-		
+ 	
 }
 
 int main() {
@@ -142,22 +140,18 @@ int main() {
     init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
 	init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
 	init_pair(BACKGROUND, COLOR_BLACK,COLOR_BLACK);
-	init_pair(WALL_BASE, COLOR_BLUE, COLOR_BLACK);
 	init_pair(TRAP_COLOR, COLOR_RED, COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
 	
-	attron(COLOR_PAIR(WALL_BASE));
 	draw_map(&st,&map);
-	attroff(COLOR_PAIR(WALL_BASE));
-	
 	
 	while(1) {
 		time(&curtime);
 		move(nrows - 1, 0);
 		attron(COLOR_PAIR(4));
-		printw("(%d, %d) %d %d , time: %s", st.playerX, st.playerY, ncols, nrows,ctime(&curtime));
+		printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
 		attroff(COLOR_PAIR(4));
 		
 		attron(COLOR_PAIR(2));

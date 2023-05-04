@@ -7,12 +7,20 @@
 #include "mapa.h"
 
 #define TRAP_PERCENTAGE 10
+#define TRAP_COLOR_2 8
+#define WALL_COLOR 7
 
 void draw_map(STATE* s, MAPA* map) {
+    start_color();
+
+    init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
+    init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLACK);
+
     s->playerX = 10;
     s->playerY = 10;
     int casas_totais = ((map->x) * (map->y)) - 2 * (map->x + map->y);
 
+    attron(COLOR_PAIR(WALL_COLOR));
     for (int i = 0; i < casas_totais * 0.4; i++) {
         int x1 = rand() % (map->x - 2) + 1;
         int y1 = rand() % (map->y - 1);
@@ -21,6 +29,7 @@ void draw_map(STATE* s, MAPA* map) {
     }
 
     // Adiciona paredes nas bordas do mapa
+   
     for (int i = 0; i < map->x; i++) {
         map->matriz[i][0] = '#'; // Parede superior
         map->matriz[i][map->y - 2] = '#'; // Parede inferior (uma linha acima da última)
@@ -33,6 +42,7 @@ void draw_map(STATE* s, MAPA* map) {
         mvaddch(i, 0, map->matriz[0][i]);
         mvaddch(i, map->x - 1, map->matriz[map->x - 1][i]);
     }
+  
 
     // Limpa a última linha (linha inferior)
     for (int i = 1; i < map->x - 1; i++) {
@@ -41,6 +51,7 @@ void draw_map(STATE* s, MAPA* map) {
     }
 
     // Transforma algumas posições em paredes se existirem pelo menos 5 paredes em um quadrado 3x3 centrado em cada posição
+    
     for (int d = 0; d < 2; d++) {
     for (int i = 1; i < map->x - 1; i++) {
         for (int j = 1; j < map->y - 1; j++) {
@@ -58,8 +69,11 @@ void draw_map(STATE* s, MAPA* map) {
             }
         }
     }
+    }
+    
 // Verifica cada posição em um quadrado 5x5 centrado e transforma em parede se não houver nenhuma parede vizinha
 // faz-se 7 passagens para um resultado mais polido
+
 for (int d = 0; d < 7; d++) {
     for (int i = 2; i < map->x - 2; i++) {
         for (int j = 2; j < map->y - 2; j++) {
@@ -78,6 +92,7 @@ for (int d = 0; d < 7; d++) {
         }
     }
 }
+
 // Elimina paredes soltas
 for (int i = 1; i < map->x - 1; i++) {
     for (int j = 1; j < map->y - 1; j++) {
@@ -95,7 +110,9 @@ for (int i = 1; i < map->x - 1; i++) {
         }
     }
 }
-}
+attroff(COLOR_PAIR(WALL_COLOR));
+
+attron(COLOR_PAIR(TRAP_COLOR_2));
 for(int i = 1; i < map->y -1 ; i++) {
         for(int j = 1; j < map->x -1; j++) {
             char test = '#';
@@ -104,4 +121,6 @@ for(int i = 1; i < map->y -1 ; i++) {
             } 
         }
     }
+ attroff (COLOR_PAIR(TRAP_COLOR_2));
+
 }
