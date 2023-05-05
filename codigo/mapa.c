@@ -21,7 +21,7 @@ void draw_map(STATE* s, MAPA* map) {
     s->playerX = 10;
     s->playerY = 10;
     int casas_totais = ((map->x) * (map->y)) - 2 * (map->x + map->y);
-    int heal_percentage = casas_totais * 0.05;
+    int heal_percentage = casas_totais * 0.01;
     int heal_count = 0;
 
     attron(COLOR_PAIR(WALL_COLOR));
@@ -119,8 +119,8 @@ attroff(COLOR_PAIR(WALL_COLOR));
 attron(COLOR_PAIR(TRAP_COLOR_2));
 for(int i = 2; i < map->y-2; i++) {
         for(int j = 2; j < map->x-2; j++) {
-            char test = ' ';
-            if((drand48() * 1000 < TRAP_PERCENTAGE) && ((mvinch(j,i) && A_CHARTEXT) == test)) {
+            char test = '#';
+            if((drand48() * 1000 < TRAP_PERCENTAGE) && ((mvinch(j,i) && A_CHARTEXT) != test)) {
                 mvaddch(i, j, '*'| A_BOLD);
             } 
         }
@@ -128,14 +128,15 @@ for(int i = 2; i < map->y-2; i++) {
 attroff (COLOR_PAIR(TRAP_COLOR_2));
 
 attron (COLOR_PAIR(HEAL));
-for (int i = 2; i < map->y-2; i++){
-    for (int j = 2; j < map-> x -2; j++){
-        if ((map->matriz[i][j] == ' ') && (heal_count < heal_percentage)){
-            mvaddch(i,j, '+'|A_BOLD);
-            heal_count ++;
-        }
-    }
-}
+while  (heal_count < heal_percentage) {
+ int x1 = rand() % (map->x - 2) + 1;
+ int y1 = rand() % (map->y - 1);
+ if (map->matriz [x1] [y1] != '#') {
+  map->matriz[x1][y1] = '+';
+  mvaddch(y1, x1, map->matriz[x1][y1]);
+ }
+ heal_count ++;
+ }
 attroff(COLOR_PAIR(HEAL));
 
 }

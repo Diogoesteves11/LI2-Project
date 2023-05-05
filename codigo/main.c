@@ -24,7 +24,7 @@ void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
     char test = '#';
 	char trap = '*';
 
-    for (int x = centerY - 3; x <= centerY + 3; x++) {  // ILUMINA as paredes e traps
+    for (int x = centerY - 3; x <= centerY + 3; x++) {  // ILUMINA as paredes e traps do mapa
         for (int y = centerX - 3; y <= centerX + 3; y++) {
 			char testch = (mvinch(x,y) & A_CHARTEXT);
             if (testch == test) {
@@ -47,11 +47,12 @@ void do_movement_action(STATE *st, int dx, int dy) {
     int nextY = st->playerY + dy;
 	char test,testch, testTrap = '*';
     test = '#';
+	char heal = '+';
 	testch = (mvinch(nextX, nextY) & A_CHARTEXT);
     if (testch == test){
      return;
     }
-	else if((mvinch(nextX,nextY) & A_CHARTEXT) == testTrap) {
+	else if(testch == testTrap) {
 		if(st->hp == 0){
 		erase();
         mvprintw(0, 0, "You stepped on a trap and died!");
@@ -62,6 +63,7 @@ void do_movement_action(STATE *st, int dx, int dy) {
 		}
 		else st->hp--;
      }
+	 else if (testch == heal) st ->hp +=2; // cada cura aumenta 2 de hp
 	mvaddch(st->playerX, st->playerY, ' ');
     st->playerX = nextX;
     st->playerY = nextY;
