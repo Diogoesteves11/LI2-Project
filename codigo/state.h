@@ -13,6 +13,7 @@ typedef struct state {
 	int playerX;
 	int playerY;
 	int hp;
+	int coins;
 } STATE;
 
 #endif

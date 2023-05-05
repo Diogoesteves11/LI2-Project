@@ -9,14 +9,17 @@
 #define TRAP_PERCENTAGE 10
 #define TRAP_COLOR_2 8
 #define WALL_COLOR 7
-#define HEAL 12
+#define HEAL_OFF 12
+#define COIN_OFF 15
 
 void draw_map(STATE* s, MAPA* map) {
     start_color();
 
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
     init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLACK);
-    init_pair(HEAL,COLOR_GREEN,COLOR_BLACK);
+    init_pair(HEAL_OFF,COLOR_BLACK,COLOR_BLACK);
+    init_pair (COIN_OFF, COLOR_BLACK,COLOR_BLACK);
+    
 
     s->playerX = 10;
     s->playerY = 10;
@@ -127,7 +130,7 @@ for(int i = 2; i < map->y-2; i++) {
     }
 attroff (COLOR_PAIR(TRAP_COLOR_2));
 
-attron (COLOR_PAIR(HEAL));
+attron (COLOR_PAIR(HEAL_OFF));
 while  (heal_count < heal_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
  int y1 = rand() % (map->y - 1);
@@ -137,6 +140,20 @@ while  (heal_count < heal_percentage) {
  }
  heal_count ++;
  }
-attroff(COLOR_PAIR(HEAL));
+attroff(COLOR_PAIR(HEAL_OFF));
+
+heal_count = 0; // utiliza-se a mesma variavel pois as curas e as coins têm a mesma percentagem
+
+attron (COLOR_PAIR(COIN_OFF));
+while  (heal_count < heal_percentage) {
+ int x1 = rand() % (map->x - 2) + 1;
+ int y1 = rand() % (map->y - 1);
+ if (map->matriz [x1] [y1] != '#') {
+  map->matriz[x1][y1] = '$';
+  mvaddch(y1, x1, map->matriz[x1][y1]);
+ }
+ heal_count ++;
+ }
+attroff(COLOR_PAIR(COIN_OFF));
 
 }
