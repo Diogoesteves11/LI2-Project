@@ -14,16 +14,9 @@
 #define LIGHT 3
 #define SCORE 4 
 #define WALL_BASE 5
-#define TRAP_COLOR 6     // definem-se numeros para a definição das cores dos diferentes elementos do jogo
+#define TRAP_COLOR 6  
+#define MEDIUM_HP 11   // definem-se numeros para a definição das cores dos diferentes elementos do jogo
 
-
-int check_traps(int *x, int *y) {
-	char test = '*';
-    if ((mvinch(*x, *y) && A_CHARTEXT) == test) {
-        return 1;
-    }
-    return 0;
-}
 
 void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
     int centerX = s->playerY;  
@@ -52,18 +45,22 @@ void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
 void do_movement_action(STATE *st, int dx, int dy) {
 	int nextX = st->playerX + dx;
     int nextY = st->playerY + dy;
-	char test,testch;
+	char test,testch, testTrap = '*';
     test = '#';
 	testch = (mvinch(nextX, nextY) & A_CHARTEXT);
     if (testch == test){
      return;
     }
-	else if(check_traps(&nextX,&nextY)) {
+	else if((mvinch(nextX,nextY) & A_CHARTEXT) == testTrap) {
+		if(st->hp == 0){
+		erase();
         mvprintw(0, 0, "You stepped on a trap and died!");
         refresh();
-        sleep(2);
+        sleep(1);
         endwin();
         exit(0);
+		}
+		else st->hp--;
      }
 	mvaddch(st->playerX, st->playerY, ' ');
     st->playerX = nextX;
@@ -73,7 +70,7 @@ void do_movement_action(STATE *st, int dx, int dy) {
 
 void update(STATE *st) {
 	int key = getch();
-
+    
 	switch(key) {
 		case KEY_A1:
 		case '7': do_movement_action(st, -1, -1); break;
@@ -106,12 +103,10 @@ void update(STATE *st) {
 
 int main() {
 	MAPA map;
-	STATE st = {20,20};
+	STATE st = {20,20,3};
 	WINDOW *wnd = initscr();
-	time_t curtime;
 	int ncols, nrows;
 	getmaxyx(wnd,nrows,ncols);
-   
 
 	srand48(time(NULL));
 	start_color();
@@ -128,22 +123,38 @@ int main() {
 	init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
 	init_pair(BACKGROUND, COLOR_BLACK,COLOR_BLACK);
 	init_pair(TRAP_COLOR, COLOR_RED, COLOR_BLACK);
+	init_pair(MEDIUM_HP, COLOR_YELLOW,COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
 	
 	draw_map(&st,&map);
 	
+
 	while(1) {
-		time(&curtime);
 		move(nrows - 1, 0);
-		attron(COLOR_PAIR(4));
+		attron(COLOR_PAIR(1));
 		printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
-		attroff(COLOR_PAIR(4));
+		attroff(COLOR_PAIR(1));
 		
-		attron(COLOR_PAIR(2));
+
+       if (st.hp > 1) {
+        attron(COLOR_PAIR(2));
 		mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
 		attroff(COLOR_PAIR(2));
+	   }
+	   else if (st.hp == 1){
+		attron(COLOR_PAIR(MEDIUM_HP));
+		mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
+		attroff(COLOR_PAIR(MEDIUM_HP));
+	   }
+	   else {
+		attron(COLOR_PAIR(TRAP_COLOR));
+		mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
+		attroff(COLOR_PAIR(TRAP_COLOR));
+	   }
+		
+
 		draw_light(&st,&map);
         
         move(st.playerX,st.playerY);

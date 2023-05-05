@@ -12,6 +12,7 @@ typedef struct mapa{
 typedef struct state {
 	int playerX;
 	int playerY;
+	int hp;
 } STATE;
 
 #endif
