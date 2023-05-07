@@ -142,18 +142,4 @@ while  (heal_count < heal_percentage) {
  }
 attroff(COLOR_PAIR(HEAL_OFF));
 
-heal_count = 0; // utiliza-se a mesma variavel pois as curas e as coins têm a mesma percentagem
-
-attron (COLOR_PAIR(COIN_OFF));
-while  (heal_count < heal_percentage) {
- int x1 = rand() % (map->x - 2) + 1;
- int y1 = rand() % (map->y - 1);
- if (map->matriz [x1] [y1] != '#') {
-  map->matriz[x1][y1] = '$';
-  mvaddch(y1, x1, map->matriz[x1][y1]);
- }
- heal_count ++;
- }
-attroff(COLOR_PAIR(COIN_OFF));
-
 }

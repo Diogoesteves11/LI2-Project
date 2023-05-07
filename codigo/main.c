@@ -17,7 +17,7 @@
 #define TRAP_COLOR 6  
 #define MEDIUM_HP 11 
 #define HEAL_ON 13  // definem-se numeros para a definição das cores dos diferentes elementos do jogo
-#define COIN 14
+
 
 void draw_light (STATE *s){ // Função que desenhará a luz
     int centerX = s->playerY;  
@@ -25,8 +25,6 @@ void draw_light (STATE *s){ // Função que desenhará a luz
     char test = '#';
 	char trap = '*';
 	char heal = '+';
-	char vazio = ' ';
-	char coin = '$';
 
     for (int x = centerY - 3; x <= centerY + 3; x++) {  // ILUMINA as paredes e traps do mapa
         for (int y = centerX - 3; y <= centerX + 3; y++) {
@@ -46,11 +44,6 @@ void draw_light (STATE *s){ // Função que desenhará a luz
                 mvaddch(x, y, '+'| A_BOLD);
                 attroff(COLOR_PAIR(HEAL_ON));
 			}
-			else if (testch == coin) {
-				attron(COLOR_PAIR(COIN));
-                mvaddch(x, y, '$'| A_BOLD);
-                attroff(COLOR_PAIR(COIN));
-			}
         }
     }
     
@@ -62,7 +55,6 @@ void do_movement_action(STATE *st, int dx, int dy) {
 	char test,testch, testTrap = '*';
     test = '#';
 	char heal = '+';
-	char coin = '$';
 	testch = (mvinch(nextX, nextY) & A_CHARTEXT);
     if (testch == test){
      return;
@@ -78,7 +70,6 @@ void do_movement_action(STATE *st, int dx, int dy) {
 		}
 		else st->hp--;
      }
-	else if(testch == coin) st->coins ++;
 	else if (testch == heal) st ->hp +=2; // cada cura aumenta 2 de hp
 	mvaddch(st->playerX, st->playerY, ' ');
     st->playerX = nextX;
@@ -121,7 +112,7 @@ void update(STATE *st) {
 
 int main() {
 	MAPA map;
-	STATE st = {20,20,3,0};
+	STATE st = {20,20,3};
 	WINDOW *wnd = initscr();
 	int ncols, nrows;
 	getmaxyx(wnd,nrows,ncols);
@@ -143,7 +134,6 @@ int main() {
 	init_pair(TRAP_COLOR, COLOR_RED, COLOR_BLACK);
 	init_pair(MEDIUM_HP, COLOR_YELLOW,COLOR_BLACK);
 	init_pair (HEAL_ON, COLOR_GREEN,COLOR_BLACK);
-	init_pair (COIN, COLOR_YELLOW, COLOR_BLACK); 
 
     map.y = nrows;
 	map.x = ncols;
@@ -154,7 +144,7 @@ int main() {
 	while(1) {
 		move(nrows - 1, 0);
 		attron(COLOR_PAIR(1));
-		printw("(%d, %d) %d %d | COINS COLLECTED: %d| HP : %d", st.playerX, st.playerY, ncols, nrows, st.coins, st.hp);
+		printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
 		attroff(COLOR_PAIR(1));
 		
 
