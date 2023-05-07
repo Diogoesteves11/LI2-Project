@@ -10,16 +10,17 @@
 #define TRAP_COLOR_2 8
 #define WALL_COLOR 7
 #define HEAL_OFF 12
-#define COIN_OFF 15
+#define BULLET_OFF 16
+
 
 void draw_map(STATE* s, MAPA* map) {
     start_color();
 
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
-    init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLACK);
+    init_pair(WALL_COLOR, COLOR_BLACK, COLOR_BLACK);
     init_pair(HEAL_OFF,COLOR_BLACK,COLOR_BLACK);
-    init_pair (COIN_OFF, COLOR_BLACK,COLOR_BLACK);
-    
+    init_pair (BULLET_OFF, COLOR_BLACK,COLOR_BLACK);
+
 
     s->playerX = 10;
     s->playerY = 10;
@@ -142,4 +143,15 @@ while  (heal_count < heal_percentage) {
  }
 attroff(COLOR_PAIR(HEAL_OFF));
 
+
+attron (COLOR_PAIR(BULLET_OFF));
+for (int i = 0; i < casas_totais * 0.2; i++) {
+        int x1 = rand() % (map->x - 2) + 1;
+        int y1 = rand() % (map->y - 1);
+        if (map->matriz[x1][y1] == ' ') {
+            map->matriz[x1][y1] = '-';
+            mvaddch(y1, x1, map->matriz[x1][y1]);
+        }
+    }
+attroff (COLOR_PAIR(BULLET_OFF));
 }

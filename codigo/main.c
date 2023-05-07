@@ -17,7 +17,8 @@
 #define TRAP_COLOR 6  
 #define MEDIUM_HP 11 
 #define HEAL_ON 13  // definem-se numeros para a definição das cores dos diferentes elementos do jogo
-
+#define BULLET_ON 17
+#define CASE_COLOR 18
 
 void draw_light (STATE *s){ // Função que desenhará a luz
     int centerX = s->playerY;  
@@ -25,6 +26,8 @@ void draw_light (STATE *s){ // Função que desenhará a luz
     char test = '#';
 	char trap = '*';
 	char heal = '+';
+	char bullet = '-';
+	char casa = '.';
 
     for (int x = centerY - 3; x <= centerY + 3; x++) {  // ILUMINA as paredes e traps do mapa
         for (int y = centerX - 3; y <= centerX + 3; y++) {
@@ -44,6 +47,11 @@ void draw_light (STATE *s){ // Função que desenhará a luz
                 mvaddch(x, y, '+'| A_BOLD);
                 attroff(COLOR_PAIR(HEAL_ON));
 			}
+			else if (testch == bullet){
+				attron(COLOR_PAIR(BULLET_ON));
+                mvaddch(x, y, '-'| A_BOLD);
+                attroff(COLOR_PAIR(BULLET_ON));
+			}
         }
     }
     
@@ -55,6 +63,7 @@ void do_movement_action(STATE *st, int dx, int dy) {
 	char test,testch, testTrap = '*';
     test = '#';
 	char heal = '+';
+	char bullet = '-';
 	testch = (mvinch(nextX, nextY) & A_CHARTEXT);
     if (testch == test){
      return;
@@ -70,6 +79,7 @@ void do_movement_action(STATE *st, int dx, int dy) {
 		}
 		else st->hp--;
      }
+	else if (testch == bullet) st -> bullets += 5; // cada recarga aumenta 5 balas
 	else if (testch == heal) st ->hp +=2; // cada cura aumenta 2 de hp
 	mvaddch(st->playerX, st->playerY, ' ');
     st->playerX = nextX;
@@ -112,7 +122,7 @@ void update(STATE *st) {
 
 int main() {
 	MAPA map;
-	STATE st = {20,20,3};
+	STATE st = {20,20,3,0};
 	WINDOW *wnd = initscr();
 	int ncols, nrows;
 	getmaxyx(wnd,nrows,ncols);
@@ -134,6 +144,7 @@ int main() {
 	init_pair(TRAP_COLOR, COLOR_RED, COLOR_BLACK);
 	init_pair(MEDIUM_HP, COLOR_YELLOW,COLOR_BLACK);
 	init_pair (HEAL_ON, COLOR_GREEN,COLOR_BLACK);
+	init_pair (BULLET_ON, COLOR_YELLOW,COLOR_BLACK);
 
     map.y = nrows;
 	map.x = ncols;
@@ -145,6 +156,7 @@ int main() {
 		move(nrows - 1, 0);
 		attron(COLOR_PAIR(1));
 		printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
+		printw("    Bullets: %d", st.bullets);
 		attroff(COLOR_PAIR(1));
 		
 
