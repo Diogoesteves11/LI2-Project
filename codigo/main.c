@@ -4,6 +4,10 @@
 #include <ncurses.h>
 #include <time.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+
 #include "state.h"
 #include "mapa.h"
 #include "mapa.c"
@@ -20,14 +24,14 @@
 #define BULLET_ON 17
 #define CASE_COLOR 18
 
-void draw_light (STATE *s){ // Função que desenhará a luz
+void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
     int centerX = s->playerY;  
     int centerY = s->playerX; 
     char test = '#';
 	char trap = '*';
 	char heal = '+';
 	char bullet = '-';
-	char casa = '.';
+	double angle = 0;
 
     for (int x = centerY - 3; x <= centerY + 3; x++) {  // ILUMINA as paredes e traps do mapa
         for (int y = centerX - 3; y <= centerX + 3; y++) {
@@ -54,6 +58,27 @@ void draw_light (STATE *s){ // Função que desenhará a luz
 			}
         }
     }
+ 
+ /*
+ for (angle = 0; angle < M_2_PI; angle += M_PI_3){
+      int x = s->playerX;
+	  int y = s->playerY;
+
+
+
+      while(map->matriz [x][y] != '#') {
+		x +=1;
+		y +=1;
+		attron (COLOR_PAIR(WALL_ILUMINATED));
+		mvaddch(y,x,map->matriz[x][y]);
+		attroff (COLOR_PAIR(WALL_ILUMINATED));
+		map->matriz [x][y] = '.';
+	  }
+
+	}
+ */
+    
+
     
 }
 
@@ -176,7 +201,7 @@ int main() {
 		attroff(COLOR_PAIR(TRAP_COLOR));
 	   }
 		
-		draw_light(&st);
+		draw_light(&st,&map);
 		
         move(st.playerX,st.playerY);
 		update(&st);
