@@ -19,14 +19,13 @@
 #define WALL_BASE 5
 #define TRAP_COLOR 6
 #define MEDIUM_HP 11
-#define HEAL_ON 13
+#define HEAL_ON 13 // definem-se numeros para a definição das cores dos diferentes elementos do jogo
 #define BULLET_ON 17
 #define CASE_COLOR 18
 
 
 void draw_light(STATE *s, MAPA *map){ // Função que desenhará a luz
-
-    int centerX = s->playerY;
+	int centerX = s->playerY;
 	int centerY = s->playerX;
 
 	char test = '#';
@@ -36,25 +35,52 @@ void draw_light(STATE *s, MAPA *map){ // Função que desenhará a luz
 	char casa = ' ';
 	double angle = 0;
 
-    int dx, dy;
+	/*
+	for (int x = centerY - 3; x <= centerY + 3; x++) {  // ILUMINA as paredes e traps do mapa
+		   for (int y = centerX - 3; y <= centerX + 3; y++) {
+			   char testch = (mvinch(x,y) & A_CHARTEXT);
+			   if (testch == test) {
+				   attron(COLOR_PAIR(WALL_ILUMINATED));
+				   mvaddch(x, y, '#');
+				   attroff(COLOR_PAIR(WALL_ILUMINATED));
+			   }
+			   else if (testch == trap){
+				   attron(COLOR_PAIR(TRAP_COLOR));
+				   mvaddch(x, y, '*' | A_BOLD);
+				   attroff(COLOR_PAIR(TRAP_COLOR));
+			   }
+			   else if(testch == heal) {
+				   attron(COLOR_PAIR(HEAL_ON));
+				   mvaddch(x, y, '+'| A_BOLD);
+				   attroff(COLOR_PAIR(HEAL_ON));
+			   }
+			   else if (testch == bullet){
+				   attron(COLOR_PAIR(BULLET_ON));
+				   mvaddch(x, y, '-'| A_BOLD);
+				   attroff(COLOR_PAIR(BULLET_ON));
+			   }
+		   }
+	   }
 
-	for (angle = 0; angle < M_2_PI; angle += 0.2)
+	*/
+
+	for (angle = 0; angle < M_2_PI; angle += 0.1)
 	{
 		int centerX1 = s->playerY;
 		int centerY1 = s->playerX;
 
-		
-		if ((0 <= angle) && (angle <= M_PI / 2))
+		int dx, dy;
+		if (0 <= angle && angle <= M_PI_2)
 		{
 			dx = 1;
 			dy = 1;
 		}
-		else if ((M_PI_2 < angle) && (angle <= M_PI))
+		else if (M_PI_2 < angle && angle <= M_PI)
 		{
 			dx = -1;
 			dy = 1;
 		}
-		else if ((M_PI < angle) && (angle <= (3 * M_PI) / 2))
+		else if (M_PI < angle && angle <= (3 * M_PI) / 2)
 		{
 			dx = -1;
 			dy = -1;
@@ -101,11 +127,65 @@ void draw_light(STATE *s, MAPA *map){ // Função que desenhará a luz
 				break;
 			}
 
-		} while (1);
+		} while (testch1 != test);
 	}
 
-}
+	/*
+	for (int i = centerX; i < map->x; i++){
+	   for (int j = centerY; j < map->y; j++){
+		if (map->matriz [j][i] == ' '){
+		   map-> matriz[j][i] = '.';
+		   attron (COLOR_PAIR(LIGHT));
+		   mvaddch (i,j,map->matriz [j][i]);
+		   attroff (COLOR_PAIR(LIGHT));
+		}
+		else if (map->matriz [j][i] == '#'){
+		   map-> matriz[j][i] = '#';
+		   attron (COLOR_PAIR(LIGHT));
+		   mvaddch (i,j,map->matriz [j][i]);
+		   attroff (COLOR_PAIR(LIGHT));
+		}
+		else if (map->matriz [j][i] != '+'){
+		   map-> matriz[j][i] = '+';
+		   attron (COLOR_PAIR(HEAL_ON));
+		   mvaddch (i,j,map->matriz [j][i]);
+		   attroff (COLOR_PAIR(HEAL_ON));
+		}
+		else if (map->matriz [j][i] != '-'){
+		   map-> matriz[j][i] = '-';
+		   attron (COLOR_PAIR(BULLET_ON));
+		   mvaddch (i,j,map->matriz [j][i]);
+		   attroff (COLOR_PAIR(BULLET_ON));
+		}
+		else if (map->matriz [j][i] != '*'){
+		   map-> matriz[j][i] = '*';
+		   attron (COLOR_PAIR(TRAP_COLOR));
+		   mvaddch (i,j,map->matriz [j][i]);
+		   attroff (COLOR_PAIR(TRAP_COLOR));
+		}
+	   }
+   }
+	*/
 
+	/*
+	for (angle = 0; angle < M_2_PI; angle += M_PI_3){
+		 int x = s->playerX;
+		 int y = s->playerY;
+
+
+
+		 while(map->matriz [x][y] != '#') {
+		   x +=1;
+		   y +=1;
+		   attron (COLOR_PAIR(WALL_ILUMINATED));
+		   mvaddch(y,x,map->matriz[x][y]);
+		   attroff (COLOR_PAIR(WALL_ILUMINATED));
+		   map->matriz [x][y] = '.';
+		 }
+
+	   }
+	*/
+}
 
 void lights_off(STATE *s, MAPA *map)
 {
