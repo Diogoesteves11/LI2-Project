@@ -58,7 +58,44 @@ void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
 			}
         }
     }
- 
+  
+     /*
+	 for (int i = centerX; i < map->x; i++){
+		for (int j = centerY; j < map->y; j++){
+         if (map->matriz [j][i] == ' '){
+			map-> matriz[j][i] = '.';
+			attron (COLOR_PAIR(LIGHT));
+			mvaddch (i,j,map->matriz [j][i]);
+			attroff (COLOR_PAIR(LIGHT));
+		 }
+		 else if (map->matriz [j][i] == '#'){
+			map-> matriz[j][i] = '#';
+			attron (COLOR_PAIR(LIGHT));
+			mvaddch (i,j,map->matriz [j][i]);
+			attroff (COLOR_PAIR(LIGHT));
+		 }
+		 else if (map->matriz [j][i] != '+'){
+			map-> matriz[j][i] = '+';
+			attron (COLOR_PAIR(HEAL_ON));
+			mvaddch (i,j,map->matriz [j][i]);
+			attroff (COLOR_PAIR(HEAL_ON));
+		 } 
+		 else if (map->matriz [j][i] != '-'){
+			map-> matriz[j][i] = '-';
+			attron (COLOR_PAIR(BULLET_ON));
+			mvaddch (i,j,map->matriz [j][i]);
+			attroff (COLOR_PAIR(BULLET_ON));
+		 }
+		 else if (map->matriz [j][i] != '*'){
+			map-> matriz[j][i] = '*';
+			attron (COLOR_PAIR(TRAP_COLOR));
+			mvaddch (i,j,map->matriz [j][i]);
+			attroff (COLOR_PAIR(TRAP_COLOR));
+		 }
+		}
+	}
+	 */
+	
  /*
  for (angle = 0; angle < M_2_PI; angle += M_PI_3){
       int x = s->playerX;
