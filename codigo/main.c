@@ -31,9 +31,10 @@ void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
 	char trap = '*';
 	char heal = '+';
 	char bullet = '-';
+	char casa = ' ';
 	double angle = 0;
-
-    for (int x = centerY - 3; x <= centerY + 3; x++) {  // ILUMINA as paredes e traps do mapa
+ /*
+ for (int x = centerY - 3; x <= centerY + 3; x++) {  // ILUMINA as paredes e traps do mapa
         for (int y = centerX - 3; y <= centerX + 3; y++) {
 			char testch = (mvinch(x,y) & A_CHARTEXT);
             if (testch == test) {
@@ -58,7 +59,61 @@ void draw_light (STATE *s, MAPA *map){ // Função que desenhará a luz
 			}
         }
     }
-  
+ */
+    
+
+	for (angle = 0; angle < M_2_PI; angle += 0.1) {
+      double x = cos (angle);
+	  double y = sin (angle);
+	  int x1 = ((int) x) + centerX;
+	  int y1 = ((int) y) + centerY;
+	  char testch1 = (mvinch(x1,y1) &A_CHARTEXT);
+      int dx,dy;
+      if ( 0 <= angle && angle <= M_PI_2){
+		dx = 1;
+		dy = 1;
+	  }
+	  else if (M_PI_2 < angle&& angle <= M_PI) {
+		dx = -1;
+		dy = 1;
+	  }
+	  else if (M_PI < angle && angle <=(3*M_PI)/2) {
+		dx = -1;
+		dy = -1;
+	  }
+	  else {
+		dx = 1;
+		dy = -1;
+	  }
+	 
+	  do{
+		x1 += dx;
+		y1 += dy;
+		if (testch1 == casa){
+			attron(COLOR_PAIR(LIGHT));
+			mvaddch (y1,x1, '.');
+			attroff(COLOR_PAIR(LIGHT));
+		}
+		else if(testch1 == trap) {
+			attron(COLOR_PAIR(TRAP_COLOR));
+			mvaddch (y1,x1, '*');
+			attroff(COLOR_PAIR(TRAP_COLOR));
+		}
+		else if(testch1 == heal) {
+			attron(COLOR_PAIR(HEAL_ON));
+			mvaddch (y1,x1, '+');
+			attroff(COLOR_PAIR(HEAL_ON));
+		}
+		else if(testch1 == bullet) {
+			attron(COLOR_PAIR(BULLET_ON));
+			mvaddch (y1,x1, '-');
+			attroff(COLOR_PAIR(BULLET_ON));
+		}
+
+	  } while (testch1 != test);
+
+	}
+
      /*
 	 for (int i = centerX; i < map->x; i++){
 		for (int j = centerY; j < map->y; j++){
@@ -239,9 +294,9 @@ int main() {
 	   }
 		
 		draw_light(&st,&map);
-		
         move(st.playerX,st.playerY);
 		update(&st);
+		
 	}
 
 	return 0;
