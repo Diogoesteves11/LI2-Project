@@ -34,120 +34,80 @@ void draw_light(STATE *s, MAPA *map){ // Função que desenhará a luz
 	char heal = '+';
 	char bullet = '-';
 	char casa = ' ';
-	double angle = 0;
 
-    int dx, dy;
-
-	for (angle = 0; angle < M_2_PI; angle += 0.2)
-	{
+	for (double angle = 0; angle < (M_PI * 2); angle += (M_PI / 8)){ // este ciclo desenha a nova luz
 		int centerX1 = s->playerY;
 		int centerY1 = s->playerX;
+		int dx = 0, dy = 0;
 
-		
-		if ((0 <= angle) && (angle <= M_PI / 2))
+		if ((0 < angle) && (angle < M_PI / 2))
 		{
 			dx = 1;
 			dy = 1;
 		}
-		else if ((M_PI_2 < angle) && (angle <= M_PI))
+		else if ((M_PI / 2 < angle) && (angle < M_PI))
 		{
 			dx = -1;
 			dy = 1;
 		}
-		else if ((M_PI < angle) && (angle <= (3 * M_PI) / 2))
+		else if ((M_PI < angle) && (angle < (3 * M_PI) / 2))
 		{
 			dx = -1;
 			dy = -1;
 		}
-		else
-		{
+		else if (((3 * M_PI) / 2 < angle) && (angle < 2* M_PI)){
 			dx = 1;
 			dy = -1;
 		}
-		int x = centerX1, y = centerY1;
-		char testch1;
-
-		do
-		{
-			x += dx;
-			y += dy;
-			testch1 = mvinch(y, x) & A_CHARTEXT;
-			if (testch1 == casa)
-			{
-				attron(COLOR_PAIR(LIGHT));
-				mvaddch(y, x, '.');
-				attroff(COLOR_PAIR(LIGHT));
-			}
-			else if (testch1 == trap)
-			{
-				attron(COLOR_PAIR(TRAP_COLOR));
-				mvaddch(y, x, '*' | A_BOLD);
-				attroff(COLOR_PAIR(TRAP_COLOR));
-			}
-			else if (testch1 == heal)
-			{
-				attron(COLOR_PAIR(HEAL_ON));
-				mvaddch(y, x, '+' | A_BOLD);
-				attroff(COLOR_PAIR(HEAL_ON));
-			}
-			else if (testch1 == bullet)
-			{
-				attron(COLOR_PAIR(BULLET_ON));
-				mvaddch(y, x, '-' | A_BOLD);
-				attroff(COLOR_PAIR(BULLET_ON));
-			}
-			else
-			{
-				break;
-			}
-
-		} while (1);
-	}
-
-}
-
-
-void lights_off(STATE *s, MAPA *map)
-{
-	char test = '#';
-	char trap = '*';
-	char heal = '+';
-	char bullet = '-';
-	char casa = ' ';
-	for (int x = 1; x < map->x-2; x++){
-		for (int y = 1; y < map->y-2; y++)
-		{
-			char testch = (mvinch(x, y) & A_CHARTEXT);
-			if (testch == trap)
-			{
-				attron(COLOR_PAIR(TRAP_COLOR_2));
-				mvaddch(y, x, '*');
-				attroff(COLOR_PAIR(TRAP_COLOR_2));
-			}
-			else if (testch == heal)
-			{
-				attron(COLOR_PAIR(HEAL_OFF));
-				mvaddch(y, x, '+');
-				attroff(COLOR_PAIR(HEAL_OFF));
-			}
-			else if (testch == bullet)
-			{
-				attron(COLOR_PAIR(BULLET_OFF));
-				mvaddch(y, x, '-');
-				attroff(COLOR_PAIR(BULLET_OFF));
-			}
-			else if (testch == casa)
-			{
-				attron(COLOR_PAIR(BACKGROUND));
-				mvaddch(y, x, ' ');
-				attroff(COLOR_PAIR(BACKGROUND));
-			}
+        else if ((angle == 0)) {
+			dx = 1;
+			dy = 0;
 		}
-	}
-}
+		else if ((angle == M_PI / 2)){
+			dx = 0;
+			dy = 1;
+		}
+		else if ((angle == (3 * M_PI) / 2)){
+			dx = 0;
+			dy = -1;
+		}
+		else if ((angle == M_PI)){
+			dx = -1;
+			dy = 0;
+		}
 
-void do_movement_action(STATE *st, int dx, int dy)
-{
+		int x = centerX, y = centerY;
+		char testch1 = ' ';
+        
+   while (testch1 != '#'){
+	    x += dx;
+		y += dy;
+		testch1 = mvinch(y, x) & A_CHARTEXT;
+		if (testch1 == casa){
+			attron(COLOR_PAIR(LIGHT));
+			mvaddch(y, x, '.');
+			attroff(COLOR_PAIR(LIGHT));
+		}
+		else if (testch1 == trap){
+			attron(COLOR_PAIR(TRAP_COLOR));
+			mvaddch(y, x, '*' | A_BOLD);
+			attroff(COLOR_PAIR(TRAP_COLOR));
+		}
+		else if (testch1 == heal){
+	        attron(COLOR_PAIR(HEAL_ON));
+			mvaddch(y, x, '+' | A_BOLD);
+			attroff(COLOR_PAIR(HEAL_ON));
+		}
+		else if (testch1 == bullet){
+		    attron(COLOR_PAIR(BULLET_ON));
+			mvaddch(y, x, '-' | A_BOLD);
+			attroff(COLOR_PAIR(BULLET_ON));
+		}
+   }
+ }
+}
+	
+void do_movement_action(STATE *st, int dx, int dy){
 	int nextX = st->playerX + dx;
 	int nextY = st->playerY + dy;
 	char test, testch, testTrap = '*';
@@ -307,7 +267,6 @@ int main(){
 		draw_light(&st, &map);
 		move(st.playerX, st.playerY);
 		update(&st);
-		//lights_off(&st, &map);
 		
 	}
 
