@@ -30,6 +30,11 @@
 #define WEST 22
 
 
+int distance_player_point (STATE *s, int *x, int *y){
+	int dist = sqrt(((s->playerX - *x)^2)+ ((s->playerY - *y)^2));
+	return dist;
+}
+
 void draw_light(STATE *s){ // Função que desenhará a luz
 
     int centerX = s->playerY;
