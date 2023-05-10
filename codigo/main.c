@@ -24,6 +24,12 @@
 #define CASE_COLOR 18
 
 
+#define NORTH 19
+#define SOUTH 20
+#define EAST 21
+#define WEST 22
+
+
 void draw_light(STATE *s){ // Função que desenhará a luz
 
     int centerX = s->playerY;
@@ -36,8 +42,39 @@ void draw_light(STATE *s){ // Função que desenhará a luz
 	char casa = ' ';
 	char casa_iluminada = '.';
 
+for (int x = centerY - 3; x <= centerY + 3; x++) {  // Desenha o raio de visão do jogador
+        for (int y = centerX - 3; y <= centerX + 3; y++) {
+			char testch = (mvinch(x,y) & A_CHARTEXT);
+            if (testch == test) {
+                attron(COLOR_PAIR(WALL_ILUMINATED));
+                mvaddch(x, y, '#');
+                attroff(COLOR_PAIR(WALL_ILUMINATED));
+            }
+			else if (testch == trap){
+				attron(COLOR_PAIR(TRAP_COLOR));
+                mvaddch(x, y, '*'| A_BOLD);
+                attroff(COLOR_PAIR(TRAP_COLOR));
+			}
+			else if(testch == heal) {
+				attron(COLOR_PAIR(HEAL_ON));
+                mvaddch(x, y, '+'| A_BOLD);
+                attroff(COLOR_PAIR(HEAL_ON));
+			}
+			else if (testch == bullet){
+				attron(COLOR_PAIR(BULLET_ON));
+                mvaddch(x, y, '-'| A_BOLD);
+                attroff(COLOR_PAIR(BULLET_ON));
+			}
+			else if (testch == casa){
+				attron(COLOR_PAIR(LIGHT));
+                mvaddch(x, y, '.'| A_BOLD);
+                attroff(COLOR_PAIR(LIGHT));
+			}
+
+        }
+    }
  
-	for (double angle = 0; angle < (M_PI * 2); angle += 0.01){ // este ciclo desenha a nova luz
+	for (double angle = 0; angle < (M_PI * 2); angle += 0.01){ // este ciclo desenha a visão do jogador (lanterna do jogador)
 		int dx = 0, dy = 0;
 
 		double dx1 = cos (angle);
@@ -133,64 +170,83 @@ void do_movement_action(STATE *st, int dx, int dy){
 	st->playerY = nextY;
 }
 
+void shoot(STATE *s, int *direction){
+  int x=s->playerX,y= s->playerY;
+  char testch = mvinch(y,x) & A_CHARTEXT;
+  switch (*direction){
+	case NORTH:{
+      for (y; (testch == ' ') || (testch == (' ')); y--){
+		if(s->bullets> 0){
+         attron(COLOR_PAIR(MEDIUM_HP));
+		mvaddch(y,x,'|');
+		attroff(COLOR_PAIR(MEDIUM_HP));
+		s->bullets --;
+		}
+	  }
+	}
+  }
+}
+
 void update(STATE *st){
 	int key = getch();
+	int last_direction;
 
 	switch (key)
 	{
 	case KEY_A1:
 	case '7':
-		do_movement_action(st, -1, -1);
+		do_movement_action(st, -1, -1);last_direction = WEST;
 		break;
 	case KEY_UP:
 	case '8':
-		do_movement_action(st, -1, +0);
+		do_movement_action(st, -1, +0);last_direction = NORTH;
 		break;
 	case KEY_A3:
 	case '9':
-		do_movement_action(st, -1, +1);
+		do_movement_action(st, -1, +1);last_direction = EAST;
 		break;
 	case KEY_LEFT:
 	case '4':
-		do_movement_action(st, +0, -1);
+		do_movement_action(st, +0, -1);last_direction = WEST;
 		break;
 	case KEY_B2:
 	case '5':
 		break;
 	case KEY_RIGHT:
 	case '6':
-		do_movement_action(st, +0, +1);
+		do_movement_action(st, +0, +1);last_direction = EAST;
 		break;
 	case KEY_C1:
 	case '1':
-		do_movement_action(st, +1, -1);
+		do_movement_action(st, +1, -1);last_direction = WEST;
 		break;
 	case KEY_DOWN:
 	case '2':
-		do_movement_action(st, +1, +0);
+		do_movement_action(st, +1, +0);last_direction = SOUTH;
 		break;
 	case KEY_C3:
 	case '3':
-		do_movement_action(st, +1, +1);
+		do_movement_action(st, +1, +1);last_direction = EAST;
 		break;
 	case 'q':
 		endwin();
 		exit(0);
 		break;
 	case 'w':
-		do_movement_action(st, -1, +0);
+		do_movement_action(st, -1, +0);last_direction = NORTH;
 		break;
 	case 'a':
-		do_movement_action(st, +0, -1);
+		do_movement_action(st, +0, -1);last_direction = WEST;
 		break;
 	case 's':
-		do_movement_action(st, +1, +0);
+		do_movement_action(st, +1, +0);last_direction = SOUTH;
 		break;
 	case 'd':
-		do_movement_action(st, +0, +1);
+		do_movement_action(st, +0, +1);last_direction = EAST;
 		break;
 	case '\0':
 		break;
+	case ' ': shoot(st,&last_direction);break;
 	default:
 		break;
 	}
