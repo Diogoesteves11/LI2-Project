@@ -60,7 +60,7 @@ void draw_map(STATE* s, MAPA* map) {
 
     // Transforma algumas posições em paredes se existirem pelo menos 5 paredes em um quadrado 3x3 centrado em cada posição
     
-    for (int d = 0; d < 2; d++) {
+    for (int d = 0; d < 3; d++) {
     for (int i = 1; i < map->x - 1; i++) {
         for (int j = 1; j < map->y - 1; j++) {
             int count = 0;
@@ -82,7 +82,7 @@ void draw_map(STATE* s, MAPA* map) {
 // Verifica cada posição em um quadrado 5x5 centrado e transforma em parede se não houver nenhuma parede vizinha
 // faz-se 7 passagens para um resultado mais polido
 
-for (int d = 0; d < 7; d++) {
+for (int d = 0; d < 4; d++) {
     for (int i = 2; i < map->x - 2; i++) {
         for (int j = 2; j < map->y - 2; j++) {
             int count = 0;
