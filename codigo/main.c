@@ -56,7 +56,7 @@ double delta = 0.05; // Incremento do angulo
          double dy = sin(angle);
 
         // posição inicial
-        double x = centerX + 0.5; // incrementa-se 0.5 para se arredondar o valor de sin e cos para cima
+        double x = centerX + 0.5; // incrementa-se 0.5 para se arredondar o valor para cima
         double y = centerY + 0.5;
 
         // percorre a direção dada pelo raio até à borda do mapa ou até encontrar um obstáculo(parede)
