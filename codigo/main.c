@@ -4,6 +4,7 @@
 #include <ncurses.h>
 #include <time.h>
 
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -36,94 +37,66 @@ int distance_player_point (STATE *s, int *x, int *y){
 	return dist;
 }
 
-void draw_light(STATE *s){ // Função que desenhará a luz
+void draw_light(STATE *s,MAPA *map){ // Função que desenhará a luz
 
-    int centerX = s->playerY;
-	int centerY = s->playerX;
+int centerX = s->playerY;
+int centerY = s->playerX;
 
-	char test = '#';
-	char trap = '*';
-	char heal = '+';
-	char bullet = '-';
-	char casa = ' ';
-	char casa_iluminada = '.';
+char test = '#';
+char trap = '*';
+char heal = '+';
+char bullet = '-';
+char casa = ' ';
 
-for (int x = centerY - 3; x <= centerY + 3; x++) {  // Desenha o raio de visão do jogador
-        for (int y = centerX - 3; y <= centerX + 3; y++) {
-			char testch = (mvinch(x,y) & A_CHARTEXT);
+double delta = 0.05; // Incremento do angulo
+
+    for (double angle = 0; angle < 2 * M_PI; angle += delta) {
+
+         double dx = cos(angle);
+         double dy = sin(angle);
+
+        // posição inicial
+        double x = centerX + 0.5; // incrementa-se 0.5 para se arredondar o valor de sin e cos para cima
+        double y = centerY + 0.5;
+
+        // percorre a direção dada pelo raio até à borda do mapa ou até encontrar um obstáculo(parede)
+        while (x >= 0 && x < map->x && y >= 0 && y < map->y) {
+            char testch = mvinch((int)y, (int)x) & A_CHARTEXT;
             if (testch == test) {
                 attron(COLOR_PAIR(WALL_ILUMINATED));
-                mvaddch(x, y, '#');
+                mvaddch(y, x, '#');
                 attroff(COLOR_PAIR(WALL_ILUMINATED));
+                break;
             }
-			else if (testch == trap){
-				attron(COLOR_PAIR(TRAP_COLOR));
-                mvaddch(x, y, '*'| A_BOLD);
+            else if (testch == trap) {
+                attron(COLOR_PAIR(TRAP_COLOR));
+                mvaddch(y, x, '*' | A_BOLD);
                 attroff(COLOR_PAIR(TRAP_COLOR));
-			}
-			else if(testch == heal) {
-				attron(COLOR_PAIR(HEAL_ON));
-                mvaddch(x, y, '+'| A_BOLD);
+                
+            }
+            else if (testch == heal) {
+                attron(COLOR_PAIR(HEAL_ON));
+                mvaddch(y, x, '+' | A_BOLD);
                 attroff(COLOR_PAIR(HEAL_ON));
-			}
-			else if (testch == bullet){
-				attron(COLOR_PAIR(BULLET_ON));
-                mvaddch(x, y, '-'| A_BOLD);
+                
+            }
+            else if (testch == bullet) {
+                attron(COLOR_PAIR(BULLET_ON));
+                mvaddch(y, x, '-' | A_BOLD);
                 attroff(COLOR_PAIR(BULLET_ON));
-			}
-			else if (testch == casa){
-				attron(COLOR_PAIR(LIGHT));
-                mvaddch(x, y, '.'| A_BOLD);
+                
+            }
+            else if (testch == casa) {
+                attron(COLOR_PAIR(LIGHT));
+                mvaddch(y, x, '.' | A_BOLD);
                 attroff(COLOR_PAIR(LIGHT));
-			}
-
+            }
+            x += dx;
+            y += dy;
         }
     }
- 
-	for (double angle = 0; angle < (M_PI * 2); angle += 0.01){ // este ciclo desenha a visão do jogador (lanterna do jogador)
-		int dx = 0, dy = 0;
-
-		double dx1 = cos (angle);
-		double dy1 = sin (angle);
-
-		dx = round (dx1);
-		dy = round (dy1);
-
-		int x = centerX, y = centerY;
-		char testch1 = casa;
-        
-   while (testch1 != '#'){
-	    x += dx;
-		y += dy;
-		testch1 = mvinch(y, x) & A_CHARTEXT;
-		if (testch1 == casa){
-			attron(COLOR_PAIR(LIGHT));
-			mvaddch(y, x, casa_iluminada);
-			attroff(COLOR_PAIR(LIGHT));
-		}
-		else if (testch1 == trap){
-			attron(COLOR_PAIR(TRAP_COLOR));
-			mvaddch(y, x, trap | A_BOLD);
-			attroff(COLOR_PAIR(TRAP_COLOR));
-		}
-		else if (testch1 == heal){
-	        attron(COLOR_PAIR(HEAL_ON));
-			mvaddch(y, x, heal | A_BOLD);
-			attroff(COLOR_PAIR(HEAL_ON));
-		}
-		else if (testch1 == bullet){
-		    attron(COLOR_PAIR(BULLET_ON));
-			mvaddch(y, x, bullet | A_BOLD);
-			attroff(COLOR_PAIR(BULLET_ON));
-		}
-		else if (testch1 == test){
-		    attron(COLOR_PAIR(LIGHT));
-			mvaddch(y, x, test | A_BOLD);
-			attroff(COLOR_PAIR(LIGHT));
-		}
-   }
- }
 }
+
 	
 void lights_off(MAPA *map){
 
@@ -315,7 +288,7 @@ int main(){
 			attroff(COLOR_PAIR(TRAP_COLOR));
 		}
         
-		draw_light(&st);
+		draw_light(&st,&map);
 		move(st.playerX, st.playerY);
 		update(&st);
 		lights_off(&map);
