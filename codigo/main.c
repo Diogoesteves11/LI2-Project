@@ -31,7 +31,6 @@
 #define WEST 22
 
 
-
 int distance_player_point (STATE *s, int *x, int *y){
 	int dist = sqrt(((s->playerX - *x)^2)+ ((s->playerY - *y)^2));
 	return dist;
@@ -52,8 +51,8 @@ double delta = 0.05; // Incremento do angulo
 
     for (double angle = 0; angle < 2 * M_PI; angle += delta) {
 
-         double dx = cos(angle);
-         double dy = sin(angle);
+        double dx = cos(angle);
+        double dy = sin(angle);
 
         // posição inicial
         double x = centerX + 0.5; // incrementa-se 0.5 para se arredondar o valor para cima
@@ -97,7 +96,6 @@ double delta = 0.05; // Incremento do angulo
     }
 }
 
-	
 void lights_off(MAPA *map){
 
 	char casa_iluminada = '.';
@@ -131,7 +129,7 @@ void do_movement_action(STATE *st, int dx, int dy){
 		if (st->hp == 0)
 		{
 			erase();
-			mvprintw(0, 0, "You stepped on a trap and died!");
+			mvprintw(0, 0, "YOU DIED!");
 			refresh();
 			sleep(1);
 			endwin();
@@ -267,6 +265,7 @@ int main(){
 		attron(COLOR_PAIR(1));
 		printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
 		printw("    Bullets: %d", st.bullets);
+		printw("   HP: %d", (st.hp +1));
 		attroff(COLOR_PAIR(1));
 
 		if (st.hp > 1)

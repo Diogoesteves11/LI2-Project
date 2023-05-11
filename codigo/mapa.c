@@ -14,10 +14,10 @@
 
 
 void draw_map(STATE* s, MAPA* map) {
+    srand(time(NULL));
     start_color();
-
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
-    init_pair(WALL_COLOR, COLOR_BLACK, COLOR_BLACK);
+    init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLACK);
     init_pair(HEAL_OFF,COLOR_BLACK,COLOR_BLACK);
     init_pair (BULLET_OFF, COLOR_BLACK,COLOR_BLACK);
 
@@ -102,6 +102,7 @@ for (int d = 0; d < 7; d++) {
 }
 
 // Elimina paredes soltas
+
 for (int i = 1; i < map->x - 1; i++) {
     for (int j = 1; j < map->y - 1; j++) {
         if (map->matriz[i][j] == '#') {
