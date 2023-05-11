@@ -30,6 +30,7 @@
 #define WEST 22
 
 
+
 int distance_player_point (STATE *s, int *x, int *y){
 	int dist = sqrt(((s->playerX - *x)^2)+ ((s->playerY - *y)^2));
 	return dist;
@@ -176,19 +177,20 @@ void do_movement_action(STATE *st, int dx, int dy){
 }
 
 void shoot(STATE *s, int *direction){
-  int x=s->playerX,y= s->playerY;
-  char testch = mvinch(y,x) & A_CHARTEXT;
   switch (*direction){
 	case NORTH:{
-      for (y; (testch == ' ') || (testch == (' ')); y--){
-		if(s->bullets> 0){
-         attron(COLOR_PAIR(MEDIUM_HP));
-		mvaddch(y,x,'|');
-		attroff(COLOR_PAIR(MEDIUM_HP));
-		s->bullets --;
+		char testch;
+		int y = s->playerY, x = s->playerX;
+		for (;(testch =(mvinch (y,x))) == ' '; y--){
+          if (s->bullets > 0){
+			 attron(COLOR_PAIR(MEDIUM_HP));
+		     mvaddch(y,x,'|');
+		     attroff(COLOR_PAIR(MEDIUM_HP));
+		     s->bullets --;
+		  }
 		}
-	  }
 	}
+	default: break;
   }
 }
 
@@ -252,8 +254,6 @@ void update(STATE *st){
 	case '\0':
 		break;
 	case ' ': shoot(st,&last_direction);break;
-	default:
-		break;
 	}
 }
 
