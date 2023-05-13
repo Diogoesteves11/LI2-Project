@@ -155,20 +155,13 @@ void do_movement_action(STATE *st, int dx, int dy){
 }
 
 void shoot(STATE *s, int *direction){
-  switch (*direction){
-	case NORTH:{
-		char testch;
-		int y = s->playerY, x = s->playerX;
-		for (;(testch =(mvinch (y,x))) == ' '; y--){
-          if (s->bullets > 0){
-			 attron(COLOR_PAIR(MEDIUM_HP));
-		     mvaddch(y,x,'|');
-		     attroff(COLOR_PAIR(MEDIUM_HP));
-		     s->bullets --;
-		  }
-		}
+	int y = s->playerY, x = s->playerX;
+  if (*direction == NORTH && s->bullets> 0){
+	for (; y < s->playerY-5; y--){ //As balas têm um alcance de 5 casas
+      attron (COLOR_PAIR(BULLET_ON));
+	  mvaddch(y,x, '|');
+	  attroff(COLOR_PAIR(BULLET_ON));
 	}
-	default: break;
   }
 }
 
