@@ -96,20 +96,27 @@ double delta = 0.05; // Incremento do angulo
     }
 }
 
-void lights_off(MAPA *map){
+void lights_off(MAPA *map) {
+    char casa_iluminada = '.';
+    char trap = '*';
 
-	char casa_iluminada = '.';
-
-	for (int x = 1; x < map->x -1; x++){ // ciclo que apagará as luzes da jogada anterior
-		for (int y = 1; y < map->y-1; y++){
-			char testch = (mvinch(y,x) & A_CHARTEXT);
-			if (testch == casa_iluminada){
-				attron(COLOR_PAIR(BACKGROUND));
-				mvaddch(y,x,' ');
-				attroff(COLOR_PAIR(BACKGROUND));
-			}
-		}
-}
+    attron(COLOR_PAIR(BACKGROUND));
+    for (int x = 1; x < map->x - 1; x++) {
+        for (int y = 1; y < map->y - 1; y++) {
+            char testch = (mvinch(y, x) & A_CHARTEXT);
+            if (testch == casa_iluminada) {
+                mvaddch(y, x, ' ');
+            }
+            else if (testch == trap) {
+                attron(COLOR_PAIR(BACKGROUND));
+                attron(A_BOLD);  // chama-se esta função para garantir que as traps sejam pintadas de preto
+                mvaddch(y, x, '*' | A_COLOR);
+                attroff(COLOR_PAIR(BACKGROUND));
+                attroff(A_BOLD);
+            }
+        }
+    }
+    attroff(COLOR_PAIR(BACKGROUND));
 }
 
 void do_movement_action(STATE *st, int dx, int dy){
@@ -287,11 +294,10 @@ int main(){
 			attroff(COLOR_PAIR(TRAP_COLOR));
 		}
         
+		lights_off(&map);
 		draw_light(&st,&map);
 		move(st.playerX, st.playerY);
 		update(&st);
-		lights_off(&map);
-		
 		
 	}
 

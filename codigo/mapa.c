@@ -17,7 +17,7 @@ void draw_map(STATE* s, MAPA* map) {
     srand(time(NULL));
     start_color();
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
-    init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLACK);
+    init_pair(WALL_COLOR, COLOR_BLACK, COLOR_BLACK);
     init_pair(HEAL_OFF,COLOR_BLACK,COLOR_BLACK);
     init_pair (BULLET_OFF, COLOR_BLACK,COLOR_BLACK);
 
