@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "mapa.h"
+#include "state.h"
 
 #define TRAP_PERCENTAGE 10
 #define TRAP_COLOR_2 8

@@ -18,10 +18,11 @@ typedef struct state {
 } STATE;
 
 typedef struct enemie {
+   int enemieID;	
    int enemieX;
    int enemieY;
    int enemiehp;
    int speed;
-} ENEMIE;
+} ENEMIE;  
 
 #endif
