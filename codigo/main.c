@@ -42,6 +42,8 @@ char trap = '*';
 char heal = '+';
 char bullet = '-';
 char casa = ' ';
+char damage = '^';
+
 
 double delta = 0.05; // Incremento do angulo
 
@@ -86,6 +88,11 @@ double delta = 0.05; // Incremento do angulo
                 mvaddch(y, x, '.' | A_BOLD);
                 attroff(COLOR_PAIR(LIGHT));
             }
+			else if (testch == damage) {
+                attron(COLOR_PAIR(TRAP_COLOR));
+                mvaddch(y, x, '.' | A_BOLD);
+                attroff(COLOR_PAIR(TRAP_COLOR));
+			}
             x += dx;
             y += dy;
         }
@@ -95,6 +102,7 @@ double delta = 0.05; // Incremento do angulo
 void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     char casa_iluminada = '.';
     char trap = '*';
+	char damage = '^';
 
     attron(COLOR_PAIR(BACKGROUND));
     for (int x = 1; x < map->x - 1; x++) { // ciclos for para percorrer todas as casas do mapa
@@ -151,13 +159,30 @@ void do_movement_action(STATE *st, int dx, int dy){  // função que dará "fisi
 }
 
 
+void attack (STATE *s){
+	int x = s->playerX, y = s->playerY;
+	char wall = '#', heal = '+', bullets = '-';
+    if (s->sword){
+		for (int ix = x-1; ix <= x+1; ix++){
+			for (int iy = y-1; iy <= y+1; iy++){
+				char testch = mvinch(ix,iy) & A_CHARTEXT;
+				if (testch != wall && testch != heal && testch != bullets){
+                 attron(COLOR_PAIR(TRAP_COLOR));
+				 mvaddch(ix,iy, '^'|A_BOLD); // o desenho do triângulo é imediatamente substituido por um ponto de luz vermelhjo. O simbolo só foi utilizado para diferenciar o ataque dentro do codigo
+				 attroff(COLOR_PAIR(TRAP_COLOR));
+				}
+			}
+		}
+	}
+	
+}
+
 void update(STATE *st){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
 	int last_direction;
 
 	switch (key)
 	{
-
      case 't':
         // se o jogador não tiver a espada equipada, equipa a espada
         if (!st->sword) {
@@ -220,6 +245,7 @@ void update(STATE *st){ // função que fornecerá à "do_movement_action" as in
 	case 'd':
 		do_movement_action(st, +0, +1);last_direction = EAST;
 		break;
+	case ' ': attack(st); break;
 	}
 }
 
