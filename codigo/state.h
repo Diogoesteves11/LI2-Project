@@ -17,4 +17,11 @@ typedef struct state {
 	int sword;
 } STATE;
 
+typedef struct enemie {
+   int enemieX;
+   int enemieY;
+   int enemiehp;
+   int speed;
+} ENEMIE;
+
 #endif
