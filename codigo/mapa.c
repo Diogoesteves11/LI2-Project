@@ -17,19 +17,19 @@ void draw_map(STATE* s, MAPA* map) {
     srand(time(NULL));
     start_color();
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
-    init_pair(WALL_COLOR, COLOR_BLACK, COLOR_BLACK);
+    init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLACK);
     init_pair(HEAL_OFF,COLOR_BLACK,COLOR_BLACK);
     init_pair (BULLET_OFF, COLOR_BLACK,COLOR_BLACK);
 
 
     s->playerX = 10;
     s->playerY = 10;
-    int casas_totais = ((map->x) * (map->y)) - 2 * (map->x + map->y);
+    int casas_totais = ((map->x) * (map->y)) - (2 * (map->x + map->y));
     int heal_percentage = casas_totais * 0.01;
     int heal_count = 0;
 
     attron(COLOR_PAIR(WALL_COLOR));
-    for (int i = 0; i < casas_totais * 0.4; i++) {
+    for (int i = 0; i < (casas_totais * 0.35); i++) {
         int x1 = rand() % (map->x - 2) + 1;
         int y1 = rand() % (map->y - 1);
         map->matriz[x1][y1] = '#';

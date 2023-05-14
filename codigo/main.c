@@ -4,7 +4,7 @@
 #include <ncurses.h>
 #include <time.h>
 #define _USE_MATH_DEFINES
-#include <math.h>      
+#include <math.h>
 
 #include "state.h"
 #include "mapa.h"
@@ -20,104 +20,114 @@
 #define MEDIUM_HP 11
 #define HEAL_ON 13
 #define BULLET_ON 17
-#define CASE_COLOR 18  // definições das "referências" das cores 
+#define CASE_COLOR 18 // definições das "referências" das cores
 
-
-#define NORTH 19    //definição das "referências" das direções
+#define NORTH 19 // definição das "referências" das direções
 #define SOUTH 20
 #define EAST 21
 #define WEST 22
 
-
-int distance_player_point (STATE *s, int *x, int *y){  // calculo da distância entre o jogador e um determinado ponto em linha reta
-	int dist = sqrt(((s->playerX - *x)^2)+ ((s->playerY - *y)^2));
+int distance_player_point(STATE *s, int *x, int *y)
+{ // calculo da distância entre o jogador e um determinado ponto em linha reta
+	int dist = sqrt(((s->playerX - *x) ^ 2) + ((s->playerY - *y) ^ 2));
 	return dist;
 }
 
-void draw_light(STATE *s,MAPA *map){ // Função que desenhará a luz
+void draw_light(STATE *s, MAPA *map)
+{ // Função que desenhará a luz
 
-int centerX = s->playerY;
-int centerY = s->playerX;
+	int centerX = s->playerY;
+	int centerY = s->playerX;
 
-char test = '#';  // definição das variáveis para os diferentes obstáculos
-char trap = '*';
-char heal = '+';
-char bullet = '-';
-char casa = ' ';
+	char test = '#'; // definição das variáveis para os diferentes obstáculos
+	char trap = '*';
+	char heal = '+';
+	char bullet = '-';
+	char casa = ' ';
 
-double delta = 0.05; // Incremento do angulo
+	double delta = 0.05; // Incremento do angulo
 
-    for (double angle = 0; angle < 2 * M_PI; angle += delta) {
+	for (double angle = 0; angle < 2 * M_PI; angle += delta)
+	{
 
-        double dx = cos(angle);
-        double dy = sin(angle);
+		double dx = cos(angle);
+		double dy = sin(angle);
 
-        // posição inicial
-        double x = centerX + 0.5; // incrementa-se 0.5 para se arredondar o valor para cima
-        double y = centerY + 0.5;
+		// posição inicial
+		double x = centerX + 0.5; // incrementa-se 0.5 para se arredondar o valor para cima
+		double y = centerY + 0.5;
 
-        // percorre a direção dada pelo raio até à borda do mapa ou até encontrar um obstáculo(parede)
-        while (x >= 0 && x < map->x && y >= 0 && y < map->y) {
-            char testch = mvinch((int)y, (int)x) & A_CHARTEXT;
-            if (testch == test) {
-                attron(COLOR_PAIR(WALL_ILUMINATED));  // caso se encontre uma parede, para-se de se desenhar a luz na direção definida
-                mvaddch(y, x, '#');
-                attroff(COLOR_PAIR(WALL_ILUMINATED));
-                break;
-            }
-            else if (testch == trap) {
-                attron(COLOR_PAIR(TRAP_COLOR));    // mesmo que se encontre um obstáculo que não seja uma parede, desenhamos a luz além do mesmos, iluminando-o
-                mvaddch(y, x, '*' | A_BOLD);
-                attroff(COLOR_PAIR(TRAP_COLOR));
-                
-            }
-            else if (testch == heal) {
-                attron(COLOR_PAIR(HEAL_ON));
-                mvaddch(y, x, '+' | A_BOLD);
-                attroff(COLOR_PAIR(HEAL_ON));
-                
-            }
-            else if (testch == bullet) {
-                attron(COLOR_PAIR(BULLET_ON));
-                mvaddch(y, x, '-' | A_BOLD);
-                attroff(COLOR_PAIR(BULLET_ON));
-                
-            }
-            else if (testch == casa) {
-                attron(COLOR_PAIR(LIGHT));
-                mvaddch(y, x, '.' | A_BOLD);
-                attroff(COLOR_PAIR(LIGHT));
-            }
-            x += dx;
-            y += dy;
-        }
-    }
+		// percorre a direção dada pelo raio até à borda do mapa ou até encontrar um obstáculo(parede)
+		while (x >= 0 && x < map->x && y >= 0 && y < map->y)
+		{
+			char testch = mvinch((int)y, (int)x) & A_CHARTEXT;
+			if (testch == test)
+			{
+				attron(COLOR_PAIR(WALL_ILUMINATED)); // caso se encontre uma parede, para-se de se desenhar a luz na direção definida
+				mvaddch(y, x, '#');
+				attroff(COLOR_PAIR(WALL_ILUMINATED));
+				break;
+			}
+			else if (testch == trap)
+			{
+				attron(COLOR_PAIR(TRAP_COLOR)); // mesmo que se encontre um obstáculo que não seja uma parede, desenhamos a luz além do mesmos, iluminando-o
+				mvaddch(y, x, '*' | A_BOLD);
+				attroff(COLOR_PAIR(TRAP_COLOR));
+			}
+			else if (testch == heal)
+			{
+				attron(COLOR_PAIR(HEAL_ON));
+				mvaddch(y, x, '+' | A_BOLD);
+				attroff(COLOR_PAIR(HEAL_ON));
+			}
+			else if (testch == bullet)
+			{
+				attron(COLOR_PAIR(BULLET_ON));
+				mvaddch(y, x, '-' | A_BOLD);
+				attroff(COLOR_PAIR(BULLET_ON));
+			}
+			else if (testch == casa)
+			{
+				attron(COLOR_PAIR(LIGHT));
+				mvaddch(y, x, '.' | A_BOLD);
+				attroff(COLOR_PAIR(LIGHT));
+			}
+			x += dx;
+			y += dy;
+		}
+	}
 }
 
-void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
-    char casa_iluminada = '.';
-    char trap = '*';
+void lights_off(MAPA *map)
+{ // função que apaga a luz da jogada anterior
+	char casa_iluminada = '.';
+	char trap = '*';
 
-    attron(COLOR_PAIR(BACKGROUND));
-    for (int x = 1; x < map->x - 1; x++) { // ciclos for para percorrer todas as casas do mapa
-        for (int y = 1; y < map->y - 1; y++) {
-            char testch = (mvinch(y, x) & A_CHARTEXT);
-            if (testch == casa_iluminada) {  //  se a casa estiver iluminada, é apagada para a mesma cor do background, bem como as traps (cor preta)
-                mvaddch(y, x, ' ');
-            }
-            else if (testch == trap) {
-                attron(COLOR_PAIR(BACKGROUND));
-                attron(A_BOLD);  // chama-se esta função para garantir que as traps sejam pintadas de preto
-                mvaddch(y, x, '*' | A_COLOR);
-                attroff(COLOR_PAIR(BACKGROUND));
-                attroff(A_BOLD);
-            }
-        }
-    }
-    attroff(COLOR_PAIR(BACKGROUND));
+	attron(COLOR_PAIR(BACKGROUND));
+	for (int x = 1; x < map->x - 1; x++)
+	{ // ciclos for para percorrer todas as casas do mapa
+		for (int y = 1; y < map->y - 1; y++)
+		{
+			char testch = (mvinch(y, x) & A_CHARTEXT);
+			if (testch == casa_iluminada)
+			{ //  se a casa estiver iluminada, é apagada para a mesma cor do background, bem como as traps (cor preta)
+				mvaddch(y, x, ' ');
+			}
+			else if (testch == trap)
+			{
+				attron(COLOR_PAIR(BACKGROUND));
+				attron(A_BOLD); // chama-se esta função para garantir que as traps sejam pintadas de preto
+				mvaddch(y, x, '*' | A_COLOR);
+				attroff(COLOR_PAIR(BACKGROUND));
+				attroff(A_BOLD);
+			}
+		}
+	}
+	attroff(COLOR_PAIR(BACKGROUND));
 }
 
-void do_movement_action(STATE *st, int dx, int dy){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
+void do_movement_action(STATE *st, int dx, int dy)
+{ // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
 	int nextX = st->playerX + dx;
 	int nextY = st->playerY + dy;
 	char test, testch, testTrap = '*';
@@ -125,7 +135,7 @@ void do_movement_action(STATE *st, int dx, int dy){  // função que dará "fisi
 	char heal = '+';
 	char bullet = '-';
 	testch = (mvinch(nextX, nextY) & A_CHARTEXT);
-	if (testch == test)  // se a próxima posição for uma parede, o jogador não se mexe e a função retorna
+	if (testch == test) // se a próxima posição for uma parede, o jogador não se mexe e a função retorna
 	{
 		return;
 	}
@@ -152,8 +162,8 @@ void do_movement_action(STATE *st, int dx, int dy){  // função que dará "fisi
 	st->playerY = nextY;
 }
 
-
-void update(STATE *st){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
+void update(STATE *st)
+{ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
 	int last_direction;
 
@@ -161,59 +171,72 @@ void update(STATE *st){ // função que fornecerá à "do_movement_action" as in
 	{
 	case KEY_A1:
 	case '7':
-		do_movement_action(st, -1, -1);last_direction = WEST;
+		do_movement_action(st, -1, -1);
+		last_direction = WEST;
 		break;
 	case KEY_UP:
 	case '8':
-		do_movement_action(st, -1, +0);last_direction = NORTH;
+		do_movement_action(st, -1, +0);
+		last_direction = NORTH;
 		break;
 	case KEY_A3:
 	case '9':
-		do_movement_action(st, -1, +1);last_direction = EAST;
+		do_movement_action(st, -1, +1);
+		last_direction = EAST;
 		break;
 	case KEY_LEFT:
 	case '4':
-		do_movement_action(st, +0, -1);last_direction = WEST;
+		do_movement_action(st, +0, -1);
+		last_direction = WEST;
 		break;
 	case KEY_B2:
 	case '5':
 		break;
 	case KEY_RIGHT:
 	case '6':
-		do_movement_action(st, +0, +1);last_direction = EAST;
+		do_movement_action(st, +0, +1);
+		last_direction = EAST;
 		break;
 	case KEY_C1:
 	case '1':
-		do_movement_action(st, +1, -1);last_direction = WEST;
+		do_movement_action(st, +1, -1);
+		last_direction = WEST;
 		break;
 	case KEY_DOWN:
 	case '2':
-		do_movement_action(st, +1, +0);last_direction = SOUTH;
+		do_movement_action(st, +1, +0);
+		last_direction = SOUTH;
 		break;
 	case KEY_C3:
 	case '3':
-		do_movement_action(st, +1, +1);last_direction = EAST;
+		do_movement_action(st, +1, +1);
+		last_direction = EAST;
 		break;
 	case 'q':
 		endwin();
 		exit(0);
 		break;
 	case 'w':
-		do_movement_action(st, -1, +0);last_direction = NORTH;
+		do_movement_action(st, -1, +0);
+		last_direction = NORTH;
 		break;
 	case 'a':
-		do_movement_action(st, +0, -1);last_direction = WEST;
+		do_movement_action(st, +0, -1);
+		last_direction = WEST;
 		break;
 	case 's':
-		do_movement_action(st, +1, +0);last_direction = SOUTH;
+		do_movement_action(st, +1, +0);
+		last_direction = SOUTH;
 		break;
 	case 'd':
-		do_movement_action(st, +0, +1);last_direction = EAST;
+		do_movement_action(st, +0, +1);
+		last_direction = EAST;
 		break;
 	}
 }
 
-int main(){
+int main()
+{
 	MAPA map;
 	STATE st = {20, 20, 3, 0};
 	WINDOW *wnd = initscr();
@@ -247,11 +270,13 @@ int main(){
 	while (1)
 	{
 		move(nrows - 1, 0);
-		attron(COLOR_PAIR(1));
-		printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
-		printw("    Bullets: %d", st.bullets);
-		printw("   HP: %d", (st.hp +1));
-		attroff(COLOR_PAIR(1));    // funções que desenham o scoreboard
+      attron(COLOR_PAIR(1));
+      printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
+      clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
+      printw("    Bullets: %d", st.bullets);
+      clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
+      printw("   HP: %d", (st.hp + 1));
+      attroff(COLOR_PAIR(1));  // Funções que desenham o scoreboard
 
 		if (st.hp > 1)
 		{
@@ -269,14 +294,13 @@ int main(){
 		{
 			attron(COLOR_PAIR(TRAP_COLOR));
 			mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
-			attroff(COLOR_PAIR(TRAP_COLOR));               // funções que desenham o jogador, mudando a sua cor consoante o hp
+			attroff(COLOR_PAIR(TRAP_COLOR)); // funções que desenham o jogador, mudando a sua cor consoante o hp
 		}
-        
-		lights_off(&map); // função que apaga a luz da jogada anterior
-		draw_light(&st,&map); // função que desenha a luz da nova jogada
+
+		lights_off(&map);	   // função que apaga a luz da jogada anterior
+		draw_light(&st, &map); // função que desenha a luz da nova jogada
 		move(st.playerX, st.playerY);
 		update(&st); // chamamento da função update para atualizar o estado do jogador
-		
 	}
 
 	return 0;
