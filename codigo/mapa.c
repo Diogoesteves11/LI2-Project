@@ -121,6 +121,8 @@ for (int i = 1; i < map->x - 1; i++) {
 }
 attroff(COLOR_PAIR(WALL_COLOR));
 
+
+//função que desenha as traps do mapa logo no inicio(número de traps finito)
 attron(COLOR_PAIR(TRAP_COLOR_2));
 for(int i = 2; i < map->y-2; i++) {
         for(int j = 2; j < map->x-2; j++) {
@@ -132,6 +134,7 @@ for(int i = 2; i < map->y-2; i++) {
     }
 attroff (COLOR_PAIR(TRAP_COLOR_2));
 
+//função que desenha as curas(nº finito de curas)
 attron (COLOR_PAIR(HEAL_OFF));
 while  (heal_count < heal_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
@@ -145,6 +148,7 @@ while  (heal_count < heal_percentage) {
 attroff(COLOR_PAIR(HEAL_OFF));
 
 
+//função que desenha as recargas das munições (nº finito)
 attron (COLOR_PAIR(BULLET_OFF));
 for (int i = 0; i < casas_totais * 0.2; i++) {
         int x1 = rand() % (map->x - 2) + 1;
