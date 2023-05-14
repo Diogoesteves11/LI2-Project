@@ -24,12 +24,12 @@ void draw_map(STATE* s, MAPA* map) {
 
     s->playerX = 10;
     s->playerY = 10;
-    int casas_totais = ((map->x) * (map->y)) - (2 * (map->x + map->y));
+    int casas_totais = ((map->x) * (map->y)) - 2 * (map->x + map->y);
     int heal_percentage = casas_totais * 0.01;
     int heal_count = 0;
 
     attron(COLOR_PAIR(WALL_COLOR));
-    for (int i = 0; i < (casas_totais * 0.35); i++) {
+    for (int i = 0; i < casas_totais * 0.35; i++) {
         int x1 = rand() % (map->x - 2) + 1;
         int y1 = rand() % (map->y - 1);
         map->matriz[x1][y1] = '#';
@@ -58,7 +58,7 @@ void draw_map(STATE* s, MAPA* map) {
         mvaddch(map->y - 1, i, map->matriz[i][map->y - 1]);
     }
 
-    // Transforma algumas posições em paredes se existirem pelo menos 5 paredes em um quadrado 3x3 centrado em cada posição
+    // Transforma a posição central em parede se existirem pelo menos 5 paredes vizinhas em um quadrado 3x3 centrado numa celula.
     
     for (int d = 0; d < 3; d++) {
     for (int i = 1; i < map->x - 1; i++) {
@@ -79,8 +79,7 @@ void draw_map(STATE* s, MAPA* map) {
     }
     }
     
-// Verifica cada posição em um quadrado 5x5 centrado e transforma em parede se não houver nenhuma parede vizinha
-// faz-se 7 passagens para um resultado mais polido
+// Verifica cada posição em um quadrado 5x5 centrado e transforma a celula central em parede se não houver nenhuma parede vizinha
 
 for (int d = 0; d < 4; d++) {
     for (int i = 2; i < map->x - 2; i++) {
@@ -101,7 +100,7 @@ for (int d = 0; d < 4; d++) {
     }
 }
 
-// Elimina paredes soltas
+// Elimina algumas paredes soltas 
 
 for (int i = 1; i < map->x - 1; i++) {
     for (int j = 1; j < map->y - 1; j++) {
@@ -122,7 +121,7 @@ for (int i = 1; i < map->x - 1; i++) {
 attroff(COLOR_PAIR(WALL_COLOR));
 
 
-//função que desenha as traps do mapa logo no inicio(número de traps finito)
+// Função que desenha as traps do mapa logo no inicio(número de traps finito)
 attron(COLOR_PAIR(TRAP_COLOR_2));
 for(int i = 2; i < map->y-2; i++) {
         for(int j = 2; j < map->x-2; j++) {
@@ -134,7 +133,7 @@ for(int i = 2; i < map->y-2; i++) {
     }
 attroff (COLOR_PAIR(TRAP_COLOR_2));
 
-//função que desenha as curas(nº finito de curas)
+// Função que desenha as curas(nº finito de curas)
 attron (COLOR_PAIR(HEAL_OFF));
 while  (heal_count < heal_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
@@ -148,7 +147,7 @@ while  (heal_count < heal_percentage) {
 attroff(COLOR_PAIR(HEAL_OFF));
 
 
-//função que desenha as recargas das munições (nº finito)
+// Função que desenha as recargas das munições (nº finito)
 attron (COLOR_PAIR(BULLET_OFF));
 for (int i = 0; i < casas_totais * 0.2; i++) {
         int x1 = rand() % (map->x - 2) + 1;

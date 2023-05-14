@@ -14,6 +14,7 @@ typedef struct state {
 	int playerY;
 	int hp;
 	int bullets;
+	int sword;
 } STATE;
 
 #endif
