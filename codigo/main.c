@@ -28,6 +28,13 @@
 #define EAST 21
 #define WEST 22
 
+void remove_enemie(ENEMIE *enemies, int *num_enemies, int index){
+    (*num_enemies) --;
+    if(index != *num_enemies){
+        enemies[index] = enemies[*num_enemies];
+    }
+}
+
 int distance_player_point (STATE *s, int *x, int *y){  // calculo da distância entre o jogador e um determinado ponto em linha reta
 	int dist = sqrt(((s->playerX - *x)^2)+ ((s->playerY - *y)^2));
 	return dist;
@@ -144,11 +151,9 @@ void do_movement_action(STATE *st, int dx, int dy){  // função que dará "fisi
 	test = '#';
 	char heal = '+';
 	char bullet = '-';
+	char enemich = '&';
 	testch = (mvinch(nextX, nextY) & A_CHARTEXT);
-	if (testch == test)  // se a próxima posição for uma parede, o jogador não se mexe e a função retorna
-	{
-		return;
-	}
+	if (testch == test) return; // se a próxima posição for uma parede, o jogador não se mexe e a função retorna 
 	else if (testch == testTrap) // se a próxima posição for uma trap, verificamos o hp do jogador e, se esta for maior do que zero, retiramos 1 de hp, caso contrário o jogador morre
 	{
 		if (st->hp == 0)
@@ -163,37 +168,55 @@ void do_movement_action(STATE *st, int dx, int dy){  // função que dará "fisi
 		else
 			st->hp--;
 	}
-	else if (testch == bullet)
-		st->bullets += 5; // cada recarga aumenta 5 balas, caso o jogador intersete a munição
-	else if (testch == heal)
-		st->hp += 2; // cada cura aumenta 2 de hp, caso o jogador a intersete
+	else if (testch == bullet) st->bullets += 5; // cada recarga aumenta 5 balas, caso o jogador intersete a munição
+	else if (testch == heal) st->hp += 2; // cada cura aumenta 2 de hp, caso o jogador a intersete
+	else if (testch == enemich) return;
 	mvaddch(st->playerX, st->playerY, ' ');
 	st->playerX = nextX; // atualizamos as novas coordenadas do jogador no state do mesmo
 	st->playerY = nextY;
 }
 
-void attack (STATE *s){ // função responsável pela fisica dos ataques
-	ENEMIE *enemie;
+void attack (STATE *s, int *num_enemies, ENEMIE *enemies){ // função responsável pela fisica dos ataques
 	int x = s->playerX, y = s->playerY;
-	char wall = '#', heal = '+', bullets = '-', enemie = '&';
-    if (s->sword){
-		for (int ix = x-1; ix <= x+1; ix++){
-			for (int iy = y-1; iy <= y+1; iy++){
-				char testch = mvinch(ix,iy) & A_CHARTEXT;
-				if (testch != wall && testch != heal && testch != bullets){
-                 attron(COLOR_PAIR(TRAP_COLOR));
-				 mvaddch(ix,iy, '^'|A_BOLD); // o desenho do triângulo é imediatamente substituido por um ponto de luz vermelhjo. O simbolo só foi utilizado para distinguir o ataque dentro do codigo
-				 attroff(COLOR_PAIR(TRAP_COLOR));
-				}
-			}
-		}
-	}
-	
+    char wall = '#', heal = '+', bullets = '-', enemiech = '&';
+
+    if (s->sword) {
+        for (int ix = x - 1; ix <= x + 1; ix++) {
+            for (int iy = y - 1; iy <= y + 1; iy++) {
+                char testch = mvinch(ix, iy) & A_CHARTEXT;
+
+                if (testch != wall && testch != heal && testch != bullets && testch != enemiech) {
+                    attron(COLOR_PAIR(TRAP_COLOR));
+                    mvaddch(ix, iy, '^' | A_BOLD);
+                    attroff(COLOR_PAIR(TRAP_COLOR));
+                } else if (testch == enemiech) {
+                    for (int i = 0; i < *num_enemies; i++) {
+                        if (enemies[i].enemieX == ix && enemies[i].enemieY == iy && enemies[i].hp > 0) {
+                            enemies[i].hp--;
+                            if (enemies[i].hp == 0) {
+                                attron(COLOR_PAIR(TRAP_COLOR));
+                                mvaddch(ix, iy, '^' | A_BOLD);
+                                attroff(COLOR_PAIR(TRAP_COLOR));
+                                s->kills++;
+
+                                // Atualize a posição do jogador, se necessário
+                                if (ix == x && iy == y) {
+                                    s->playerX = -1;
+                                    s->playerY = -1;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
-void update(STATE *st){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
+void update(STATE *st,int *num_enemies, ENEMIE *enemie){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
-	int last_direction;
+	
 
 	switch (key)
 	{
@@ -210,92 +233,93 @@ void update(STATE *st){ // função que fornecerá à "do_movement_action" as in
 
 	case KEY_A1:
 	case '7':
-		do_movement_action(st, -1, -1);last_direction = WEST;
+		do_movement_action(st, -1, -1);
 		break;
 	case KEY_UP:
 	case '8':
-		do_movement_action(st, -1, +0);last_direction = NORTH;
+		do_movement_action(st, -1, +0);
 		break;
 	case KEY_A3:
 	case '9':
-		do_movement_action(st, -1, +1);last_direction = EAST;
+		do_movement_action(st, -1, +1);
 		break;
 	case KEY_LEFT:
 	case '4':
-		do_movement_action(st, +0, -1);last_direction = WEST;
+		do_movement_action(st, +0, -1);
 		break;
 	case KEY_B2:
 	case '5':
 		break;
 	case KEY_RIGHT:
 	case '6':
-		do_movement_action(st, +0, +1);last_direction = EAST;
+		do_movement_action(st, +0, +1);
 		break;
 	case KEY_C1:
 	case '1':
-		do_movement_action(st, +1, -1);last_direction = WEST;
+		do_movement_action(st, +1, -1);
 		break;
 	case KEY_DOWN:
 	case '2':
-		do_movement_action(st, +1, +0);last_direction = SOUTH;
+		do_movement_action(st, +1, +0);
 		break;
 	case KEY_C3:
 	case '3':
-		do_movement_action(st, +1, +1);last_direction = EAST;
+		do_movement_action(st, +1, +1);
 		break;
 	case 'q':
 		endwin();
 		exit(0);
 		break;
 	case 'w':
-		do_movement_action(st, -1, +0);last_direction = NORTH;
+		do_movement_action(st, -1, +0);
 		break;
 	case 'a':
-		do_movement_action(st, +0, -1);last_direction = WEST;
+		do_movement_action(st, +0, -1);
 		break;
 	case 's':
-		do_movement_action(st, +1, +0);last_direction = SOUTH;
+		do_movement_action(st, +1, +0);
 		break;
 	case 'd':
-		do_movement_action(st, +0, +1);last_direction = EAST;
+		do_movement_action(st, +0, +1);
 		break;
-	case ' ': attack(st); break;
+	case ' ': attack(st,num_enemies,enemie); break;
 	}
 }
 
 void spawn_enemie(ENEMIE *enemie, int * num_enemies, int y, int x){
-  if (*num_enemies < 20 && rand()% 10 == 0){ // se o número de inimigos for menor do que 20 temos 30% de chance de ele aparecer(pode ser que o nº 0 seja gerado pela função rand que tem um alcance de 0 a 30) 
+  if (*num_enemies < 20){ // se o número de inimigos for menor do que 20 temos 30% de chance de ele aparecer(pode ser que o nº 0 seja gerado pela função rand que tem um alcance de 0 a 30) 
    ENEMIE new_enemie;
    char casa = ' ';
-   int newX = rand() % x;
-   int newY = rand() % y;
+   int newX = (rand() % x-2);
+   int newY = (rand() % y-2);
    char testch = mvinch(newX,newY) & A_CHARTEXT;
    if (testch == casa){
-	new_enemie.enemieID = 0;
     new_enemie.enemieX = newX;
 	new_enemie.enemieY = newY;
-	new_enemie.enemiehp = 1;
+	new_enemie.hp = 1;
 	enemie[*num_enemies] = new_enemie;
 	(*num_enemies)++;
    }
   }
 }
 
-void draw_enemies(ENEMIE *enemies, int num_enemies, STATE *s){
-	for (int i = 0; i < num_enemies; i++){ // desenhamos os inimigos da mesma cor do que o fundo, porque estes serão iluminados pela lanterna do jogador
+void draw_enemies(ENEMIE *enemies, int *num_enemies, STATE *s){
+    for (int i = 0; i < *num_enemies; i++){
         ENEMIE *enemie = &enemies[i];
         move(enemie->enemieY, enemie->enemieX);
-        attron(COLOR_PAIR(BACKGROUND));
-        mvaddch(enemie->enemieY, enemie->enemieX, '&' | A_BOLD);
-        attroff(COLOR_PAIR(BACKGROUND));
-		move(s->playerY, s->playerX);
-	}
+        if (mvinch(enemie->enemieY, enemie->enemieX) == ' '){
+            attron(COLOR_PAIR(BACKGROUND));
+            mvaddch(enemie->enemieY, enemie->enemieX, '&' | A_BOLD);
+            attroff(COLOR_PAIR(BACKGROUND));
+        }
+    }
+    move(s->playerY, s->playerX);
 }
 
 int main(){
 	MAPA map;
 	ENEMIE enemies[19];
-	STATE st = {20, 20, 3, 0, 1};
+	STATE st = {20, 20, 3, 0, 1, 0};
 	WINDOW *wnd = initscr();
 	int ncols, nrows, num_enemies = 0;
 	getmaxyx(wnd, nrows, ncols);
@@ -337,11 +361,14 @@ int main(){
 	  printw("   HP: %d", (st.hp + 1));
 	   clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
 	  printw("   ENEMIES: %d", num_enemies);
-      printw("   Equipped:");
+       clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
+      printw("   KILLS: %d", st.kills);
+	  clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
+      printw("   EQUIPPED:");
 	  if (st.sword) {
-        printw(" Sword ");
+      printw(" SWORD ");
      } else {
-      printw(" Gun");
+      printw(" GUN");
      }
 	  attroff(COLOR_PAIR(1));
 
@@ -364,13 +391,12 @@ int main(){
 			attroff(COLOR_PAIR(TRAP_COLOR));               // funções que desenham o jogador, mudando a sua cor consoante o hp
 		}
         spawn_enemie(&enemies[num_enemies],&num_enemies,nrows,ncols);
-        draw_enemies(&enemies[num_enemies], num_enemies, &st);
+        draw_enemies(&enemies[num_enemies],&num_enemies, &st);
 
 		lights_off(&map); // função que apaga a luz da jogada anterior
 		draw_light(&st,&map); // função que desenha a luz da nova jogada
 		move(st.playerX, st.playerY);
-		update(&st); // chamamento da função update para atualizar o estado do jogador
-		
+		update(&st,&num_enemies,enemies); // chamamento da função update para atualizar o estado do jogador
 	}
 
 	return 0;

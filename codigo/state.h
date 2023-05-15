@@ -15,13 +15,13 @@ typedef struct state {
 	int hp;
 	int bullets;
 	int sword;
+	int kills;
 } STATE;
 
-typedef struct enemie {
-   int enemieID;	
+typedef struct enemie {	
    int enemieX;
    int enemieY;
-   int enemiehp;
+   int hp;
    int speed;
 } ENEMIE;  
 
