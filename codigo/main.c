@@ -56,6 +56,7 @@ char heal = '+';
 char bullet = '-';
 char casa = ' ';
 char enemy = '&';
+char damage = '^';
 
 double delta = 0.05; // Incremento do angulo
 
@@ -106,6 +107,12 @@ double delta = 0.05; // Incremento do angulo
              mvaddch(y, x, '&' | A_BOLD);
              attroff(COLOR_PAIR(ENEMIE_COLOR));
             }
+             else if (testch == damage){
+             attron(COLOR_PAIR(TRAP_COLOR));
+             mvaddch(y, x, '.' | A_BOLD);
+             attroff(COLOR_PAIR(TRAP_COLOR));
+             map->matriz[(int)x][(int)y] = '.';
+            }
             x += dx;
             y += dy;
         }
@@ -116,6 +123,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     char casa_iluminada = '.';
     char trap = '*';
 	char enemy = '&';
+    char damage = '^';
 
     attron(COLOR_PAIR(BACKGROUND));
     for (int x = 1; x < map->x - 1; x++) { // ciclos for para percorrer todas as casas do mapa
@@ -138,6 +146,14 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
                 attron(COLOR_PAIR(BACKGROUND));
                 attron(A_BOLD);  // chama-se esta função para garantir que os inimigos sejam pintadas de preto
                 mvaddch(y, x, enemy|A_COLOR);
+                attroff(COLOR_PAIR(BACKGROUND));
+                attroff(A_BOLD);
+            }
+            else if (testch == damage){
+                map->matriz[x][y] = '^';
+                attron(COLOR_PAIR(BACKGROUND));
+                attron(A_BOLD);  // chama-se esta função para garantir que os inimigos sejam pintadas de preto
+                mvaddch(y, x, map->matriz[x][y]|A_COLOR);
                 attroff(COLOR_PAIR(BACKGROUND));
                 attroff(A_BOLD);
             }
@@ -178,21 +194,46 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que d
 	st->playerY = nextY;
 }
 
-void remove_enemie(ENEMIE *enemies, int *num_enemies, int index) {
-    for (int i = index; i < (*num_enemies - 1); i++) {
+void remove_enemie(ENEMIE *enemies, int *num_enemies, int index) { // percorre o array de structs a partir do indice do inimigo morto, e move todos os indices superiores um indeice para baixo, sobrepondo assim o indice do inimigo morto e removendo-o
+    for (int i = index; i < (*num_enemies) - 1; i++) {
         enemies[i] = enemies[i + 1];
     }
     (*num_enemies)--;
 }
 
-void attack(STATE *s, int *num_enemies, ENEMIE *enemies,MAPA *map) {
+
+void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map) {
     int x = s->playerX, y = s->playerY;
-    char wall = '#', heal = '+', bullets = '-', enemiech = '&',trap = '*',casa = ' ', casa_iluminada = '.';
+    char wall = '#', heal = '+', bullets = '-', enemych = '&', trap = '*', casa = ' ', casa_iluminada = '.', damage = '^';
 
     if (s->sword) {
-        
+        for (int ix = x - 1; ix <= x + 1; ix++) {
+            for (int iy = y - 1; iy <= y + 1; iy++) {
+                if (ix >= 0 && ix < map->x && iy >= 0 && iy < map->y) {
+                    char testch = map->matriz[ix][iy];
+                    if (testch == casa || testch == casa_iluminada) {
+                        map->matriz[ix][iy] = damage;
+                    } else if (testch == enemych) {
+                        for (int i = 0; i < *num_enemies; i++) {
+                            if (enemy[i].enemieX == ix && enemy[i].enemieY == iy) {
+                                if (enemy[i].hp > 0) {
+                                    enemy[i].hp--;
+                                    if (enemy[i].hp == 0) {
+                                        remove_enemie(enemy, num_enemies, i);
+                                        map->matriz[ix][iy] = damage;
+                                        s->kills++;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
+
 
 void update(STATE *st,int *num_enemies, ENEMIE *enemie,MAPA *map,int *game_menu){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
@@ -274,7 +315,7 @@ void spawn_enemie(ENEMIE *enemie, int * num_enemies, int y, int x,MAPA *map){
     map->matriz[newX][newY] = '&';
     new_enemie.enemieX = newX;
 	new_enemie.enemieY = newY;
-	new_enemie.hp = 1;
+	new_enemie.hp = 2;
 	enemie[*num_enemies] = new_enemie;
 	(*num_enemies)++;
    }
