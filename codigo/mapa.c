@@ -14,7 +14,7 @@
 #define BULLET_OFF 16
 
 
-void draw_map(STATE* s, MAPA* map) {
+void draw_map(MAPA* map) {
     srand(time(NULL));
     start_color();
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
@@ -23,8 +23,6 @@ void draw_map(STATE* s, MAPA* map) {
     init_pair (BULLET_OFF, COLOR_BLACK,COLOR_BLACK);
 
 
-    s->playerX = 10;
-    s->playerY = 10;
     int casas_totais = ((map->x) * (map->y)) - 2 * (map->x + map->y);
     int heal_percentage = casas_totais * 0.01;
     int heal_count = 0;
@@ -128,6 +126,7 @@ for(int i = 2; i < map->y-2; i++) {
         for(int j = 2; j < map->x-2; j++) {
             char test = '#';
             if((drand48() * 1000 < TRAP_PERCENTAGE) && ((mvinch(j,i) && A_CHARTEXT) != test)) {
+                map->matriz[j][i] = '*';
                 mvaddch(i, j, '*'| A_BOLD);
             } 
         }

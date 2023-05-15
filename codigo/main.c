@@ -28,11 +28,21 @@
 #define EAST 21
 #define WEST 22
 
-void remove_enemie(ENEMIE *enemies, int *num_enemies, int index){
-    (*num_enemies) --;
-    if(index != *num_enemies){
-        enemies[index] = enemies[*num_enemies];
-    }
+void spawn_player(STATE *st, MAPA *map) {
+    int x, y;
+    // Escolhe uma posição aleatória dentro do mapa
+    do {
+        x = (rand() % (map->x - 2)) + 1;
+        y = (rand() % (map->y - 3)) + 2;
+    } while (map->matriz[y][x] !=' '|| // posição já ocupada
+             map->matriz[y-1][x] == '#' || // parede acima
+             map->matriz[y+1][x] == '#' || // parede abaixo
+             map->matriz[y][x-1] == '#' || // parede à esquerda
+             map->matriz[y][x+1] == '#'); // parede à direita
+
+    st->playerX = y;
+    st->playerY = x;
+
 }
 
 int distance_player_point (STATE *s, int *x, int *y){  // calculo da distância entre o jogador e um determinado ponto em linha reta
@@ -40,73 +50,65 @@ int distance_player_point (STATE *s, int *x, int *y){  // calculo da distância 
 	return dist;
 }
 
-void draw_light(STATE *s,MAPA *map){ // Função que desenhará a luz
+void draw_light(STATE *s, MAPA *map) {
+    int centerX = s->playerX;
+    int centerY = s->playerY;
 
-int centerX = s->playerY;
-int centerY = s->playerX;
+    char test = '#';  // definição das variáveis para os diferentes obstáculos
+    char trap = '*';
+    char heal = '+';
+    char bullet = '-';
+    char casa = ' ';
+    char damage = '^';
+    char enemie = '&';
 
-char test = '#';  // definição das variáveis para os diferentes obstáculos
-char trap = '*';
-char heal = '+';
-char bullet = '-';
-char casa = ' ';
-char damage = '^';
-char enemie = '&';
-
-
-double delta = 0.05; // Incremento do angulo
+    double delta = 0.05;  // Incremento do ângulo
 
     for (double angle = 0; angle < 2 * M_PI; angle += delta) {
-
         double dx = cos(angle);
         double dy = sin(angle);
 
-        // posição inicial
-        double x = centerX + 0.5; // incrementa-se 0.5 para se arredondar o valor para cima
+        // Posição inicial
+        double x = centerX + 0.5;  // Incrementa-se 0.5 para se arredondar o valor para cima
         double y = centerY + 0.5;
 
-        // percorre a direção dada pelo raio até à borda do mapa ou até encontrar um obstáculo(parede)
+        // Percorre a direção dada pelo raio até à borda do mapa ou até encontrar um obstáculo (parede)
         while (x >= 0 && x < map->x && y >= 0 && y < map->y) {
-            char testch = mvinch((int)y, (int)x) & A_CHARTEXT;
+            char testch = map->matriz[(int)x][(int)y];
             if (testch == test) {
-                attron(COLOR_PAIR(WALL_ILUMINATED));  // caso se encontre uma parede, para-se de se desenhar a luz na direção definida
+                attron(COLOR_PAIR(WALL_ILUMINATED));
                 mvaddch(y, x, '#');
                 attroff(COLOR_PAIR(WALL_ILUMINATED));
                 break;
-            }
-            else if (testch == trap) {
-                attron(COLOR_PAIR(TRAP_COLOR));    // mesmo que se encontre um obstáculo que não seja uma parede, desenhamos a luz além do mesmos, iluminando-o
+            } else if (testch == trap) {
+                attron(COLOR_PAIR(TRAP_COLOR));
                 mvaddch(y, x, '*' | A_BOLD);
                 attroff(COLOR_PAIR(TRAP_COLOR));
-                
-            }
-            else if (testch == heal) {
+            } else if (testch == heal) {
                 attron(COLOR_PAIR(HEAL_ON));
                 mvaddch(y, x, '+' | A_BOLD);
                 attroff(COLOR_PAIR(HEAL_ON));
-                
-            }
-            else if (testch == bullet) {
+            } else if (testch == bullet) {
                 attron(COLOR_PAIR(BULLET_ON));
                 mvaddch(y, x, '-' | A_BOLD);
                 attroff(COLOR_PAIR(BULLET_ON));
-                
-            }
-            else if (testch == casa) {
+            } else if (testch == casa) {
+                map->matriz[(int)x][(int)y] = '.';
                 attron(COLOR_PAIR(LIGHT));
-                mvaddch(y, x, '.' | A_BOLD);
+                attron(A_BOLD);  // chama-se esta função para garantir que as traps sejam pintadas de preto
+                mvaddch(y, x, '.' | A_COLOR);
                 attroff(COLOR_PAIR(LIGHT));
-            }
-			else if (testch == damage) {
+                attroff(A_BOLD);
+            } else if (testch == damage) {
+                map->matriz[(int)x][(int)y] = '^';
                 attron(COLOR_PAIR(TRAP_COLOR));
                 mvaddch(y, x, '.' | A_BOLD);
                 attroff(COLOR_PAIR(TRAP_COLOR));
-			}
-			else if (testch == enemie) {
+            } else if (testch == enemie) {
                 attron(COLOR_PAIR(ENEMIE_COLOR));
                 mvaddch(y, x, '&' | A_BOLD);
                 attroff(COLOR_PAIR(ENEMIE_COLOR));
-			}
+            }
             x += dx;
             y += dy;
         }
@@ -121,9 +123,12 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     attron(COLOR_PAIR(BACKGROUND));
     for (int x = 1; x < map->x - 1; x++) { // ciclos for para percorrer todas as casas do mapa
         for (int y = 1; y < map->y - 1; y++) {
-            char testch = (mvinch(y, x) & A_CHARTEXT);
+            char testch = map->matriz[x][y];
             if (testch == casa_iluminada) {  //  se a casa estiver iluminada, é apagada para a mesma cor do background, bem como as traps (cor preta)
-                mvaddch(y, x, ' ');
+                map->matriz[x][y] = ' ';   
+				attron(COLOR_PAIR(BACKGROUND));         
+				mvaddch(y, x, ' '|A_BOLD);
+				attroff(COLOR_PAIR(BACKGROUND));
             }
             else if (testch == trap) {
                 attron(COLOR_PAIR(BACKGROUND));
@@ -134,7 +139,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
             }
 			else if (testch == enemie) {
                 attron(COLOR_PAIR(BACKGROUND));
-                attron(A_BOLD);  // chama-se esta função para garantir que as traps sejam pintadas de preto
+                attron(A_BOLD);  // chama-se esta função para garantir que os inimigos sejam pintadas de preto
                 mvaddch(y, x, '&' | A_COLOR);
                 attroff(COLOR_PAIR(BACKGROUND));
                 attroff(A_BOLD);
@@ -144,15 +149,15 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     attroff(COLOR_PAIR(BACKGROUND));
 }
 
-void do_movement_action(STATE *st, int dx, int dy){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
+void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
 	int nextX = st->playerX + dx;
 	int nextY = st->playerY + dy;
-	char test, testch, testTrap = '*';
+	char test,testTrap = '*';
 	test = '#';
 	char heal = '+';
 	char bullet = '-';
 	char enemich = '&';
-	testch = (mvinch(nextX, nextY) & A_CHARTEXT);
+	char testch = map->matriz[nextX][nextY];
 	if (testch == test) return; // se a próxima posição for uma parede, o jogador não se mexe e a função retorna 
 	else if (testch == testTrap) // se a próxima posição for uma trap, verificamos o hp do jogador e, se esta for maior do que zero, retiramos 1 de hp, caso contrário o jogador morre
 	{
@@ -171,39 +176,41 @@ void do_movement_action(STATE *st, int dx, int dy){  // função que dará "fisi
 	else if (testch == bullet) st->bullets += 5; // cada recarga aumenta 5 balas, caso o jogador intersete a munição
 	else if (testch == heal) st->hp += 2; // cada cura aumenta 2 de hp, caso o jogador a intersete
 	else if (testch == enemich) return;
-	mvaddch(st->playerX, st->playerY, ' ');
+	mvaddch(st->playerY, st->playerX, ' ');
 	st->playerX = nextX; // atualizamos as novas coordenadas do jogador no state do mesmo
 	st->playerY = nextY;
 }
 
-void attack (STATE *s, int *num_enemies, ENEMIE *enemies){ // função responsável pela fisica dos ataques
-	int x = s->playerX, y = s->playerY;
-    char wall = '#', heal = '+', bullets = '-', enemiech = '&';
+void remove_enemie(ENEMIE *enemies, int *num_enemies, int index) {
+    for (int i = index; i < (*num_enemies - 1); i++) {
+        enemies[i] = enemies[i + 1];
+    }
+    (*num_enemies)--;
+}
+
+void attack(STATE *s, int *num_enemies, ENEMIE *enemies,MAPA *map) {
+    int x = s->playerX, y = s->playerY;
+    char wall = '#', heal = '+', bullets = '-', enemiech = '&',trap = '*',casa = ' ', casa_iluminada = '.';
 
     if (s->sword) {
         for (int ix = x - 1; ix <= x + 1; ix++) {
             for (int iy = y - 1; iy <= y + 1; iy++) {
-                char testch = mvinch(ix, iy) & A_CHARTEXT;
-
-                if (testch != wall && testch != heal && testch != bullets && testch != enemiech) {
-                    attron(COLOR_PAIR(TRAP_COLOR));
-                    mvaddch(ix, iy, '^' | A_BOLD);
+				char testch = map->matriz [ix][iy];
+                if (testch == casa || testch == casa_iluminada) {
+                    map->matriz[ix][iy] = '^';              
+					attron(COLOR_PAIR(TRAP_COLOR));
+                    mvaddch(ix, iy, map->matriz[ix][iy]);
                     attroff(COLOR_PAIR(TRAP_COLOR));
                 } else if (testch == enemiech) {
                     for (int i = 0; i < *num_enemies; i++) {
                         if (enemies[i].enemieX == ix && enemies[i].enemieY == iy && enemies[i].hp > 0) {
-                            enemies[i].hp--;
-                            if (enemies[i].hp == 0) {
+                            if (--enemies[i].hp == 0) {
+								map->matriz [ix][iy] = '^';
                                 attron(COLOR_PAIR(TRAP_COLOR));
-                                mvaddch(ix, iy, '^' | A_BOLD);
+                                mvaddch(ix, iy, map->matriz[ix][iy]);
                                 attroff(COLOR_PAIR(TRAP_COLOR));
+                                remove_enemie(enemies, num_enemies, i);
                                 s->kills++;
-
-                                // Atualize a posição do jogador, se necessário
-                                if (ix == x && iy == y) {
-                                    s->playerX = -1;
-                                    s->playerY = -1;
-                                }
                             }
                             break;
                         }
@@ -214,10 +221,9 @@ void attack (STATE *s, int *num_enemies, ENEMIE *enemies){ // função responsá
     }
 }
 
-void update(STATE *st,int *num_enemies, ENEMIE *enemie){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
+void update(STATE *st,int *num_enemies, ENEMIE *enemie,MAPA *map){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
 	
-
 	switch (key)
 	{
      case 't':
@@ -233,67 +239,66 @@ void update(STATE *st,int *num_enemies, ENEMIE *enemie){ // função que fornece
 
 	case KEY_A1:
 	case '7':
-		do_movement_action(st, -1, -1);
+		do_movement_action(st, -1, -1,map);
 		break;
 	case KEY_UP:
 	case '8':
-		do_movement_action(st, -1, +0);
+		do_movement_action(st, +0, -1,map);
 		break;
 	case KEY_A3:
 	case '9':
-		do_movement_action(st, -1, +1);
+		do_movement_action(st, +1, -1,map);
 		break;
 	case KEY_LEFT:
 	case '4':
-		do_movement_action(st, +0, -1);
+		do_movement_action(st, -1, +0,map);
 		break;
 	case KEY_B2:
 	case '5':
 		break;
 	case KEY_RIGHT:
 	case '6':
-		do_movement_action(st, +0, +1);
+		do_movement_action(st, +1, +0,map);
 		break;
 	case KEY_C1:
 	case '1':
-		do_movement_action(st, +1, -1);
+		do_movement_action(st, -1, +1,map);
 		break;
 	case KEY_DOWN:
 	case '2':
-		do_movement_action(st, +1, +0);
+		do_movement_action(st, +0, +1,map);
 		break;
 	case KEY_C3:
 	case '3':
-		do_movement_action(st, +1, +1);
+		do_movement_action(st, +1, +1,map);
 		break;
 	case 'q':
 		endwin();
 		exit(0);
 		break;
 	case 'w':
-		do_movement_action(st, -1, +0);
+		do_movement_action(st, +0, -1,map);
 		break;
 	case 'a':
-		do_movement_action(st, +0, -1);
+		do_movement_action(st, -1, +0,map);
 		break;
 	case 's':
-		do_movement_action(st, +1, +0);
+		do_movement_action(st, +0, +1,map);
 		break;
 	case 'd':
-		do_movement_action(st, +0, +1);
+		do_movement_action(st, +1, +0,map);
 		break;
-	case ' ': attack(st,num_enemies,enemie); break;
+	case ' ': attack(st,num_enemies,enemie,map); break;
 	}
 }
 
-void spawn_enemie(ENEMIE *enemie, int * num_enemies, int y, int x){
+void spawn_enemie(ENEMIE *enemie, int * num_enemies, int y, int x,MAPA *map){
   if (*num_enemies < 20){ // se o número de inimigos for menor do que 20 temos 30% de chance de ele aparecer(pode ser que o nº 0 seja gerado pela função rand que tem um alcance de 0 a 30) 
    ENEMIE new_enemie;
    char casa = ' ';
    int newX = (rand() % x-2);
    int newY = (rand() % y-2);
-   char testch = mvinch(newX,newY) & A_CHARTEXT;
-   if (testch == casa){
+   if (map->matriz[newX][newY] == casa){
     new_enemie.enemieX = newX;
 	new_enemie.enemieY = newY;
 	new_enemie.hp = 1;
@@ -303,13 +308,13 @@ void spawn_enemie(ENEMIE *enemie, int * num_enemies, int y, int x){
   }
 }
 
-void draw_enemies(ENEMIE *enemies, int *num_enemies, STATE *s){
+void draw_enemies(ENEMIE *enemies, int *num_enemies, STATE *s,MAPA *map){
     for (int i = 0; i < *num_enemies; i++){
         ENEMIE *enemie = &enemies[i];
         move(enemie->enemieY, enemie->enemieX);
-        if (mvinch(enemie->enemieY, enemie->enemieX) == ' '){
+        if (map->matriz[enemie->enemieX][enemie->enemieY] == ' '){
             attron(COLOR_PAIR(BACKGROUND));
-            mvaddch(enemie->enemieY, enemie->enemieX, '&' | A_BOLD);
+            mvaddch(enemie->enemieY, enemie->enemieX, map->matriz[enemie->enemieX][enemie->enemieY]);
             attroff(COLOR_PAIR(BACKGROUND));
         }
     }
@@ -348,7 +353,8 @@ int main(){
 	map.y = nrows;
 	map.x = ncols;
 
-	draw_map(&st, &map); // chamamento da função que desenha o mapa aletório
+	draw_map(&map); // chamamento da função que desenha o mapa aletório
+    spawn_player(&st, &map);
 
 	while (1)
 	{
@@ -374,29 +380,32 @@ int main(){
 
 		if (st.hp > 1)
 		{
+			map.matriz[st.playerX][st.playerY] = '@';
 			attron(COLOR_PAIR(2));
-			mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
+			mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
 			attroff(COLOR_PAIR(2));
 		}
 		else if (st.hp == 1)
 		{
+			map.matriz[st.playerX][st.playerY] = '@';
 			attron(COLOR_PAIR(MEDIUM_HP));
-			mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
+			mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
 			attroff(COLOR_PAIR(MEDIUM_HP));
 		}
 		else
 		{
+			map.matriz[st.playerX][st.playerY] = '@';
 			attron(COLOR_PAIR(TRAP_COLOR));
-			mvaddch(st.playerX, st.playerY, '@' | A_BOLD);
+			mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
 			attroff(COLOR_PAIR(TRAP_COLOR));               // funções que desenham o jogador, mudando a sua cor consoante o hp
 		}
-        spawn_enemie(&enemies[num_enemies],&num_enemies,nrows,ncols);
-        draw_enemies(&enemies[num_enemies],&num_enemies, &st);
+        spawn_enemie(&enemies[num_enemies],&num_enemies,nrows,ncols,&map);
+        draw_enemies(&enemies[num_enemies],&num_enemies, &st,&map);
 
 		lights_off(&map); // função que apaga a luz da jogada anterior
 		draw_light(&st,&map); // função que desenha a luz da nova jogada
-		move(st.playerX, st.playerY);
-		update(&st,&num_enemies,enemies); // chamamento da função update para atualizar o estado do jogador
+		move(st.playerY, st.playerX);
+		update(&st,&num_enemies,enemies,&map); // chamamento da função update para atualizar o estado do jogador
 	}
 
 	return 0;
