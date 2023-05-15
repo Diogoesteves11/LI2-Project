@@ -45,11 +45,6 @@ void spawn_player(STATE *st, MAPA *map) {
 
 }
 
-int distance_player_point (STATE *s, int *x, int *y){  // calculo da distância entre o jogador e um determinado ponto em linha reta
-	int dist = sqrt(((s->playerX - *x)^2)+ ((s->playerY - *y)^2));
-	return dist;
-}
-
 void draw_light(STATE *s, MAPA *map) {
     int centerX = s->playerX;
     int centerY = s->playerY;
@@ -60,7 +55,7 @@ void draw_light(STATE *s, MAPA *map) {
     char bullet = '-';
     char casa = ' ';
     char damage = '^';
-    char enemie = '&';
+    char enemy = '&';
 
     double delta = 0.05;  // Incremento do ângulo
 
@@ -104,7 +99,7 @@ void draw_light(STATE *s, MAPA *map) {
                 attron(COLOR_PAIR(TRAP_COLOR));
                 mvaddch(y, x, '.' | A_BOLD);
                 attroff(COLOR_PAIR(TRAP_COLOR));
-            } else if (testch == enemie) {
+            } else if (testch == enemy) {
                 attron(COLOR_PAIR(ENEMIE_COLOR));
                 mvaddch(y, x, '&' | A_BOLD);
                 attroff(COLOR_PAIR(ENEMIE_COLOR));
@@ -118,7 +113,7 @@ void draw_light(STATE *s, MAPA *map) {
 void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     char casa_iluminada = '.';
     char trap = '*';
-	char enemie = '&';
+	char enemy = '&';
 
     attron(COLOR_PAIR(BACKGROUND));
     for (int x = 1; x < map->x - 1; x++) { // ciclos for para percorrer todas as casas do mapa
@@ -127,7 +122,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
             if (testch == casa_iluminada) {  //  se a casa estiver iluminada, é apagada para a mesma cor do background, bem como as traps (cor preta)
                 map->matriz[x][y] = ' ';   
 				attron(COLOR_PAIR(BACKGROUND));         
-				mvaddch(y, x, ' '|A_BOLD);
+				mvaddch(y, x,map->matriz[x][y]);
 				attroff(COLOR_PAIR(BACKGROUND));
             }
             else if (testch == trap) {
@@ -137,10 +132,10 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
                 attroff(COLOR_PAIR(BACKGROUND));
                 attroff(A_BOLD);
             }
-			else if (testch == enemie) {
+			else if (testch == enemy) {
                 attron(COLOR_PAIR(BACKGROUND));
                 attron(A_BOLD);  // chama-se esta função para garantir que os inimigos sejam pintadas de preto
-                mvaddch(y, x, '&' | A_COLOR);
+                mvaddch(y, x, enemy);
                 attroff(COLOR_PAIR(BACKGROUND));
                 attroff(A_BOLD);
             }
@@ -152,8 +147,8 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
 void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
 	int nextX = st->playerX + dx;
 	int nextY = st->playerY + dy;
-	char test,testTrap = '*';
-	test = '#';
+	char testTrap = '*';
+	char test = '#';
 	char heal = '+';
 	char bullet = '-';
 	char enemich = '&';
@@ -309,104 +304,167 @@ void spawn_enemie(ENEMIE *enemie, int * num_enemies, int y, int x,MAPA *map){
 }
 
 void draw_enemies(ENEMIE *enemies, int *num_enemies, STATE *s,MAPA *map){
-    for (int i = 0; i < *num_enemies; i++){
-        ENEMIE *enemie = &enemies[i];
-        move(enemie->enemieY, enemie->enemieX);
-        if (map->matriz[enemie->enemieX][enemie->enemieY] == ' '){
-            attron(COLOR_PAIR(BACKGROUND));
-            mvaddch(enemie->enemieY, enemie->enemieX, map->matriz[enemie->enemieX][enemie->enemieY]);
-            attroff(COLOR_PAIR(BACKGROUND));
+   char enemy = '&';
+   for (int ix = 0; ix < map-> x; ix++){
+    for (int iy = 0; iy < map->y; iy++){
+        if (map->matriz[ix][iy] == enemy){
+         attron(COLOR_PAIR(BACKGROUND));
+         mvaddch(iy,ix,map->matriz[ix][iy]);
+         attroff(COLOR_PAIR(BACKGROUND));
         }
     }
-    move(s->playerY, s->playerX);
+   }
+}
+
+void show_menu() {
+	start_color();
+	init_pair(1, COLOR_CYAN, COLOR_BLACK);
+	init_pair(2, COLOR_YELLOW, COLOR_BLACK);
+
+
+    clear();
+    
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);  // Obtém as dimensões da tela
+    
+    int menu_width = 20;
+    int menu_height = 6;
+    int start_x = (cols - menu_width) / 2;
+    int start_y = (rows - menu_height) / 2;
+    
+
+    attron(COLOR_PAIR(1));
+    mvprintw(start_y, start_x, "====================");
+    mvprintw(start_y + 1, start_x, "     START MENU");
+    mvprintw(start_y + 2, start_x, "====================");
+    attroff(COLOR_PAIR(1));
+
+    attron(COLOR_PAIR(2));
+    mvprintw(start_y + 3, start_x, " 1. PLAY GAME");
+    mvprintw(start_y + 4, start_x, " 2. EXIT");
+    attroff(COLOR_PAIR(2));
+
+    attron(COLOR_PAIR(1));
+    mvprintw(start_y + 5, start_x, "====================");
+    attroff(COLOR_PAIR(1));
+
+    attron(COLOR_PAIR(2));
+    mvprintw(start_y + 6, start_x, "CHOOSE AN OPTION: ");
+    attroff(COLOR_PAIR(2));
+
+    refresh();
 }
 
 int main(){
-	MAPA map;
-	ENEMIE enemies[19];
-	STATE st = {20, 20, 3, 0, 1, 0};
-	WINDOW *wnd = initscr();
-	int ncols, nrows, num_enemies = 0;
-	getmaxyx(wnd, nrows, ncols);
+  initscr();
+  keypad(stdscr, TRUE);
+  curs_set(0);
+  noecho();
+
+  start_color();
+  init_pair(LIGHT, COLOR_WHITE, COLOR_BLACK);
+
+  while(1){
+    show_menu(); // Exibir menu inicial
+
+    int choice = getch();
+	clear();
+
+    switch(choice){
+        case '1': {
+         MAPA map;
+	     ENEMIE enemies[19];
+	     STATE st = {20, 20, 3, 0, 1, 0};
+	     WINDOW *wnd = initscr();
+	     int ncols, nrows, num_enemies = 0;
+	    getmaxyx(wnd, nrows, ncols);
 
 
-	srand48(time(NULL));
-	start_color();
+	    srand48(time(NULL));
+	    start_color();
 
-	cbreak();
-	noecho();
-	nonl();
-	intrflush(stdscr, false);
-	keypad(stdscr, true);
+	    cbreak();
+	    noecho();
+	    nonl();
+	    intrflush(stdscr, false);
+	    keypad(stdscr, true);
 
-	init_pair(WALL_ILUMINATED, COLOR_WHITE, COLOR_BLACK);
-	init_pair(LIGHT, COLOR_WHITE, COLOR_BLACK);
-	init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
-	init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
-	init_pair(BACKGROUND, COLOR_BLACK, COLOR_BLACK);
-	init_pair(TRAP_COLOR, COLOR_RED, COLOR_BLACK);
-	init_pair(MEDIUM_HP, COLOR_YELLOW, COLOR_BLACK);
-	init_pair(HEAL_ON, COLOR_GREEN, COLOR_BLACK);
-	init_pair(BULLET_ON, COLOR_YELLOW, COLOR_BLACK); // definição dos pares de cores utilizados
-    init_pair(ENEMIE_COLOR, COLOR_MAGENTA, COLOR_BLACK);
+	    init_pair(WALL_ILUMINATED, COLOR_WHITE, COLOR_BLACK);
+	    init_pair(LIGHT, COLOR_WHITE, COLOR_BLACK);
+	    init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
+	    init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
+	    init_pair(BACKGROUND, COLOR_BLACK, COLOR_BLACK);
+	    init_pair(TRAP_COLOR, COLOR_RED, COLOR_BLACK);
+	    init_pair(MEDIUM_HP, COLOR_YELLOW, COLOR_BLACK);
+	    init_pair(HEAL_ON, COLOR_GREEN, COLOR_BLACK);
+	    init_pair(BULLET_ON, COLOR_YELLOW, COLOR_BLACK); // definição dos pares de cores utilizados
+        init_pair(ENEMIE_COLOR, COLOR_MAGENTA, COLOR_BLACK);
+    
+	    map.y = nrows;
+	    map.x = ncols;
+    
+	    draw_map(&map); // chamamento da função que desenha o mapa aletório
+        spawn_player(&st, &map);
+    
+	    while (1){
+          move(nrows - 1, 0);
+          attron(COLOR_PAIR(1));
+	      printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
+	      clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
+	      printw("    Bullets: %d", st.bullets);
+	      clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
+	      printw("   HP: %d", (st.hp + 1));
+	       clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
+	      printw("   ENEMIES: %d", num_enemies);
+           clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
+          printw("   KILLS: %d", st.kills);
+	      clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
+          printw("   EQUIPPED:");
+	      if (st.sword) {
+          printw(" SWORD ");
+         } else {
+          printw(" GUN");
+         }
+	      attroff(COLOR_PAIR(1));
+    
+	    	if (st.hp > 1)
+	    	{
+	    		map.matriz[st.playerX][st.playerY] = '@';
+	    		attron(COLOR_PAIR(2));
+	    		mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
+	    		attroff(COLOR_PAIR(2));
+	    	}
+	    	else if (st.hp == 1)
+	    	{
+	    		map.matriz[st.playerX][st.playerY] = '@';
+	    		attron(COLOR_PAIR(MEDIUM_HP));
+	    		mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
+	    		attroff(COLOR_PAIR(MEDIUM_HP));
+	    	}
+	    	else
+	    	{
+	    		map.matriz[st.playerX][st.playerY] = '@';
+	    		attron(COLOR_PAIR(TRAP_COLOR));
+	    		mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
+	    		attroff(COLOR_PAIR(TRAP_COLOR));               // funções que desenham o jogador, mudando a sua cor consoante o hp
+	    	}
+            spawn_enemie(&enemies[num_enemies],&num_enemies,nrows,ncols,&map);
+            draw_enemies(&enemies[num_enemies],&num_enemies, &st,&map);
+    
+	    	lights_off(&map); // função que apaga a luz da jogada anterior
+	    	draw_light(&st,&map); // função que desenha a luz da nova jogada
+	    	move(st.playerY, st.playerX);
+	    	update(&st,&num_enemies,enemies,&map); // chamamento da função update para atualizar o estado do jogador
+	     }
+        }
+        case '2': {
+          endwin();
+		  printf("YOU ARE A LOSER MAN\nYOU SHOULD BE ASHAMED OF YOURSELF\n");
+          exit(0);
+        }
+       
+    }
+  }     
 
-	map.y = nrows;
-	map.x = ncols;
-
-	draw_map(&map); // chamamento da função que desenha o mapa aletório
-    spawn_player(&st, &map);
-
-	while (1)
-	{
-      move(nrows - 1, 0);
-      attron(COLOR_PAIR(1));
-	  printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
-	  clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
-	  printw("    Bullets: %d", st.bullets);
-	  clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
-	  printw("   HP: %d", (st.hp + 1));
-	   clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
-	  printw("   ENEMIES: %d", num_enemies);
-       clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
-      printw("   KILLS: %d", st.kills);
-	  clrtoeol(); // limpa a linha atual para atualizar corretamente o scoreboard
-      printw("   EQUIPPED:");
-	  if (st.sword) {
-      printw(" SWORD ");
-     } else {
-      printw(" GUN");
-     }
-	  attroff(COLOR_PAIR(1));
-
-		if (st.hp > 1)
-		{
-			map.matriz[st.playerX][st.playerY] = '@';
-			attron(COLOR_PAIR(2));
-			mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
-			attroff(COLOR_PAIR(2));
-		}
-		else if (st.hp == 1)
-		{
-			map.matriz[st.playerX][st.playerY] = '@';
-			attron(COLOR_PAIR(MEDIUM_HP));
-			mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
-			attroff(COLOR_PAIR(MEDIUM_HP));
-		}
-		else
-		{
-			map.matriz[st.playerX][st.playerY] = '@';
-			attron(COLOR_PAIR(TRAP_COLOR));
-			mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
-			attroff(COLOR_PAIR(TRAP_COLOR));               // funções que desenham o jogador, mudando a sua cor consoante o hp
-		}
-        spawn_enemie(&enemies[num_enemies],&num_enemies,nrows,ncols,&map);
-        draw_enemies(&enemies[num_enemies],&num_enemies, &st,&map);
-
-		lights_off(&map); // função que apaga a luz da jogada anterior
-		draw_light(&st,&map); // função que desenha a luz da nova jogada
-		move(st.playerY, st.playerX);
-		update(&st,&num_enemies,enemies,&map); // chamamento da função update para atualizar o estado do jogador
-	}
-
-	return 0;
-}
+ return 0;
+}     
