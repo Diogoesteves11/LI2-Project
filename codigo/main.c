@@ -206,7 +206,50 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map, int *game_menu){  /
 	st->playerY = nextY;
 }
 
-void update(STATE *st,MAPA *map,int *game_menu){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
+void kill_monster(MONSTERS *monster, int index, MAPA *map){
+  char casa = ' ',monsterch = '&';
+  int newX = 0,newY = 0;
+  do{
+    newX = 1 + (rand()% map->x / 2);
+    newY = 1 + (rand()% map->y / 2); // inimigos tendem a aparecer tendencialmente no lado esquerdo do mapa desta forma, mas assim a geração é mais rápida
+  }while(map->matriz[newX][newY] != casa);
+  monster[index].x = newX;
+  monster[index].y = newY;
+  monster[index].hp = 2;
+  map->matriz[newX][newY] = monsterch; 
+}
+
+void attack(STATE *s, MAPA *map, MONSTERS *monster){
+  int x = s->playerX;
+  int y = s->playerY;
+  
+  char casa = ' ', casa_iluminada = '.', attack = '^', monsterch = '&';
+  if(s->sword){
+    for (int ix = x-1; ix <= x+1; ix++){
+     for (int iy = y-1; iy <= y+1; iy++){
+      char testch = map->matriz[ix][iy];
+      if(testch == casa || testch == casa_iluminada) map->matriz[ix][iy] = attack;
+      else if (testch == monsterch){
+        for (int i = 0; i < 20; i++){
+          if ((monster[i].x) == ix && (monster[i].y) == iy){
+            if(monster[i].hp > 0){
+              monster[i].hp--;
+              if(monster[i].hp == 0){
+               s->kills++;
+               kill_monster(monster,i,map);
+               map->matriz[ix][iy] = attack;
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+ }
+}
+
+void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
 	int direction = NO_DIRECTION;
 
@@ -272,6 +315,7 @@ void update(STATE *st,MAPA *map,int *game_menu){ // função que fornecerá à "
 	case 'd':
 		do_movement_action(st, +1, +0,map,game_menu);direction = E;
 		break;
+  case ' ': attack(st,map,monster);break;
 	}
 }
 
@@ -323,7 +367,7 @@ void refresh_GAME_STATUS(MAPA *map){
     }
 }
 
-void spawn_monsters(MOSNTERS *monster, MAPA *map){
+void spawn_monsters(MONSTERS *monster, MAPA *map){
   char casa = ' ';
   int ix,iy;
   for (int i = 0; i < 20; i++){
@@ -365,7 +409,7 @@ int main() {
           refresh_GAME_STATUS(&map);
           while (in_game) {
             STATE st = {20, 20, 3, 0, 1, 0};
-            MOSNTERS monster[20];
+            MONSTERS monster[20];
             WINDOW *wnd = initscr();
             int ncols, nrows;
             getmaxyx(wnd, nrows, ncols);
@@ -437,7 +481,7 @@ int main() {
               lights_off(&map);
               draw_light(&st, &map);
               move(st.playerY, st.playerX);
-              update(&st,&map, &game_menu);
+              update(&st,&map, &game_menu,monster);
 
               if (game_menu) {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
@@ -503,5 +547,3 @@ int main() {
 
   return 0;
 }
-
-             

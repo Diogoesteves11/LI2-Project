@@ -23,6 +23,6 @@ typedef struct monsters
     int y;
     int x;
     int hp;
-}MOSNTERS;
+}MONSTERS;
 
 #endif
