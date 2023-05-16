@@ -203,9 +203,7 @@ void remove_enemie(ENEMIE *enemies, int *num_enemies, int index) { // percorre o
     for (int i = index; i < (*num_enemies) -1; i++) {
         enemies[i] = enemies[i + 1];
     }
-    (*num_enemies)--;
 }
-
 
 void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map, int *direction) {
     int x = s->playerX, y = s->playerY;
@@ -220,7 +218,7 @@ void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map, int *direction
                     if (testch == casa || testch == casa_iluminada) {
                         map->matriz[ix][iy] = damage;
                     } else if (testch == enemych) {
-                        for (int i = 0; i < *num_enemies; i++) {
+                        for (int i = 0; i < (*num_enemies); i++) {
                             if (enemy[i].enemieX == ix && enemy[i].enemieY == iy) {
                                 if(enemy[i].hp > 0){
                                  enemy[i].hp--;
@@ -228,9 +226,10 @@ void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map, int *direction
                                     map->matriz[ix][iy] = damage;
                                     s->kills++;
                                     remove_enemie(enemy, num_enemies, i);
-                                    i--;  // Decrementar o valor de i para verificar novamente o inimigo movido para a posição atual de i
-                                    break;
+                                    (*num_enemies)--;
+                                    return;
                                  }
+                                 return;
                                 }  
                             }
                         }
@@ -239,7 +238,7 @@ void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map, int *direction
             }
         }
     }
-    else if (s->sword == 0){
+    else if (!s->sword){
       switch(*direction){
        case N:{
         dx = 0;
@@ -297,18 +296,14 @@ void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map, int *direction
         return;
        }
       }
-     
-     
      do{
       map->matriz[x][y] = damage;
        x += dx;
        y += dy;
-     }while (map->matriz[x][y] == casa || map->matriz[x][y] == casa_iluminada);
-      
+     }while ((s->bullets > 0 )&& (map->matriz[x][y] != wall));
+     s->bullets--;
     }
 }
-
-
 
 void update(STATE *st,int *num_enemies, ENEMIE *enemie,MAPA *map,int *game_menu){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
@@ -321,7 +316,7 @@ void update(STATE *st,int *num_enemies, ENEMIE *enemie,MAPA *map,int *game_menu)
         if (!st->sword) {
             st->sword = 1;
         } 
-        // caso contrário, desequipa a espada
+        // caso contrário, desequipa a espada e equipa a arma
         else {
             st->sword = 0;
         }
