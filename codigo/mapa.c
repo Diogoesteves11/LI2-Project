@@ -18,36 +18,27 @@ void draw_map(MAPA* map) {
     srand(time(NULL));
     start_color();
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
-    init_pair(WALL_COLOR, COLOR_BLACK, COLOR_BLACK);
+    init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLACK);
     init_pair(HEAL_OFF,COLOR_BLACK,COLOR_BLACK);
     init_pair (BULLET_OFF, COLOR_BLACK,COLOR_BLACK);
 
-
-    int casas_totais = ((map->x) * (map->y)) - 2 * (map->x + map->y);
-    int heal_percentage = casas_totais * 0.01;
-    int heal_count = 0;
+   // Adiciona paredes nas bordas do mapa
+    int count1 = 0;
 
     attron(COLOR_PAIR(WALL_COLOR));
-    for (int i = 0; i < casas_totais * 0.35; i++) {
-        int x1 = rand() % (map->x - 2) + 1;
-        int y1 = rand() % (map->y - 1);
-        map->matriz[x1][y1] = '#';
-        mvaddch(y1, x1, map->matriz[x1][y1]);
-    }
-
-    // Adiciona paredes nas bordas do mapa
-   
     for (int i = 0; i < map->x; i++) {
         map->matriz[i][0] = '#'; // Parede superior
         map->matriz[i][map->y - 2] = '#'; // Parede inferior (uma linha acima da última)
         mvaddch(0, i, map->matriz[i][0]);
         mvaddch(map->y - 2, i, map->matriz[i][map->y - 2]);
+        count1++;
     }
     for (int i = 0; i < map->y - 1; i++) {
         map->matriz[0][i] = '#'; // Parede esquerda
         map->matriz[map->x - 1][i] = '#'; // Parede direita
         mvaddch(i, 0, map->matriz[0][i]);
         mvaddch(i, map->x - 1, map->matriz[map->x - 1][i]);
+        count1++;
     }
   
 
@@ -57,9 +48,22 @@ void draw_map(MAPA* map) {
         mvaddch(map->y - 1, i, map->matriz[i][map->y - 1]);
     }
 
+    int casas_totais = ((map->x) * (map->y)) - count1;
+    int heal_percentage = casas_totais * 0.01;
+    int heal_count = 0;
+
+    
+    for (int i = 0; i < casas_totais * 0.4; i++) {
+        int x1 = 2 + rand() % (map->x - 2); // soma-se 2 pra se definir o limite inferior
+        int y1 = 2 + rand() % (map->y - 2);
+        map->matriz[x1][y1] = '#';
+        mvaddch(y1, x1, map->matriz[x1][y1]);
+    }
+
+
     // Transforma a posição central em parede se existirem pelo menos 5 paredes vizinhas em um quadrado 3x3 centrado numa celula.
     
-    for (int d = 0; d < 3; d++) {
+    for (int d = 0; d < 2; d++) {
     for (int i = 1; i < map->x - 1; i++) {
         for (int j = 1; j < map->y - 1; j++) {
             int count = 0;
@@ -80,7 +84,7 @@ void draw_map(MAPA* map) {
     
 // Verifica cada posição em um quadrado 5x5 centrado e transforma a celula central em parede se não houver nenhuma parede vizinha
 
-for (int d = 0; d < 4; d++) {
+for (int d = 0; d < 5; d++) {
     for (int i = 2; i < map->x - 2; i++) {
         for (int j = 2; j < map->y - 2; j++) {
             int count = 0;
@@ -100,23 +104,25 @@ for (int d = 0; d < 4; d++) {
 }
 
 // Elimina algumas paredes soltas 
-
-for (int i = 1; i < map->x - 1; i++) {
+for (int d = 0; d < 2; d++){
+ for (int i = 1; i < map->x - 1; i++) {
     for (int j = 1; j < map->y - 1; j++) {
         if (map->matriz[i][j] == '#') {
-            int count = 0;
-            if (map->matriz[i - 1][j] == '#') count++; // Verifica parede acima
-            if (map->matriz[i + 1][j] == '#') count++; // Verifica parede abaixo
-            if (map->matriz[i][j - 1] == '#') count++; // Verifica parede à esquerda
-            if (map->matriz[i][j + 1] == '#') count++; // Verifica parede à direita
+            int count2 = 0;
+            if (map->matriz[i - 1][j] == '#') count2++; // Verifica parede esquerda
+            if (map->matriz[i + 1][j] == '#') count2++; // Verifica parede direita
+            if (map->matriz[i][j - 1] == '#') count2++; // Verifica parede acima
+            if (map->matriz[i][j + 1] == '#') count2++; // Verifica parede abaixo
 
-            if (count == 0) {
+            if (count2 == 0) {
                 map->matriz[i][j] = ' '; // Remove a parede solta
                 mvaddch(j, i, map->matriz[i][j]);
             }
         }
     }
 }
+}
+
 attroff(COLOR_PAIR(WALL_COLOR));
 
 

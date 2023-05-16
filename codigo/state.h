@@ -21,7 +21,6 @@ typedef struct state {
 typedef struct enemy {	
    int enemyX;
    int enemyY;
-   int hp;
    int speed;
 } ENEMY;
 

@@ -78,24 +78,28 @@ double delta = 0.05; // Incremento do angulo
         while (x >= 0 && x < map->x && y >= 0 && y < map->y) {
             char testch = mvinch((int)y, (int)x) & A_CHARTEXT;
             if (testch == test) {
+                map-> matriz [(int)x][(int)y] = test;
                 attron(COLOR_PAIR(WALL_ILUMINATED));
                 mvaddch(y, x, '#');
                 attroff(COLOR_PAIR(WALL_ILUMINATED));
                 break;
             }
             else if (testch == trap) {
+                map-> matriz [(int)x][(int)y] = trap;
                 attron(COLOR_PAIR(TRAP_COLOR));
                 mvaddch(y, x, '*' | A_BOLD);
                 attroff(COLOR_PAIR(TRAP_COLOR));
                 
             }
             else if (testch == heal) {
+                map-> matriz [(int)x][(int)y] = heal;
                 attron(COLOR_PAIR(HEAL_ON));
                 mvaddch(y, x, '+' | A_BOLD);
                 attroff(COLOR_PAIR(HEAL_ON));
                 
             }
             else if (testch == bullet) {
+                map-> matriz [(int)x][(int)y] = bullet;
                 attron(COLOR_PAIR(BULLET_ON));
                 mvaddch(y, x, '-' | A_BOLD);
                 attroff(COLOR_PAIR(BULLET_ON));
@@ -108,11 +112,13 @@ double delta = 0.05; // Incremento do angulo
                 attroff(COLOR_PAIR(LIGHT));
             }
             else if (testch == enemy){
+             map-> matriz [(int)x][(int)y] = enemy;
              attron(COLOR_PAIR(ENEMIE_COLOR));
              mvaddch(y, x, '&' | A_BOLD);
              attroff(COLOR_PAIR(ENEMIE_COLOR));
             }
              else if (testch == damage){
+             map-> matriz [(int)x][(int)y] = damage;
              attron(COLOR_PAIR(TRAP_COLOR));
              mvaddch(y, x, '.' | A_BOLD);
              attroff(COLOR_PAIR(TRAP_COLOR));
@@ -200,10 +206,21 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map, int *game_menu){  /
 	st->playerY = nextY;
 }
 
-void remove_enemie(ENEMY *enemies, int *num_enemies, int index) { // percorre o array de structs a partir do indice do inimigo morto, e move todos os indices superiores um indice para baixo, sobrepondo assim o indice do inimigo morto e removendo-o
-    for (int i = index; i < (*num_enemies) -1; i++) {
-        enemies[i] = enemies[i + 1];
-    }
+void replace_enemy(ENEMY *enemies,int index, MAPA *map){
+   char casa = ' ';
+   char casa_iluminada = '.';
+   int newX,newY;
+   do{
+     newX = (rand() % map->x-2);
+     newY = (rand() % map->y-2);
+   }while(map->matriz[newX][newY] != casa);
+    attron(COLOR_PAIR(BACKGROUND));
+    map->matriz[newX][newY] = '&';
+    mvaddch(enemies[index].enemyY, enemies[index].enemyX, ' ');
+    attroff(COLOR_PAIR(BACKGROUND));
+    enemies[index].enemyX= newX;
+	enemies[index].enemyX= newX;
+  
 }
 
 void attack(STATE *s, int *num_enemies, ENEMY *enemy, MAPA *map, int *direction) {
@@ -214,30 +231,25 @@ void attack(STATE *s, int *num_enemies, ENEMY *enemy, MAPA *map, int *direction)
     if (s->sword) {
         for (int ix = x - 1; ix <= x + 1; ix++) {
             for (int iy = y - 1; iy <= y + 1; iy++) {
-                if (ix >= 0 && ix < map->x && iy >= 0 && iy < map->y) {
                     char testch = map->matriz[ix][iy];
                     if (testch == casa || testch == casa_iluminada) {
                         map->matriz[ix][iy] = damage;
                     } else if (testch == enemych) {
-                        for (int i = 0; i < (*num_enemies); i++) {
+                        for (int i = 0; i <= (*num_enemies); i++) {
                             if (enemy[i].enemyX == ix && enemy[i].enemyY == iy) {
-                                if(enemy[i].hp > 0){
-                                 enemy[i].hp--;
-                                 if (enemy[i].hp == 0) {
+                                    replace_enemy(enemy,i,map);
                                     map->matriz[ix][iy] = damage;
                                     s->kills++;
-                                    remove_enemie(enemy, num_enemies, i);
-                                    (*num_enemies)--;
-                                    return;
+                                    refresh();
+                                    break;
                                  }
-                                 return;
-                                }  
+                                 refresh();
+                                 break;
+                                }
                             }
                         }
+                        
                     }
-                }
-            }
-        }
     }
     else if (!s->sword){
       switch(*direction){
@@ -305,6 +317,81 @@ void attack(STATE *s, int *num_enemies, ENEMY *enemy, MAPA *map, int *direction)
      s->bullets--;
     }
 }
+
+void move_enemies(ENEMY *enemies, int *num_enemies, MAPA *map) {
+    char enemy = '&';
+    char empty_space = ' ';
+    char casa_iluminada = '.';
+    int directions[7] = {N,S,E,W,SW,NW,SE,NE}; 
+
+    for (int i = 0; i < *num_enemies; i++) {
+        int currentX = enemies[i].enemyX;
+        int currentY = enemies[i].enemyY;
+
+        // Gera uma nova posição aleatória para o inimigo
+        int newX, newY;
+        int dx,dy;
+        do {
+           int i = rand() % 7;
+           int direction = directions[i];
+  
+        switch(direction){
+       case N:{
+        dx = 0;
+        dy = -1;
+        break;
+       }
+       case S: {
+         dx = 0;
+         dy = 1;
+         break;
+       }
+       case W:{
+        dx = -1;
+        dy = 0;
+        break;
+       }
+       case E:{
+        dx = 1;
+        dy = 0;
+        break;
+       }
+       case NW:{
+        dx = -1;
+        dy = -1;
+        break;
+       }
+       case SW:{
+        dx = -1;
+        dy = 1;
+        break;
+       }
+       case NE:{
+        dx = 1;
+        dy = -1;
+        break;
+       }
+       case SE:{
+        dx = 1;
+        dy = 1;
+        break;
+       }
+    }
+        newX = currentX + dx;  // Move-se aleatoriamente em x (esquerda, parado ou direita)
+        newY = currentY + dy;  // Move-se aleatoriamente em y (cima, parado ou baixo)
+    } while (map->matriz[newX][newY] != empty_space || map->matriz[newX][newY] != casa_iluminada);  // Repete se a nova posição não estiver vazia
+
+        // Atualiza as coordenadas do inimigo
+        enemies[i].enemyX = newX;
+        enemies[i].enemyY = newY;
+
+        // Desenha o inimigo na nova posição no mapa
+        map->matriz[newX][newY] = enemy;
+        map->matriz[currentX][currentY] = empty_space;
+
+    }
+}
+
 
 void update(STATE *st,int *num_enemies, ENEMY *enemy,MAPA *map,int *game_menu){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
@@ -377,7 +464,7 @@ void update(STATE *st,int *num_enemies, ENEMY *enemy,MAPA *map,int *game_menu){ 
 }
 
 void spawn_enemy(ENEMY *enemy, int * num_enemies, int y, int x,MAPA *map){
-  if (*num_enemies < 20){ // se o número de inimigos for menor do que 20 temos 30% de chance de ele aparecer(pode ser que o nº 0 seja gerado pela função rand que tem um alcance de 0 a 30) 
+  if ((*num_enemies) < 20){ 
    ENEMY new_enemy;
    char casa = ' ';
    char casa_iluminada = '.';
@@ -387,11 +474,11 @@ void spawn_enemy(ENEMY *enemy, int * num_enemies, int y, int x,MAPA *map){
     map->matriz[newX][newY] = '&';
     new_enemy.enemyX = newX;
 	new_enemy.enemyY = newY;
-	new_enemy.hp = 2;
 	enemy[*num_enemies] = new_enemy;
 	(*num_enemies)++;
    }
   }
+  else return;
 }
 
 void draw_enemies(MAPA *map){
@@ -481,7 +568,7 @@ int main() {
           in_game = 1; // Indica que o jogo está em execução
           refresh_GAME_STATUS(&map);
           while (in_game) {
-            ENEMY enemies[19];
+            ENEMY *enemies[19];
             STATE st = {20, 20, 3, 0, 1, 0};
             WINDOW *wnd = initscr();
             int ncols, nrows, num_enemies = 0;
@@ -523,7 +610,7 @@ int main() {
               clrtoeol();
               printw("   HP: %d", (st.hp + 1));
               clrtoeol();
-              printw("   ENEMIES: %d", num_enemies);
+              printw("   ENEMIES: %d", num_enemies+1);
               clrtoeol();
               printw("   KILLS: %d", st.kills);
               clrtoeol();
@@ -557,7 +644,8 @@ int main() {
               lights_off(&map);
               draw_light(&st, &map);
               move(st.playerY, st.playerX);
-              update(&st, &num_enemies, enemies, &map, &game_menu);
+              update(&st, &num_enemies, &enemies, &map, &game_menu);
+              move_enemies(&enemies,&num_enemies,&map);
 
               if (game_menu) {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
