@@ -132,8 +132,8 @@ for(int i = 2; i < map->y-2; i++) {
         for(int j = 2; j < map->x-2; j++) {
             char test = '#';
             if((drand48() * 1000 < TRAP_PERCENTAGE) && ((mvinch(j,i) & A_CHARTEXT) != test)) {
-                map->matriz[j][i] = '*';
-                mvaddch(i, j, '*'| A_BOLD);
+                map->matriz[j][i] = 'x';
+                mvaddch(i, j, 'x'| A_BOLD);
             } 
         }
     }
