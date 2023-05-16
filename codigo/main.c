@@ -167,7 +167,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     attroff(COLOR_PAIR(BACKGROUND));
 }
 
-void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
+void do_movement_action(STATE *st, int dx, int dy,MAPA *map, int *game_menu){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
 	int nextX = st->playerX + dx;
 	int nextY = st->playerY + dy;
 	char testTrap = '*';
@@ -185,8 +185,9 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que d
 			mvprintw(0, 0, "YOU DIED!");
 			refresh();
 			sleep(1);
-			endwin();
-			exit(0);
+            endwin();
+            (*game_menu = 1);
+			
 		}
 		else
 			st->hp--;
@@ -324,52 +325,52 @@ void update(STATE *st,int *num_enemies, ENEMIE *enemie,MAPA *map,int *game_menu)
 
 	case KEY_A1:
 	case '7':
-		do_movement_action(st, -1, -1,map);direction = NW;
+		do_movement_action(st, -1, -1,map,game_menu);direction = NW;
 		break;
 	case KEY_UP:
 	case '8':
-		do_movement_action(st, +0, -1,map);direction = N;
+		do_movement_action(st, +0, -1,map,game_menu);direction = N;
 		break;
 	case KEY_A3:
 	case '9':
-		do_movement_action(st, +1, -1,map);direction = NE;
+		do_movement_action(st, +1, -1,map,game_menu);direction = NE;
 		break;
 	case KEY_LEFT:
 	case '4':
-		do_movement_action(st, -1, +0,map);direction = W;
+		do_movement_action(st, -1, +0,map,game_menu);direction = W;
 		break;
 	case KEY_B2:
 	case '5': direction = NO_DIRECTION;break; // para fazer uma jogada parado
 	case KEY_RIGHT:
 	case '6':
-		do_movement_action(st, +1, +0,map);direction = E;
+		do_movement_action(st, +1, +0,map,game_menu);direction = E;
 		break;
 	case KEY_C1:
 	case '1':
-		do_movement_action(st, -1, +1,map);direction = SW;
+		do_movement_action(st, -1, +1,map,game_menu);direction = SW;
 		break;
 	case KEY_DOWN:
 	case '2':
-		do_movement_action(st, +0, +1,map);direction = S;
+		do_movement_action(st, +0, +1,map,game_menu);direction = S;
 		break;
 	case KEY_C3:
 	case '3':
-		do_movement_action(st, +1, +1,map);direction = SE;
+		do_movement_action(st, +1, +1,map,game_menu);direction = SE;
 		break;
 	case 'q':
         *game_menu = 1;
 		break;
 	case 'w':
-		do_movement_action(st, +0, -1,map);direction = N;
+		do_movement_action(st, +0, -1,map,game_menu);direction = N;
 		break;
 	case 'a':
-		do_movement_action(st, -1, +0,map);direction = W;
+		do_movement_action(st, -1, +0,map,game_menu);direction = W;
 		break;
 	case 's':
-		do_movement_action(st, +0, +1,map);direction = S;
+		do_movement_action(st, +0, +1,map,game_menu);direction = S;
 		break;
 	case 'd':
-		do_movement_action(st, +1, +0,map);direction = E;
+		do_movement_action(st, +1, +0,map,game_menu);direction = E;
 		break;
 	case ' ': attack(st,num_enemies,enemie,map,&direction); break;
 	}
@@ -513,7 +514,7 @@ int main() {
             spawn_player(&st, &map);
 
             while (in_game) {
-              int game_menu = 0;
+                int game_menu = 0;
               move(nrows - 1, 0);
               attron(COLOR_PAIR(1));
               printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
@@ -622,4 +623,5 @@ int main() {
 
   return 0;
 }
-               
+
+             
