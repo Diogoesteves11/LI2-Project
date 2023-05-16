@@ -23,10 +23,15 @@
 #define CASE_COLOR 18 // definições das "referências" das cores
 #define ENEMIE_COLOR 19
 
-#define NORTH 19 // definição das "referências" das direções
-#define SOUTH 20
-#define EAST 21
-#define WEST 22
+#define N 19 // definição das "referências" das direções
+#define S 20
+#define E 21
+#define W 22
+#define NW 23
+#define SW 24
+#define NE 25
+#define SE 26
+#define NO_DIRECTION 27
 
 void spawn_player(STATE *st, MAPA *map) {
     int x, y;
@@ -194,17 +199,18 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que d
 	st->playerY = nextY;
 }
 
-void remove_enemie(ENEMIE *enemies, int *num_enemies, int index) { // percorre o array de structs a partir do indice do inimigo morto, e move todos os indices superiores um indeice para baixo, sobrepondo assim o indice do inimigo morto e removendo-o
-    for (int i = index; i < (*num_enemies) - 1; i++) {
+void remove_enemie(ENEMIE *enemies, int *num_enemies, int index) { // percorre o array de structs a partir do indice do inimigo morto, e move todos os indices superiores um indice para baixo, sobrepondo assim o indice do inimigo morto e removendo-o
+    for (int i = index; i < (*num_enemies) -1; i++) {
         enemies[i] = enemies[i + 1];
     }
     (*num_enemies)--;
 }
 
 
-void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map) {
+void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map, int *direction) {
     int x = s->playerX, y = s->playerY;
     char wall = '#', heal = '+', bullets = '-', enemych = '&', trap = '*', casa = ' ', casa_iluminada = '.', damage = '^';
+    int dx = 0,dy = 0;
 
     if (s->sword) {
         for (int ix = x - 1; ix <= x + 1; ix++) {
@@ -216,15 +222,16 @@ void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map) {
                     } else if (testch == enemych) {
                         for (int i = 0; i < *num_enemies; i++) {
                             if (enemy[i].enemieX == ix && enemy[i].enemieY == iy) {
-                                if (enemy[i].hp > 0) {
-                                    enemy[i].hp--;
-                                    if (enemy[i].hp == 0) {
-                                        remove_enemie(enemy, num_enemies, i);
-                                        map->matriz[ix][iy] = damage;
-                                        s->kills++;
-                                    }
+                                if(enemy[i].hp > 0){
+                                 enemy[i].hp--;
+                                 if (enemy[i].hp == 0) {
+                                    map->matriz[ix][iy] = damage;
+                                    s->kills++;
+                                    remove_enemie(enemy, num_enemies, i);
+                                    i--;  // Decrementar o valor de i para verificar novamente o inimigo movido para a posição atual de i
                                     break;
-                                }
+                                 }
+                                }  
                             }
                         }
                     }
@@ -232,12 +239,81 @@ void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map) {
             }
         }
     }
+    else if (s->sword == 0){
+      switch(*direction){
+       case N:{
+        dx = 0;
+        dy = -1;
+        y--; // para começar a verificação na casa seguinte ao jogador segundo a direção pretendida
+        break;
+       }
+       case S: {
+         dx = 0;
+         dy = 1;
+         y++;
+         break;
+       }
+       case W:{
+        dx = -1;
+        dy = 0;
+        x--;
+        break;
+       }
+       case E:{
+        dx = 1;
+        dy = 0;
+        x++;
+        break;
+       }
+       case NW:{
+        dx = -1;
+        dy = -1;
+        x--;
+        y--;
+        break;
+       }
+       case SW:{
+        dx = -1;
+        dy = 1;
+        x--;
+        y++;
+        break;
+       }
+       case NE:{
+        dx = 1;
+        dy = -1;
+        x++;
+        y--;
+        break;
+       }
+       case SE:{
+        dx = 1;
+        dy = 1;
+        x++;
+        y++;
+        break;
+       }
+       case NO_DIRECTION:{
+        return;
+       }
+      }
+     
+     
+     do{
+      map->matriz[x][y] = damage;
+       x += dx;
+       y += dy;
+     }while (map->matriz[x][y] == casa || map->matriz[x][y] == casa_iluminada);
+      
+    }
 }
+
 
 
 void update(STATE *st,int *num_enemies, ENEMIE *enemie,MAPA *map,int *game_menu){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
-	
+	int direction = NO_DIRECTION;
+
 	switch (key)
 	{
      case 't':
@@ -253,55 +329,54 @@ void update(STATE *st,int *num_enemies, ENEMIE *enemie,MAPA *map,int *game_menu)
 
 	case KEY_A1:
 	case '7':
-		do_movement_action(st, -1, -1,map);
+		do_movement_action(st, -1, -1,map);direction = NW;
 		break;
 	case KEY_UP:
 	case '8':
-		do_movement_action(st, +0, -1,map);
+		do_movement_action(st, +0, -1,map);direction = N;
 		break;
 	case KEY_A3:
 	case '9':
-		do_movement_action(st, +1, -1,map);
+		do_movement_action(st, +1, -1,map);direction = NE;
 		break;
 	case KEY_LEFT:
 	case '4':
-		do_movement_action(st, -1, +0,map);
+		do_movement_action(st, -1, +0,map);direction = W;
 		break;
 	case KEY_B2:
-	case '5':
-		break;
+	case '5': direction = NO_DIRECTION;break; // para fazer uma jogada parado
 	case KEY_RIGHT:
 	case '6':
-		do_movement_action(st, +1, +0,map);
+		do_movement_action(st, +1, +0,map);direction = E;
 		break;
 	case KEY_C1:
 	case '1':
-		do_movement_action(st, -1, +1,map);
+		do_movement_action(st, -1, +1,map);direction = SW;
 		break;
 	case KEY_DOWN:
 	case '2':
-		do_movement_action(st, +0, +1,map);
+		do_movement_action(st, +0, +1,map);direction = S;
 		break;
 	case KEY_C3:
 	case '3':
-		do_movement_action(st, +1, +1,map);
+		do_movement_action(st, +1, +1,map);direction = SE;
 		break;
 	case 'q':
         *game_menu = 1;
 		break;
 	case 'w':
-		do_movement_action(st, +0, -1,map);
+		do_movement_action(st, +0, -1,map);direction = N;
 		break;
 	case 'a':
-		do_movement_action(st, -1, +0,map);
+		do_movement_action(st, -1, +0,map);direction = W;
 		break;
 	case 's':
-		do_movement_action(st, +0, +1,map);
+		do_movement_action(st, +0, +1,map);direction = S;
 		break;
 	case 'd':
-		do_movement_action(st, +1, +0,map);
+		do_movement_action(st, +1, +0,map);direction = E;
 		break;
-	case ' ': attack(st,num_enemies,enemie,map); break;
+	case ' ': attack(st,num_enemies,enemie,map,&direction); break;
 	}
 }
 
@@ -309,9 +384,10 @@ void spawn_enemie(ENEMIE *enemie, int * num_enemies, int y, int x,MAPA *map){
   if (*num_enemies < 20){ // se o número de inimigos for menor do que 20 temos 30% de chance de ele aparecer(pode ser que o nº 0 seja gerado pela função rand que tem um alcance de 0 a 30) 
    ENEMIE new_enemie;
    char casa = ' ';
+   char casa_iluminada = '.';
    int newX = (rand() % x-2);
    int newY = (rand() % y-2);
-   if (map->matriz[newX][newY] == casa){
+   if (map->matriz[newX][newY] == casa || map->matriz[newX][newY] == casa_iluminada){
     map->matriz[newX][newY] = '&';
     new_enemie.enemieX = newX;
 	new_enemie.enemieY = newY;
@@ -322,7 +398,7 @@ void spawn_enemie(ENEMIE *enemie, int * num_enemies, int y, int x,MAPA *map){
   }
 }
 
-void draw_enemies(ENEMIE *enemies, int *num_enemies, STATE *s,MAPA *map){
+void draw_enemies(MAPA *map){
    char enemy = '&';
    for (int ix = 0; ix < map-> x; ix++){
     for (int iy = 0; iy < map->y; iy++){
@@ -360,15 +436,16 @@ void show_menu() {
 
     attron(COLOR_PAIR(2));
     mvprintw(start_y + 3, start_x, " 1. PLAY GAME");
-    mvprintw(start_y + 4, start_x, " 2. EXIT");
+    mvprintw(start_y + 4, start_x, " 2. COMMAND LIST");
+    mvprintw(start_y + 5, start_x, " 3. EXIT");
     attroff(COLOR_PAIR(2));
 
     attron(COLOR_PAIR(1));
-    mvprintw(start_y + 5, start_x, "====================");
+    mvprintw(start_y + 6, start_x, "====================");
     attroff(COLOR_PAIR(1));
 
     attron(COLOR_PAIR(2));
-    mvprintw(start_y + 6, start_x, "  CHOOSE AN OPTION ");
+    mvprintw(start_y + 7, start_x, "  CHOOSE AN OPTION ");
     attroff(COLOR_PAIR(2));
 
     refresh();
@@ -384,6 +461,7 @@ void refresh_GAME_STATUS(MAPA *map){
 
 int main() {
   int in_game = 0;
+  int in_submenu = 0;
   MAPA map;
 
   while (1) {
@@ -478,7 +556,7 @@ int main() {
                 attroff(COLOR_PAIR(TRAP_COLOR));
               }
               spawn_enemie(&enemies[num_enemies], &num_enemies, nrows, ncols, &map);
-              draw_enemies(&enemies[num_enemies], &num_enemies, &st, &map);
+              draw_enemies(&map);
 
               lights_off(&map);
               draw_light(&st, &map);
@@ -489,16 +567,57 @@ int main() {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
               }
             }
-
-            clear();
-            endwin();
           }
 
           break;
         }
-        case '2': {
+        case '2':{
+         in_submenu = 1;
+         while (in_submenu){
+            WINDOW *wnd = initscr();
+            int ncols, nrows;
+            getmaxyx(wnd, nrows, ncols);
+
+            srand48(time(NULL));
+            start_color();
+
+            cbreak();
+            noecho();
+            nonl();
+            intrflush(stdscr, false);
+            keypad(stdscr, true);
+
+            init_pair(LIGHT,COLOR_WHITE,COLOR_BLACK);
+            init_pair(2,COLOR_GREEN,COLOR_BLACK);
+
+            int startx = ncols /20;
+            int starty = nrows/20;
+
+            attron(COLOR_PAIR(LIGHT)); 
+            mvprintw(starty,startx,"t -> switch gun");
+            mvprintw(starty+1,startx,"w/8 -> move UP");
+            mvprintw(starty+2,startx,"s/2 -> move DOWN");
+            mvprintw(starty+3,startx,"a/4 -> move LEFT");
+            mvprintw(starty+4,startx,"d/6 -> move RIGHT");
+            mvprintw(starty+5,startx,"7 -> move UPPER LEFT");
+            mvprintw(starty+6,startx,"9 -> move UPPER RIGHT");
+            mvprintw(starty+7,startx,"1 -> move DOWN LEFT");
+            mvprintw(starty+8,startx,"3 -> move DOWN RIGHT");
+            mvprintw(starty+9,startx,"SPACE -> USE WEAPON");
+            mvprintw(starty+10,startx,"5-> NO MOVEMENT");
+            attroff(COLOR_PAIR(LIGHT));
+
+
+            int key = getch();
+            switch(key){
+             case 'q': in_submenu = 0;break;
+            }
+           }
+           break;
+        }
+        case '3': {
           endwin();
-          printf("SEE YOU NEXT TIME\n");
+          printf("GAME CLOSED\n");
           exit(0);
           break;
         }
