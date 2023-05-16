@@ -18,11 +18,11 @@ typedef struct state {
 	int kills;
 } STATE;
 
-typedef struct enemie {	
-   int enemieX;
-   int enemieY;
+typedef struct enemy {	
+   int enemyX;
+   int enemyY;
    int hp;
    int speed;
-} ENEMIE;  
+} ENEMY;
 
 #endif

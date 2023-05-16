@@ -200,13 +200,13 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map, int *game_menu){  /
 	st->playerY = nextY;
 }
 
-void remove_enemie(ENEMIE *enemies, int *num_enemies, int index) { // percorre o array de structs a partir do indice do inimigo morto, e move todos os indices superiores um indice para baixo, sobrepondo assim o indice do inimigo morto e removendo-o
+void remove_enemie(ENEMY *enemies, int *num_enemies, int index) { // percorre o array de structs a partir do indice do inimigo morto, e move todos os indices superiores um indice para baixo, sobrepondo assim o indice do inimigo morto e removendo-o
     for (int i = index; i < (*num_enemies) -1; i++) {
         enemies[i] = enemies[i + 1];
     }
 }
 
-void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map, int *direction) {
+void attack(STATE *s, int *num_enemies, ENEMY *enemy, MAPA *map, int *direction) {
     int x = s->playerX, y = s->playerY;
     char wall = '#', heal = '+', bullets = '-', enemych = '&', trap = '*', casa = ' ', casa_iluminada = '.', damage = '^';
     int dx = 0,dy = 0;
@@ -220,7 +220,7 @@ void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map, int *direction
                         map->matriz[ix][iy] = damage;
                     } else if (testch == enemych) {
                         for (int i = 0; i < (*num_enemies); i++) {
-                            if (enemy[i].enemieX == ix && enemy[i].enemieY == iy) {
+                            if (enemy[i].enemyX == ix && enemy[i].enemyY == iy) {
                                 if(enemy[i].hp > 0){
                                  enemy[i].hp--;
                                  if (enemy[i].hp == 0) {
@@ -306,7 +306,7 @@ void attack(STATE *s, int *num_enemies, ENEMIE *enemy, MAPA *map, int *direction
     }
 }
 
-void update(STATE *st,int *num_enemies, ENEMIE *enemie,MAPA *map,int *game_menu){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
+void update(STATE *st,int *num_enemies, ENEMY *enemy,MAPA *map,int *game_menu){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
 	int direction = NO_DIRECTION;
 
@@ -372,23 +372,23 @@ void update(STATE *st,int *num_enemies, ENEMIE *enemie,MAPA *map,int *game_menu)
 	case 'd':
 		do_movement_action(st, +1, +0,map,game_menu);direction = E;
 		break;
-	case ' ': attack(st,num_enemies,enemie,map,&direction); break;
+	case ' ': attack(st,num_enemies,enemy,map,&direction); break;
 	}
 }
 
-void spawn_enemie(ENEMIE *enemie, int * num_enemies, int y, int x,MAPA *map){
+void spawn_enemy(ENEMY *enemy, int * num_enemies, int y, int x,MAPA *map){
   if (*num_enemies < 20){ // se o número de inimigos for menor do que 20 temos 30% de chance de ele aparecer(pode ser que o nº 0 seja gerado pela função rand que tem um alcance de 0 a 30) 
-   ENEMIE new_enemie;
+   ENEMY new_enemy;
    char casa = ' ';
    char casa_iluminada = '.';
    int newX = (rand() % x-2);
    int newY = (rand() % y-2);
    if (map->matriz[newX][newY] == casa || map->matriz[newX][newY] == casa_iluminada){
     map->matriz[newX][newY] = '&';
-    new_enemie.enemieX = newX;
-	new_enemie.enemieY = newY;
-	new_enemie.hp = 2;
-	enemie[*num_enemies] = new_enemie;
+    new_enemy.enemyX = newX;
+	new_enemy.enemyY = newY;
+	new_enemy.hp = 2;
+	enemy[*num_enemies] = new_enemy;
 	(*num_enemies)++;
    }
   }
@@ -481,7 +481,7 @@ int main() {
           in_game = 1; // Indica que o jogo está em execução
           refresh_GAME_STATUS(&map);
           while (in_game) {
-            ENEMIE enemies[19];
+            ENEMY enemies[19];
             STATE st = {20, 20, 3, 0, 1, 0};
             WINDOW *wnd = initscr();
             int ncols, nrows, num_enemies = 0;
@@ -551,7 +551,7 @@ int main() {
                 mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
                 attroff(COLOR_PAIR(TRAP_COLOR));
               }
-              spawn_enemie(&enemies[num_enemies], &num_enemies, nrows, ncols, &map);
+              spawn_enemy(&enemies[num_enemies], &num_enemies, nrows, ncols, &map);
               draw_enemies(&map);
 
               lights_off(&map);
