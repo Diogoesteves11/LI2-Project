@@ -22,6 +22,7 @@
 #define BULLET_ON 17
 #define CASE_COLOR 18 // definições das "referências" das cores
 #define ENEMIE_COLOR 19
+#define FLASHLIGHT 28
 
 #define N 19 // definição das "referências" das direções
 #define S 20
@@ -215,7 +216,7 @@ void kill_monster(MONSTERS *monster, int index, MAPA *map){
   }while(map->matriz[newX][newY] != casa);
   monster[index].x = newX;
   monster[index].y = newY;
-  monster[index].hp = 2;
+  monster[index].hp = 3;
   map->matriz[newX][newY] = monsterch; 
 }
 
@@ -235,7 +236,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
           if ((monster[i].x) == ix && (monster[i].y) == iy){
             if(monster[i].hp > 0){
               monster[i].hp--;
-              if(monster[i].hp == 0){
+              if(monster[i].hp <= 0){
                s->kills++;
                s-> bullets++; // cada inimigo morto dá-nos 1 bala
                kill_monster(monster,i,map);
@@ -265,7 +266,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
-              if(monster[i].hp == 0){
+              if(monster[i].hp <= 0){
                s->kills++;
                s-> bullets++; // cada inimigo morto dá-nos 1 bala
                kill_monster(monster,i,map);
@@ -294,7 +295,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
-              if(monster[i].hp == 0){
+              if(monster[i].hp <= 0){
                s->kills++;
                s-> bullets++; // cada inimigo morto dá-nos 1 bala
                kill_monster(monster,i,map);
@@ -323,7 +324,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
-              if(monster[i].hp == 0){
+              if(monster[i].hp <= 0){
                s->kills++;
                s-> bullets++; // cada inimigo morto dá-nos 1 bala
                kill_monster(monster,i,map);
@@ -352,7 +353,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
-              if(monster[i].hp == 0){
+              if(monster[i].hp <= 0){
                s->kills++;
                s-> bullets++; // cada inimigo morto dá-nos 1 bala
                kill_monster(monster,i,map);
@@ -381,7 +382,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
-              if(monster[i].hp == 0){
+              if(monster[i].hp <= 0){
                s->kills++;
                s-> bullets++; // cada inimigo morto dá-nos 1 bala
                kill_monster(monster,i,map);
@@ -410,7 +411,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
-              if(monster[i].hp == 0){
+              if(monster[i].hp <= 0){
                s->kills++;
                s-> bullets++; // cada inimigo morto dá-nos 1 bala
                kill_monster(monster,i,map);
@@ -439,7 +440,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
-              if(monster[i].hp == 0){
+              if(monster[i].hp <= 0){
                s->kills++;
                s-> bullets++; // cada inimigo morto dá-nos 1 bala
                kill_monster(monster,i,map);
@@ -585,16 +586,17 @@ void show_menu() {
 
     attron(COLOR_PAIR(2));
     mvprintw(start_y + 3, start_x, " 1. PLAY GAME");
-    mvprintw(start_y + 4, start_x, " 2. COMMAND LIST");
-    mvprintw(start_y + 5, start_x, " 3. EXIT");
+    mvprintw(start_y + 4, start_x, " 2. GAME DYNAMICS");
+    mvprintw(start_y + 5, start_x, " 3. COMMAND LIST");
+    mvprintw(start_y + 6, start_x, " 4. EXIT");
     attroff(COLOR_PAIR(2));
 
     attron(COLOR_PAIR(1));
-    mvprintw(start_y + 6, start_x, "====================");
+    mvprintw(start_y + 7, start_x, "====================");
     attroff(COLOR_PAIR(1));
 
     attron(COLOR_PAIR(2));
-    mvprintw(start_y + 7, start_x, "  CHOOSE AN OPTION ");
+    mvprintw(start_y + 8, start_x, "  CHOOSE AN OPTION ");
     attroff(COLOR_PAIR(2));
 
     refresh();
@@ -619,13 +621,14 @@ void spawn_monsters(MONSTERS *monster, MAPA *map){
    map->matriz[ix][iy] = '&';
    monster[i].y = iy;
    monster[i].x = ix;
-   monster[i].hp = 2;
+   monster[i].hp = 3;
   }
 }
 
 int main() {
   int in_game = 0;
   int in_submenu = 0;
+  int in_game_dynamics = 0;
   MAPA map;
 
   while (1) {
@@ -734,6 +737,55 @@ int main() {
           break;
         }
         case '2':{
+          in_game_dynamics = 1;
+          while(in_game_dynamics){
+            WINDOW *wnd = initscr();
+            int ncols, nrows;
+            getmaxyx(wnd, nrows, ncols);
+
+            srand48(time(NULL));
+            start_color();
+
+            cbreak();
+            noecho();
+            nonl();
+            intrflush(stdscr, false);
+            keypad(stdscr, true);
+
+            init_pair(LIGHT,COLOR_WHITE,COLOR_BLACK);
+
+            int starty = nrows/20;
+
+            attron(COLOR_PAIR(LIGHT));
+            mvprintw(starty,(ncols / 2)-9,"DINAMICAS DE JOGO");
+            mvprintw(starty+2,1,"MOVIMENTACAO: ");
+            mvprintw(starty+3,2,"1. O jogador só se move uma casa em casa jogada, em qualquer direção");
+            mvprintw(starty+4,2,"2. O jogador tem a opção de não se mover numa jogada, se pressionar a tecla 5");
+            mvprintw(starty+5,2,"3. O jogador não se move contra obstáculos, como paredes ou inimigos");
+            mvprintw(starty+6,2,"4. Os inimigos movem-se de forma aleatória até entrarem em um determinado raio com centro no jogador. Nesse caso começam a mover-se em direção ao mesmo");
+
+            mvprintw(starty+9,1,"ILUMINACAO: ");
+            mvprintw(starty+10,2,"1.Com centro no jogador, são iluminadas dinamicamente todas as casas à sua volta, bem como as paredes. Permanecem iluminadas as paredes e o loot, representando assim a área explorada.");
+
+            mvprintw(starty+13,1,"COMBATE: ");
+            mvprintw(starty+14,2,"1. Cada dano infligido pelos inimigos ao jogador, diminui 2 de hp ao jogador");
+            mvprintw(starty+15,2,"2. Cada jogador começa com 4 de hp e zero balas. Cada inimigo tem 3 de hp");
+            mvprintw(starty+16,2,"3. As vidas e as balas do jogador são recarregáveis no mapa ('+' aumenta 2 de hp e '-' recarregam 5 balas). Matar um inimigo recarrega 1 bala");
+            mvprintw(starty+17,2,"4. Cada dano infligido pelo jogador aos inimigos com a espada, diminui 1 de hp ao inimigo");
+            mvprintw(starty+18,2,"5. Cada dano infligido pelo jogador aos inimigos com a arma, diminui 2 de hp ao inimigo");
+            mvprintw(starty+19,2,"6. Sempre que um jogador cai numa trap, perde 1 de hp");
+            mvprintw(starty+20,2,"7. A espada tem um alcance de 1 casa à volta do jogador e a arma dispara a bala na ultima direção que o jogador tomou, até encontrar um inimigo ou uma parede");
+            mvprintw(starty+21,2,"8. Sempre que um inimigo morre, este volta a aparecer numa posição aleatória do mapa. Existem um total de 20 inimigos");
+
+
+           int key = getch();
+           switch(key){
+            case 'q': in_game_dynamics = 0;break;
+           }
+          }
+          break;
+        }
+        case '3':{
          in_submenu = 1;
          while (in_submenu){
             WINDOW *wnd = initscr();
@@ -750,7 +802,6 @@ int main() {
             keypad(stdscr, true);
 
             init_pair(LIGHT,COLOR_WHITE,COLOR_BLACK);
-            init_pair(2,COLOR_GREEN,COLOR_BLACK);
 
             int startx = ncols /20;
             int starty = nrows/20;
@@ -777,7 +828,7 @@ int main() {
            }
            break;
         }
-        case '3': {
+        case '4': {
           endwin();
           printf("GAME CLOSED\n");
           exit(0);
