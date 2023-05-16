@@ -33,7 +33,7 @@
 #define SE 26
 #define NO_DIRECTION 27
 
-void spawn_player(STATE *st, MAPA *map) {
+void spawn_player(STATE *st, MAPA *map) { // função que escolhe ateatóriamente um local do mapa para o jogador aparecer, sem paredes imediatamente à sua volta
     int x, y;
     // Escolhe uma posição aleatória dentro do mapa
     do {
