@@ -667,7 +667,7 @@ int main() {
             intrflush(stdscr, false);
             keypad(stdscr, true);
 
-            init_pair(WALL_ILUMINATED, COLOR_WHITE, COLOR_BLUE);
+            init_pair(WALL_ILUMINATED, COLOR_BLUE, COLOR_BLUE);
             init_pair(LIGHT, COLOR_WHITE, COLOR_BLACK);
             init_pair(SCORE, COLOR_WHITE, COLOR_BLACK);
             init_pair(PLAYER, COLOR_BLACK, COLOR_GREEN);
@@ -728,7 +728,6 @@ int main() {
               draw_light(&st, &map);
               move(st.playerY, st.playerX);
               update(&st,&map, &game_menu,monster,&direction);
-
               if (game_menu) {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
               }
