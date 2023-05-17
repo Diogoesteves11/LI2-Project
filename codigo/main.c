@@ -106,9 +106,9 @@ double delta = 0.05; // Incremento do angulo
             }
             else if (testch == casa) {
                 map->matriz[(int)x][(int)y] = '.';
-                attron(COLOR_PAIR(LIGHT));
+                attron(COLOR_PAIR(FLASHLIGHT)); 
                 mvaddch(y, x, '.' | A_BOLD);
-                attroff(COLOR_PAIR(LIGHT));
+                attroff(COLOR_PAIR(FLASHLIGHT));
             }
             else if (testch == enemy){
              map-> matriz [(int)x][(int)y] = enemy;
@@ -666,16 +666,17 @@ int main() {
             intrflush(stdscr, false);
             keypad(stdscr, true);
 
-            init_pair(WALL_ILUMINATED, COLOR_WHITE, COLOR_BLACK);
+            init_pair(WALL_ILUMINATED, COLOR_WHITE, COLOR_BLUE);
             init_pair(LIGHT, COLOR_WHITE, COLOR_BLACK);
             init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
-            init_pair(PLAYER, COLOR_GREEN, COLOR_BLACK);
+            init_pair(PLAYER, COLOR_BLACK, COLOR_GREEN);
             init_pair(BACKGROUND, COLOR_BLACK, COLOR_BLACK);
             init_pair(TRAP_COLOR, COLOR_RED, COLOR_BLACK);
             init_pair(MEDIUM_HP, COLOR_YELLOW, COLOR_BLACK);
             init_pair(HEAL_ON, COLOR_GREEN, COLOR_BLACK);
             init_pair(BULLET_ON, COLOR_YELLOW, COLOR_BLACK);
             init_pair(ENEMIE_COLOR, COLOR_MAGENTA, COLOR_BLACK);
+            init_pair(FLASHLIGHT, COLOR_YELLOW, COLOR_YELLOW);
 
             map.y = nrows;
             map.x = ncols;
