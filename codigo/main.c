@@ -6,8 +6,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include "state.h"
-#include "mapa.h"
 #include "mapa.c"
 
 #define BACKGROUND 0
