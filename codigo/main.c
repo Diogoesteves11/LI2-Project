@@ -21,6 +21,7 @@
 #define CASE_COLOR 18 // definições das "referências" das cores
 #define ENEMIE_COLOR 19
 #define FLASHLIGHT 28
+#define LOW_HP 29
 
 #define N 19 // definição das "referências" das direções
 #define S 20
@@ -668,15 +669,16 @@ int main() {
 
             init_pair(WALL_ILUMINATED, COLOR_WHITE, COLOR_BLUE);
             init_pair(LIGHT, COLOR_WHITE, COLOR_BLACK);
-            init_pair(SCORE, COLOR_BLUE, COLOR_BLACK);
+            init_pair(SCORE, COLOR_WHITE, COLOR_BLACK);
             init_pair(PLAYER, COLOR_BLACK, COLOR_GREEN);
             init_pair(BACKGROUND, COLOR_BLACK, COLOR_BLACK);
             init_pair(TRAP_COLOR, COLOR_RED, COLOR_BLACK);
-            init_pair(MEDIUM_HP, COLOR_YELLOW, COLOR_BLACK);
+            init_pair(MEDIUM_HP, COLOR_BLACK, COLOR_YELLOW);
             init_pair(HEAL_ON, COLOR_GREEN, COLOR_BLACK);
             init_pair(BULLET_ON, COLOR_YELLOW, COLOR_BLACK);
-            init_pair(ENEMIE_COLOR, COLOR_MAGENTA, COLOR_BLACK);
-            init_pair(FLASHLIGHT, COLOR_YELLOW, COLOR_YELLOW);
+            init_pair(ENEMIE_COLOR, COLOR_BLACK, COLOR_MAGENTA);
+            init_pair(FLASHLIGHT, COLOR_WHITE, COLOR_BLACK);
+            init_pair(LOW_HP,COLOR_BLACK,COLOR_RED);
 
             map.y = nrows;
             map.x = ncols;
@@ -688,7 +690,7 @@ int main() {
             while (in_game) {
                 int game_menu = 0;
               move(nrows - 1, 0);
-              attron(COLOR_PAIR(1));
+              attron(COLOR_PAIR(SCORE));
               printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
               clrtoeol();
               printw("    Bullets: %d", st.bullets);
@@ -703,13 +705,13 @@ int main() {
               } else {
                 printw(" GUN");
               }
-              attroff(COLOR_PAIR(1));
+              attroff(COLOR_PAIR(SCORE));
 
               if (st.hp > 1) {
                 map.matriz[st.playerX][st.playerY] = '@';
-                attron(COLOR_PAIR(2));
+                attron(COLOR_PAIR(PLAYER));
                 mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
-                attroff(COLOR_PAIR(2));
+                attroff(COLOR_PAIR(PLAYER));
               } else if (st.hp == 1) {
                 map.matriz[st.playerX][st.playerY] = '@';
                 attron(COLOR_PAIR(MEDIUM_HP));
@@ -717,9 +719,9 @@ int main() {
                 attroff(COLOR_PAIR(MEDIUM_HP));
               } else {
                 map.matriz[st.playerX][st.playerY] = '@';
-                attron(COLOR_PAIR(TRAP_COLOR));
+                attron(COLOR_PAIR(LOW_HP));
                 mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
-                attroff(COLOR_PAIR(TRAP_COLOR));
+                attroff(COLOR_PAIR(LOW_HP));
               }
 
               lights_off(&map);
