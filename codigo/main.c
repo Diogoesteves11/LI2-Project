@@ -33,6 +33,73 @@
 #define SE 26
 #define NO_DIRECTION 27
 
+void move_enemy(STATE *s,MAPA *map,MONSTERS *monsters) {
+   char casa = ' ', casa_iluminada = '.', enemych = '&',trap = 'x';
+   int directions[8] = {N,S,E,W,SW,SE,NW,NE};
+   int raio = 10;
+
+   for (int i = 0; i < 20; i++){
+    int distancia = abs(monsters[i].y - s->playerY)+ abs(monsters[i].x - s->playerX);
+    int newX = 0, newY = 0;
+    char testch = map->matriz[newX][newY];
+
+    int inicialX = monsters[i].x, inicialY = monsters[i].y;
+
+    if(distancia > raio){
+      int new_direction = directions[rand() % 8];
+      switch(new_direction){
+        case N:{
+          newX = monsters[i].x;
+          newY = monsters[i].y - 1;
+          break;
+        }
+        case S:{
+          newX = monsters[i].x;
+          newY = monsters[i].y + 1;
+          break;
+        }
+        case W: {
+          newX = monsters[i].x - 1;
+          newY = monsters[i].y;
+          break;
+        }
+        case E:{
+          newX = monsters[i].x + 1;
+          newY = monsters[i].y;
+          break;
+        }
+        case SW:{
+          newX = monsters[i].x - 1 ;
+          newY = monsters[i].y + 1;
+          break;
+        }
+        case SE :{
+          newX = monsters[i].x + 1;
+          newY = monsters[i].y + 1;
+          break;
+        }
+        case NW:{
+          newX = monsters[i].x - 1;
+          newY = monsters[i].y - 1;
+          break;
+        }
+        case NE:{
+          newX = monsters[i].x + 1;
+          newY = monsters[i].y - 1;
+          break;
+        }
+      }
+      
+      if ((testch == casa || testch == casa_iluminada) && testch != enemych && testch != trap){
+        map->matriz[newX][newY] = enemych;
+        monsters[i].x = newX;
+        monsters[i].y = newY;
+        map->matriz [inicialX][inicialY] = casa;
+      }
+    }
+   }
+}
+
 void spawn_player(STATE *st, MAPA *map) { // função que escolhe ateatóriamente um local do mapa para o jogador aparecer, sem paredes imediatamente à sua volta
     int x, y;
     // Escolhe uma posição aleatória dentro do mapa
@@ -147,6 +214,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
 				attroff(COLOR_PAIR(BACKGROUND));
             }
             else if (testch == trap) {
+                map->matriz[x][y] = 'x';
                 attron(COLOR_PAIR(BACKGROUND));
                 attron(A_BOLD);  // chama-se esta função para garantir que as traps sejam pintadas de preto
                 mvaddch(y, x, 'x' | A_COLOR);
@@ -154,6 +222,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
                 attroff(A_BOLD);
             }
 			      else if (testch == enemy) {
+                map->matriz[x][y] = '&';
                 attron(COLOR_PAIR(BACKGROUND));
                 attron(A_BOLD);  // chama-se esta função para garantir que os inimigos sejam pintadas de preto
                 mvaddch(y, x, enemy|A_COLOR);
@@ -667,7 +736,7 @@ int main() {
             intrflush(stdscr, false);
             keypad(stdscr, true);
 
-            init_pair(WALL_ILUMINATED, COLOR_BLUE, COLOR_BLUE);
+            init_pair(WALL_ILUMINATED, COLOR_CYAN, COLOR_BLUE);
             init_pair(LIGHT, COLOR_WHITE, COLOR_BLACK);
             init_pair(SCORE, COLOR_WHITE, COLOR_BLACK);
             init_pair(PLAYER, COLOR_BLACK, COLOR_GREEN);
@@ -723,11 +792,13 @@ int main() {
                 mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
                 attroff(COLOR_PAIR(LOW_HP));
               }
-
+              
               lights_off(&map);
               draw_light(&st, &map);
               move(st.playerY, st.playerX);
               update(&st,&map, &game_menu,monster,&direction);
+              move_enemy(&st,&map,monster);
+
               if (game_menu) {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
               }
