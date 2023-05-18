@@ -258,17 +258,6 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map, int *game_menu){  /
 	if (testch == test) return; // se a próxima posição for uma parede, o jogador não se mexe e a função retorna 
 	else if (testch == testTrap) // se a próxima posição for uma trap, verificamos o hp do jogador e, se esta for maior do que zero, retiramos 1 de hp, caso contrário o jogador morre
 	{
-		if (st->hp == 0)
-		{
-			erase();
-			mvprintw(0, 0, "YOU DIED!");
-			refresh();
-			sleep(1);
-            endwin();
-            (*game_menu = 1);
-			
-		}
-		else
 			st->hp--;
 	}
 	else if (testch == bullet) st->bullets += 5; // cada recarga aumenta 5 balas, caso o jogador intersete a munição
@@ -790,11 +779,14 @@ int main() {
                 attron(COLOR_PAIR(MEDIUM_HP));
                 mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
                 attroff(COLOR_PAIR(MEDIUM_HP));
-              } else {
+              } else if (st.hp == 0){
                 map.matriz[st.playerX][st.playerY] = '@';
                 attron(COLOR_PAIR(LOW_HP));
                 mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
                 attroff(COLOR_PAIR(LOW_HP));
+              }else{
+                in_game = 0;
+                break;
               }
               
               lights_off(&map);
@@ -805,6 +797,7 @@ int main() {
 
               if (game_menu) {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
+                
               }
             }
           }
