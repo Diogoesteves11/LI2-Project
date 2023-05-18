@@ -33,71 +33,75 @@
 #define SE 26
 #define NO_DIRECTION 27
 
-void move_enemy(STATE *s,MAPA *map,MONSTERS *monsters) {
-   char casa = ' ', casa_iluminada = '.', enemych = '&',trap = 'x';
-   int directions[8] = {N,S,E,W,SW,SE,NW,NE};
-   int raio = 10;
+void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters) {
+    int playerX = st->playerX;
+    int playerY = st->playerY;
+    char monster = '&';
+    int raio = 10;
+    
 
-   for (int i = 0; i < 20; i++){
-    int distancia = abs(monsters[i].y - s->playerY)+ abs(monsters[i].x - s->playerX);
-    int newX = 0, newY = 0;
-    char testch = map->matriz[newX][newY];
+    for (int i = 0; i < 20; i++) {
+        int distacia_raio = abs (monsters[i].x-st->playerX) + abs(monsters[i].y - st->playerY);
+        
+        if(distacia_raio <= raio){
+        int monsterX = monsters[i].x;
+        int monsterY = monsters[i].y;
+        
+        // Calculate the distance between the monster and the player
+        int distanceX = abs(playerX - monsterX);
+        int distanceY = abs(playerY - monsterY);
 
-    int inicialX = monsters[i].x, inicialY = monsters[i].y;
+        // Move the monster towards the player
+        if (distanceX > distanceY) {
+            if (playerX < monsterX) {
+                monsterX--;
+            } else if (playerX > monsterX) {
+                monsterX++;
+            }
+        } else {
+            if (playerY < monsterY) {
+                monsterY--;
+            } else if (playerY > monsterY) {
+                monsterY++;
+            }
+        }
 
-    if(distancia > raio){
-      int new_direction = directions[rand() % 8];
-      switch(new_direction){
-        case N:{
-          newX = monsters[i].x;
-          newY = monsters[i].y - 1;
-          break;
+        // Check if the new position is valid
+        if ((map->matriz[monsterX][monsterY] == '.' || map->matriz[monsterX][monsterY] == ' ') && (map->matriz[monsterX][monsterY] != '@' && (monsterX != playerX || monsterY != playerY) && map->matriz[monsterX][monsterY] != '&')) {
+            // Clear the previous position of the monster
+            map->matriz[monsters[i].x][monsters[i].y] = '.';
+            // Update the monster position in the state
+            monsters[i].x = monsterX;
+            monsters[i].y = monsterY;
+            // Update the monster position in the mapa
+            map->matriz[monsterX][monsterY] = monster;
         }
-        case S:{
-          newX = monsters[i].x;
-          newY = monsters[i].y + 1;
-          break;
+
+        }else{
+         int monsterX = monsters[i].x;
+         int monsterY = monsters[i].y;
+
+         int rand_direction = rand() % 4;
+
+         switch (rand_direction){
+          case 0: monsterY--;break; // segue para norte(cima)
+          case 1: monsterY++; break; // segue para sul(baixo)
+          case 2: monsterX++; break; //segue para este(direita)
+          case 3: monsterX--; break; // segue para oeste (esquerda)
+         }
+
+         // Check if the new position is valid
+        if ((map->matriz[monsterX][monsterY] == '.' || map->matriz[monsterX][monsterY] == ' ') && (map->matriz[monsterX][monsterY] != '@' && (monsterX != playerX || monsterY != playerY) && map->matriz[monsterX][monsterY] != '&')) {
+            // Clear the previous position of the monster
+            map->matriz[monsters[i].x][monsters[i].y] = '.';
+            // Update the monster position in the state
+            monsters[i].x = monsterX;
+            monsters[i].y = monsterY;
+            // Update the monster position in the map
+            map->matriz[monsterX][monsterY] = monster;
         }
-        case W: {
-          newX = monsters[i].x - 1;
-          newY = monsters[i].y;
-          break;
         }
-        case E:{
-          newX = monsters[i].x + 1;
-          newY = monsters[i].y;
-          break;
-        }
-        case SW:{
-          newX = monsters[i].x - 1 ;
-          newY = monsters[i].y + 1;
-          break;
-        }
-        case SE :{
-          newX = monsters[i].x + 1;
-          newY = monsters[i].y + 1;
-          break;
-        }
-        case NW:{
-          newX = monsters[i].x - 1;
-          newY = monsters[i].y - 1;
-          break;
-        }
-        case NE:{
-          newX = monsters[i].x + 1;
-          newY = monsters[i].y - 1;
-          break;
-        }
-      }
-      
-      if ((testch == casa || testch == casa_iluminada) && testch != enemych && testch != trap){
-        map->matriz[newX][newY] = enemych;
-        monsters[i].x = newX;
-        monsters[i].y = newY;
-        map->matriz [inicialX][inicialY] = casa;
-      }
     }
-   }
 }
 
 void spawn_player(STATE *st, MAPA *map) { // função que escolhe ateatóriamente um local do mapa para o jogador aparecer, sem paredes imediatamente à sua volta
@@ -203,15 +207,15 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
 	  char enemy = '&';
     char damage = '*';
 
-    attron(COLOR_PAIR(BACKGROUND));
+    
     for (int x = 1; x < map->x - 1; x++) { // ciclos for para percorrer todas as casas do mapa
         for (int y = 1; y < map->y - 1; y++) {
             char testch = map->matriz[x][y];
             if (testch == casa_iluminada) {  //  se a casa estiver iluminada, é apagada para a mesma cor do background, bem como as traps (cor preta)
                 map->matriz[x][y] = ' ';   
-				attron(COLOR_PAIR(BACKGROUND));         
-				mvaddch(y, x,map->matriz[x][y]);
-				attroff(COLOR_PAIR(BACKGROUND));
+				        attron(COLOR_PAIR(BACKGROUND));         
+				        mvaddch(y, x,map->matriz[x][y]);
+			         	attroff(COLOR_PAIR(BACKGROUND));
             }
             else if (testch == trap) {
                 map->matriz[x][y] = 'x';
@@ -239,7 +243,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
             }
         }
     }
-    attroff(COLOR_PAIR(BACKGROUND));
+    
 }
 
 void do_movement_action(STATE *st, int dx, int dy,MAPA *map, int *game_menu){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
@@ -797,7 +801,7 @@ int main() {
               draw_light(&st, &map);
               move(st.playerY, st.playerX);
               update(&st,&map, &game_menu,monster,&direction);
-              move_enemy(&st,&map,monster);
+              move_monsters(&st,&map,monster);
 
               if (game_menu) {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
