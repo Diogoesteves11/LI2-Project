@@ -276,8 +276,8 @@ void kill_monster(MONSTERS *monster, int index, MAPA *map){
   char casa = ' ',monsterch = '&';
   int newX = 0,newY = 0;
   do{
-    newX = 1 + (rand()% map->x / 2);
-    newY = 1 + (rand()% map->y / 2); // inimigos tendem a aparecer tendencialmente no lado esquerdo do mapa desta forma, mas assim a geração é mais rápida
+    newX = 1 + (rand()% map->x - 2);
+    newY = 1 + (rand()% map->y - 2); // inimigos tendem a aparecer tendencialmente no lado esquerdo do mapa desta forma, mas assim a geração é mais rápida
   }while(map->matriz[newX][newY] != casa);
   monster[index].x = newX;
   monster[index].y = newY;
@@ -680,8 +680,8 @@ void spawn_monsters(MONSTERS *monster, MAPA *map){
   int ix,iy;
   for (int i = 0; i < 15; i++){
    do{
-   ix = 1 + (rand() % (map-> x) / 2);
-   iy = 1 + (rand() % (map-> y) / 2);
+   ix = 1 + (rand() % (map-> x)-2);
+   iy = 1 + (rand() % (map-> y) - 2);
    }while(map->matriz[ix][iy]!= casa);
    map->matriz[ix][iy] = '&';
    monster[i].y = iy;
@@ -861,7 +861,7 @@ int main() {
             mvprintw(starty+18,2,"5. Cada dano infligido pelo jogador aos inimigos com a arma, diminui 2 de hp ao inimigo");
             mvprintw(starty+19,2,"6. Sempre que um jogador cai numa trap, perde 1 de hp");
             mvprintw(starty+20,2,"7. A espada tem um alcance de 1 casa à volta do jogador e a arma dispara a bala na ultima direção que o jogador tomou, até encontrar um inimigo ou uma parede");
-            mvprintw(starty+21,2,"8. Sempre que um inimigo morre, este volta a aparecer numa posição aleatória do mapa. Existem um total de 20 inimigos");
+            mvprintw(starty+21,2,"8. Sempre que um inimigo morre, este volta a aparecer numa posição aleatória do mapa. Existem um total de 15 inimigos");
              mvprintw(starty+22,2,"9. Os inimigos têm um alcance de 1 casa a toda a sua volta.");
 
 
