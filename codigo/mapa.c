@@ -18,7 +18,7 @@ void draw_map(MAPA* map) {
     srand(time(NULL));
     start_color();
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
-    init_pair(WALL_COLOR, COLOR_BLACK, COLOR_BLACK);
+    init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLACK);
     init_pair(HEAL_OFF,COLOR_BLACK,COLOR_BLACK);
     init_pair (BULLET_OFF, COLOR_BLACK,COLOR_BLACK);
 
@@ -63,48 +63,61 @@ void draw_map(MAPA* map) {
 
     // Transforma a posição central em parede se existirem pelo menos 5 paredes vizinhas em um quadrado 3x3 centrado numa celula.
     
-    for (int d = 0; d < 2; d++) {
-    for (int i = 1; i < map->x - 1; i++) {
-        for (int j = 1; j < map->y - 1; j++) {
-            int count = 0;
-            for (int k = -1; k <= 1; k++) {
-                for (int l = -1; l <= 1; l++) {
-                    if (map->matriz[i + k][j + l] == '#') {
-                        count++;
+    for (int i = 0; i < 3; i++) {
+        for (int y = 1; y < (map->y-1) - 1; y++) {
+            for (int x = 1; x < (map->x) - 1; x++) {
+                int neighbor_wall_count = 0;
+                for (int yy = y - 1; yy <= y + 1; yy++) {
+                    for (int xx = x - 1; xx <= x + 1; xx++) {
+                        if (map->matriz[xx][yy] == '#') {
+                            neighbor_wall_count++;
+                        }
+                    }
+                }
+                if (map->matriz[x][y] == '#') {
+                    if (neighbor_wall_count < 3) {
+                        map->matriz[x][y] = ' ';
+                        mvaddch(y,x,map->matriz[x][y]);
+                    }
+                } else {
+                    if (neighbor_wall_count > 4) {
+                        map->matriz[x][y] = '#';
+                        mvaddch(y,x,map->matriz[x][y]);
                     }
                 }
             }
-            if (count >= 5) {
-                map->matriz[i][j] = '#';
-                mvaddch(j, i, map->matriz[i][j]);
-            }
         }
-    }
     }
     
 // Verifica cada posição em um quadrado 5x5 centrado e transforma a celula central em parede se não houver nenhuma parede vizinha
-
-for (int d = 0; d < 5; d++) {
-    for (int i = 2; i < map->x - 2; i++) {
-        for (int j = 2; j < map->y - 2; j++) {
-            int count = 0;
-            for (int k = -2; k <= 2; k++) {
-                for (int l = -2; l <= 2; l++) {
-                    if (map->matriz[i + k][j + l] == '#') {
-                        count++;
+    for (int i = 0; i < 4; i++) {
+        for (int y = 1; y < (map->y-1) - 1; y++) {
+            for (int x = 1; x < (map->x) - 1; x++) {
+                int neighbor_wall_count = 0;
+                for (int iy = y - 1; iy <= y + 1; iy++) {
+                    for (int ix = x - 1; ix <= x + 1; ix++) {
+                        if (map->matriz[ix][iy] == '#' && (iy != y || ix != x)) {
+                            neighbor_wall_count++;
+                        }
+                    }
+                }
+                if (map->matriz[x][y] == '#') {
+                    if (neighbor_wall_count < 3) {
+                        map->matriz[x][y] = ' ';
+                        mvaddch(y,x,map->matriz[x][y]);
+                    }
+                }
+                if (map->matriz[x][y]== ' ') {
+                    if (neighbor_wall_count > 4) {
+                        map->matriz[x][y] = '#';
+                        mvaddch(y,x,map->matriz[x][y]);
                     }
                 }
             }
-            if (count == 0) {
-                map->matriz[i][j] = '#';
-                mvaddch(j, i, map->matriz[i][j]);
-            }
         }
     }
-}
 
 // Elimina algumas paredes soltas 
-for (int d = 0; d < 2; d++){
  for (int i = 1; i < map->x - 1; i++) {
     for (int j = 1; j < map->y - 1; j++) {
         if (map->matriz[i][j] == '#') {
@@ -121,8 +134,6 @@ for (int d = 0; d < 2; d++){
         }
     }
 }
-}
-
 attroff(COLOR_PAIR(WALL_COLOR));
 
 

@@ -40,7 +40,7 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters) {
     int raio = 10;
     
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 15; i++) {
         int distacia_raio = abs (monsters[i].x-st->playerX) + abs(monsters[i].y - st->playerY);
         
         if(distacia_raio <= raio){
@@ -81,13 +81,17 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters) {
          int monsterX = monsters[i].x;
          int monsterY = monsters[i].y;
 
-         int rand_direction = rand() % 4;
+         int rand_direction = rand() % 8;
 
          switch (rand_direction){
           case 0: monsterY--;break; // segue para norte(cima)
           case 1: monsterY++; break; // segue para sul(baixo)
           case 2: monsterX++; break; //segue para este(direita)
           case 3: monsterX--; break; // segue para oeste (esquerda)
+          case 4: monsterX--; monsterY--; break; // segue Nordoeste (diganonal para cima e para a esquerda)
+          case 5: monsterX--; monsterY++;break; // segue para Sudoeste(diagonal para baixo e para a esquerda)
+          case 6: monsterX++; monsterY--;break;  //segue para Nordoeste (diagonal para cima e para a direita)
+          case 7: monsterX++; monsterY++;break; // segue para Sudoeste (diagonal para baixo e para a direita)
          }
 
          // Check if the new position is valid
@@ -246,7 +250,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     
 }
 
-void do_movement_action(STATE *st, int dx, int dy,MAPA *map, int *game_menu){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
+void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
 	int nextX = st->playerX + dx;
 	int nextY = st->playerY + dy;
 	char testTrap = 'x';
@@ -277,7 +281,7 @@ void kill_monster(MONSTERS *monster, int index, MAPA *map){
   }while(map->matriz[newX][newY] != casa);
   monster[index].x = newX;
   monster[index].y = newY;
-  monster[index].hp = 3;
+  monster[index].hp = 2;
   map->matriz[newX][newY] = monsterch; 
 }
 
@@ -293,7 +297,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
       char testch = map->matriz[ix][iy];
       if(testch == casa || testch == casa_iluminada) map->matriz[ix][iy] = attack;
       else if (testch == monsterch){
-        for (int i = 0; i < 20; i++){
+        for (int i = 0; i < 15; i++){
           if ((monster[i].x) == ix && (monster[i].y) == iy){
             if(monster[i].hp > 0){
               monster[i].hp--;
@@ -323,7 +327,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 20; i++){
+         for (int i = 0; i < 15; i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -352,7 +356,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 20; i++){
+         for (int i = 0; i < 15; i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -381,7 +385,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 20; i++){
+         for (int i = 0; i < 15; i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -410,7 +414,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 20; i++){
+         for (int i = 0; i < 15; i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -439,7 +443,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 20; i++){
+         for (int i = 0; i < 15; i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -468,7 +472,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 20; i++){
+         for (int i = 0; i < 15; i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -497,7 +501,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 20; i++){
+         for (int i = 0; i < 15; i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -526,7 +530,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 20; i++){
+         for (int i = 0; i < 15; i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -571,52 +575,52 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction)
 
 	case KEY_A1:
 	case '7':
-		do_movement_action(st, -1, -1,map,game_menu);*direction = NW;
+		do_movement_action(st, -1, -1,map);*direction = NW;
 		break;
 	case KEY_UP:
 	case '8':
-		do_movement_action(st, +0, -1,map,game_menu);*direction = N;
+		do_movement_action(st, +0, -1,map);*direction = N;
 		break;
 	case KEY_A3:
 	case '9':
-		do_movement_action(st, +1, -1,map,game_menu);*direction = NE;
+		do_movement_action(st, +1, -1,map);*direction = NE;
 		break;
 	case KEY_LEFT:
 	case '4':
-		do_movement_action(st, -1, +0,map,game_menu);*direction = W;
+		do_movement_action(st, -1, +0,map);*direction = W;
 		break;
 	case KEY_B2:
 	case '5': *direction = NO_DIRECTION;break; // para fazer uma jogada parado
 	case KEY_RIGHT:
 	case '6':
-		do_movement_action(st, +1, +0,map,game_menu);*direction = E;
+		do_movement_action(st, +1, +0,map);*direction = E;
 		break;
 	case KEY_C1:
 	case '1':
-		do_movement_action(st, -1, +1,map,game_menu);*direction = SW;
+		do_movement_action(st, -1, +1,map);*direction = SW;
 		break;
 	case KEY_DOWN:
 	case '2':
-		do_movement_action(st, +0, +1,map,game_menu);*direction = S;
+		do_movement_action(st, +0, +1,map);*direction = S;
 		break;
 	case KEY_C3:
 	case '3':
-		do_movement_action(st, +1, +1,map,game_menu);*direction = SE;
+		do_movement_action(st, +1, +1,map);*direction = SE;
 		break;
 	case 'q':
         *game_menu = 1;
 		break;
 	case 'w':
-		do_movement_action(st, +0, -1,map,game_menu);*direction = N;;
+		do_movement_action(st, +0, -1,map);*direction = N;;
 		break;
 	case 'a':
-		do_movement_action(st, -1, +0,map,game_menu);*direction = W;
+		do_movement_action(st, -1, +0,map);*direction = W;
 		break;
 	case 's':
-		do_movement_action(st, +0, +1,map,game_menu);*direction = S;
+		do_movement_action(st, +0, +1,map);*direction = S;
 		break;
 	case 'd':
-		do_movement_action(st, +1, +0,map,game_menu);*direction = E;
+		do_movement_action(st, +1, +0,map);*direction = E;
 		break;
   case ' ': attack(st,map,monster,direction);break;
 	}
@@ -674,7 +678,7 @@ void refresh_GAME_STATUS(MAPA *map){
 void spawn_monsters(MONSTERS *monster, MAPA *map){
   char casa = ' ';
   int ix,iy;
-  for (int i = 0; i < 20; i++){
+  for (int i = 0; i < 15; i++){
    do{
    ix = 1 + (rand() % (map-> x) / 2);
    iy = 1 + (rand() % (map-> y) / 2);
@@ -682,7 +686,20 @@ void spawn_monsters(MONSTERS *monster, MAPA *map){
    map->matriz[ix][iy] = '&';
    monster[i].y = iy;
    monster[i].x = ix;
-   monster[i].hp = 3;
+   monster[i].hp = 2;
+  }
+}
+
+void enemy_attack(MONSTERS *monster, STATE *s){
+  for(int i = 0; i < 15; i++){
+    for (int ix = ((monster[i].x)-1); ix <= (monster[i].x+1); ix ++){
+     for(int iy = ((monster[i].y)-1); iy <= ((monster[i].y)+1); iy ++){
+       if (ix == s->playerX && iy == s->playerY){
+        s->hp --;
+        break;
+       }
+     }
+    }
   }
 }
 
@@ -713,8 +730,9 @@ int main() {
           in_game = 1; // Indica que o jogo está em execução
           refresh_GAME_STATUS(&map);
           while (in_game) {
+            int game_menu = 0;
             STATE st = {20, 20, 3, 0, 1, 0};
-            MONSTERS monster[20];
+            MONSTERS monster[15];
             WINDOW *wnd = initscr();
             int ncols, nrows;
             int direction = NO_DIRECTION;
@@ -750,7 +768,6 @@ int main() {
             spawn_monsters(monster,&map);
            
             while (in_game) {
-                int game_menu = 0;
               move(nrows - 1, 0);
               attron(COLOR_PAIR(SCORE));
               printw("(%d, %d) %d %d", st.playerX, st.playerY, ncols, nrows);
@@ -794,6 +811,7 @@ int main() {
               move(st.playerY, st.playerX);
               update(&st,&map, &game_menu,monster,&direction);
               move_monsters(&st,&map,monster);
+              enemy_attack(monster,&st);
 
               if (game_menu) {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
@@ -836,7 +854,7 @@ int main() {
             mvprintw(starty+10,2,"1.Com centro no jogador, são iluminadas dinamicamente todas as casas à sua volta, bem como as paredes. Permanecem iluminadas as paredes e o loot, representando assim a área explorada.");
 
             mvprintw(starty+13,1,"COMBATE: ");
-            mvprintw(starty+14,2,"1. Cada dano infligido pelos inimigos ao jogador, diminui 2 de hp ao jogador");
+            mvprintw(starty+14,2,"1. Cada dano infligido pelos inimigos ao jogador, diminui 1 de hp ao jogador");
             mvprintw(starty+15,2,"2. Cada jogador começa com 4 de hp e zero balas. Cada inimigo tem 3 de hp");
             mvprintw(starty+16,2,"3. As vidas e as balas do jogador são recarregáveis no mapa ('+' aumenta 2 de hp e '-' recarregam 5 balas). Matar um inimigo recarrega 1 bala");
             mvprintw(starty+17,2,"4. Cada dano infligido pelo jogador aos inimigos com a espada, diminui 1 de hp ao inimigo");
@@ -844,6 +862,7 @@ int main() {
             mvprintw(starty+19,2,"6. Sempre que um jogador cai numa trap, perde 1 de hp");
             mvprintw(starty+20,2,"7. A espada tem um alcance de 1 casa à volta do jogador e a arma dispara a bala na ultima direção que o jogador tomou, até encontrar um inimigo ou uma parede");
             mvprintw(starty+21,2,"8. Sempre que um inimigo morre, este volta a aparecer numa posição aleatória do mapa. Existem um total de 20 inimigos");
+             mvprintw(starty+22,2,"9. Os inimigos têm um alcance de 1 casa a toda a sua volta.");
 
 
            int key = getch();
@@ -875,17 +894,20 @@ int main() {
             int starty = nrows/20;
 
             attron(COLOR_PAIR(LIGHT)); 
-            mvprintw(starty,startx,"t -> switch gun");
-            mvprintw(starty+1,startx,"w/8 -> move UP");
-            mvprintw(starty+2,startx,"s/2 -> move DOWN");
-            mvprintw(starty+3,startx,"a/4 -> move LEFT");
-            mvprintw(starty+4,startx,"d/6 -> move RIGHT");
-            mvprintw(starty+5,startx,"7 -> move UPPER LEFT");
-            mvprintw(starty+6,startx,"9 -> move UPPER RIGHT");
-            mvprintw(starty+7,startx,"1 -> move DOWN LEFT");
-            mvprintw(starty+8,startx,"3 -> move DOWN RIGHT");
-            mvprintw(starty+9,startx,"SPACE -> USE WEAPON");
-            mvprintw(starty+10,startx,"5-> NO MOVEMENT");
+            mvprintw(starty, (ncols - 7) / 2, "CONTROL");
+
+            
+            mvprintw(starty + 2, startx, "t       -> switch gun");
+            mvprintw(starty + 3, startx, "w/8     -> move UP");
+            mvprintw(starty + 4, startx, "s/2     -> move DOWN");
+            mvprintw(starty + 5, startx, "a/4     -> move LEFT");
+            mvprintw(starty + 6, startx, "d/6     -> move RIGHT");
+            mvprintw(starty + 7, startx, "7       -> move UPPER LEFT");
+            mvprintw(starty + 8, startx, "9       -> move UPPER RIGHT");
+            mvprintw(starty + 9, startx, "1       -> move DOWN LEFT");
+            mvprintw(starty + 10, startx, "3       -> move DOWN RIGHT");
+            mvprintw(starty + 11, startx, "SPACE   -> USE WEAPON");
+            mvprintw(starty + 12, startx, "5       -> NO MOVEMENT");
             attroff(COLOR_PAIR(LIGHT));
 
 
