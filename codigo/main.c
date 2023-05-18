@@ -264,7 +264,7 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que d
 	{
 			st->hp--;
 	}
-	else if (testch == bullet) st->bullets += 5; // cada recarga aumenta 5 balas, caso o jogador intersete a munição
+	else if (testch == bullet) st->bullets ++; // cada recarga aumenta 5 balas, caso o jogador intersete a munição
 	else if (testch == heal) st->hp += 2; // cada cura aumenta 2 de hp, caso o jogador a intersete
 	else if (testch == enemich) return;
 	mvaddch(st->playerY, st->playerX, ' ');
