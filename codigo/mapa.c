@@ -13,9 +13,9 @@
 #define HEAL_OFF 12
 #define BULLET_OFF 16
 
-
+// Função que desenha o mapa
 void draw_map(MAPA* map) {
-    srand(time(NULL));
+    srand(time(NULL)); // Mapas aleatorios a cada jogo
     start_color();
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
     init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLACK);
@@ -44,43 +44,46 @@ void draw_map(MAPA* map) {
 
     // Limpa a última linha (linha inferior)
     for (int i = 1; i < map->x - 1; i++) {
-        map->matriz[i][map->y - 1] = ' '; // Deixa a célula vazia
+        map->matriz[i][map->y - 1] = ' '; // Deixa a célula do canto inferior direito vazia
         mvaddch(map->y - 1, i, map->matriz[i][map->y - 1]);
     }
 
-    int casas_totais = ((map->x) * (map->y)) - count1;
+    int casas_totais = ((map->x) * (map->y)) - count1; // Calcula-se o numero de paredes sem contar as bordas.
     int heal_percentage = casas_totais * 0.01;
     int heal_count = 0;
+    int trap_count = 0;
+    int trap_percentage = casas_totais * 0.01;
+    int bullet_count = 0;
+    int bullet_percentage = casas_totais * 0.01;
 
     
     for (int i = 0; i < casas_totais * 0.4; i++) {
-        int x1 = 2 + rand() % (map->x - 2); // soma-se 2 pra se definir o limite inferior
+        int x1 = 2 + rand() % (map->x - 2); 
         int y1 = 2 + rand() % (map->y - 2);
         map->matriz[x1][y1] = '#';
         mvaddch(y1, x1, map->matriz[x1][y1]);
     }
 
 
-    // Transforma a posição central em parede se existirem pelo menos 5 paredes vizinhas em um quadrado 3x3 centrado numa celula.
-    
-    for (int i = 0; i < 3; i++) {
+    // Ciclos para deixar as paredes mais concentradas em forma de "cavernas"
+    for (int i = 0; i < 3; i++) { // fazem-se 3 passagens
         for (int y = 1; y < (map->y-1) - 1; y++) {
             for (int x = 1; x < (map->x) - 1; x++) {
-                int neighbor_wall_count = 0;
+                int count = 0;
                 for (int yy = y - 1; yy <= y + 1; yy++) {
                     for (int xx = x - 1; xx <= x + 1; xx++) {
                         if (map->matriz[xx][yy] == '#') {
-                            neighbor_wall_count++;
+                            count++;
                         }
                     }
                 }
                 if (map->matriz[x][y] == '#') {
-                    if (neighbor_wall_count < 3) {
+                    if (count < 3) {
                         map->matriz[x][y] = ' ';
                         mvaddch(y,x,map->matriz[x][y]);
                     }
                 } else {
-                    if (neighbor_wall_count > 4) {
+                    if (count > 4) {
                         map->matriz[x][y] = '#';
                         mvaddch(y,x,map->matriz[x][y]);
                     }
@@ -89,26 +92,26 @@ void draw_map(MAPA* map) {
         }
     }
     
-// Verifica cada posição em um quadrado 5x5 centrado e transforma a celula central em parede se não houver nenhuma parede vizinha
-    for (int i = 0; i < 4; i++) {
+// Ciclos para deixar o mapa mais "polido".
+    for (int i = 0; i < 4; i++) { // fazem-se 4 passagens
         for (int y = 1; y < (map->y-1) - 1; y++) {
             for (int x = 1; x < (map->x) - 1; x++) {
-                int neighbor_wall_count = 0;
+                int count = 0;
                 for (int iy = y - 1; iy <= y + 1; iy++) {
                     for (int ix = x - 1; ix <= x + 1; ix++) {
                         if (map->matriz[ix][iy] == '#' && (iy != y || ix != x)) {
-                            neighbor_wall_count++;
+                            count++;
                         }
                     }
                 }
                 if (map->matriz[x][y] == '#') {
-                    if (neighbor_wall_count < 3) {
+                    if (count < 3) {
                         map->matriz[x][y] = ' ';
                         mvaddch(y,x,map->matriz[x][y]);
                     }
                 }
                 if (map->matriz[x][y]== ' ') {
-                    if (neighbor_wall_count > 4) {
+                    if (count > 4) {
                         map->matriz[x][y] = '#';
                         mvaddch(y,x,map->matriz[x][y]);
                     }
@@ -117,7 +120,7 @@ void draw_map(MAPA* map) {
         }
     }
 
-// Elimina algumas paredes soltas 
+// Elimina algumas paredes soltas de forma a deixar um maior espaço livre para o jogador se movimentar pelo mapa
  for (int i = 1; i < map->x - 1; i++) {
     for (int j = 1; j < map->y - 1; j++) {
         if (map->matriz[i][j] == '#') {
@@ -137,21 +140,20 @@ void draw_map(MAPA* map) {
 attroff(COLOR_PAIR(WALL_COLOR));
 
 
-// Função que desenha as traps do mapa logo no inicio(número de traps finito)
-attron(COLOR_PAIR(TRAP_COLOR_2));
-for(int i = 2; i < map->y-2; i++) {
-        for(int j = 2; j < map->x-2; j++) {
-            char test = '#';
-            char testch = mvinch(j,i) & A_CHARTEXT;
-            if((drand48() * 1000 < TRAP_PERCENTAGE) && (testch != test)) {
-                map->matriz[j][i] = 'x';
-                mvaddch(i, j, 'x'| A_BOLD);
-            } 
-        }
-    }
-attroff (COLOR_PAIR(TRAP_COLOR_2));
+// Função que desenha as traps do mapa logo no inicio (número de traps finito)
+attron (COLOR_PAIR(TRAP_COLOR_2));
+while  (trap_count < trap_percentage) {
+ int x1 = rand() % (map->x - 2) + 1;
+ int y1 = rand() % (map->y - 1);
+ if (map->matriz [x1] [y1] != '#') {
+  map->matriz[x1][y1] = 'x';
+  mvaddch(y1, x1, map->matriz[x1][y1]);
+ }
+ trap_count ++;
+ }
+attroff(COLOR_PAIR(TRAP_COLOR_2));
 
-// Função que desenha as curas(nº finito de curas)
+// Função que desenha as curas (nº finito de curas)
 attron (COLOR_PAIR(HEAL_OFF));
 while  (heal_count < heal_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
@@ -165,15 +167,16 @@ while  (heal_count < heal_percentage) {
 attroff(COLOR_PAIR(HEAL_OFF));
 
 
-// Função que desenha as recargas das munições (nº finito)
+// Função que desenha as recargas das munições (nº finito de munições)
 attron (COLOR_PAIR(BULLET_OFF));
-for (int i = 0; i < casas_totais * 0.01; i++) {
-        int x1 = rand() % (map->x - 2) + 1;
-        int y1 = rand() % (map->y - 1);
-        if (map->matriz[x1][y1] == ' ') {
-            map->matriz[x1][y1] = '-';
-            mvaddch(y1, x1, map->matriz[x1][y1]);
-        }
-    }
-attroff (COLOR_PAIR(BULLET_OFF));
+while  (bullet_count < bullet_percentage) {
+ int x1 = rand() % (map->x - 2) + 1;
+ int y1 = rand() % (map->y - 1);
+ if (map->matriz [x1] [y1] != '#') {
+  map->matriz[x1][y1] = '-';
+  mvaddch(y1, x1, map->matriz[x1][y1]);
+ }
+ bullet_count ++;
+ }
+attroff(COLOR_PAIR(BULLET_OFF));
 }
