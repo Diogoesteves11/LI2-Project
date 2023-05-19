@@ -262,7 +262,7 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que d
 	if (testch == test) return; // se a próxima posição for uma parede, o jogador não se mexe e a função retorna 
 	else if (testch == testTrap) // se a próxima posição for uma trap, verificamos o hp do jogador e, se esta for maior do que zero, retiramos 1 de hp, caso contrário o jogador morre
 	{
-			st->hp--;
+			st->hp/=2;
 	}
 	else if (testch == bullet) st->bullets ++; // cada recarga aumenta 5 balas, caso o jogador intersete a munição
 	else if (testch == heal) st->hp += 2; // cada cura aumenta 2 de hp, caso o jogador a intersete
@@ -863,10 +863,10 @@ int main() {
             mvprintw(starty+13,1,"COMBATE: ");
             mvprintw(starty+14,2,"1. Cada dano infligido pelos inimigos ao jogador, diminui 1 de hp ao jogador");
             mvprintw(starty+15,2,"2. Cada jogador começa com 4 de hp e zero balas. Cada inimigo tem 3 de hp");
-            mvprintw(starty+16,2,"3. As vidas e as balas do jogador são recarregáveis no mapa ('+' aumenta 2 de hp e '-' recarregam 5 balas). Matar um inimigo recarrega 1 bala");
+            mvprintw(starty+16,2,"3. As vidas e as balas do jogador são recarregáveis no mapa ('+' aumenta 2 de hp e '-' recarregam 1 bala). Matar um inimigo recarrega 1 bala");
             mvprintw(starty+17,2,"4. Cada dano infligido pelo jogador aos inimigos com a espada, diminui 1 de hp ao inimigo");
             mvprintw(starty+18,2,"5. Cada dano infligido pelo jogador aos inimigos com a arma, diminui 2 de hp ao inimigo");
-            mvprintw(starty+19,2,"6. Sempre que um jogador cai numa trap, perde 1 de hp");
+            mvprintw(starty+19,2,"6. Sempre que um jogador cai numa trap, a sua vida é dividida por 2 até o jogador chegar a 1 de hp. Depois as traps não tiram vida ao jogador");
             mvprintw(starty+20,2,"7. A espada tem um alcance de 1 casa à volta do jogador e a arma dispara a bala na ultima direção que o jogador tomou, até encontrar um inimigo ou uma parede");
             mvprintw(starty+21,2,"8. Sempre que um inimigo morre, este volta a aparecer numa posição aleatória do mapa. Existem um total de 15 inimigos");
             mvprintw(starty+22,2,"9. Os inimigos têm um alcance de 1 casa a toda a sua volta.");
