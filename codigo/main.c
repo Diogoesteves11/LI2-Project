@@ -33,7 +33,7 @@
 #define SE 26
 #define NO_DIRECTION 27
 
-void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
+void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies, int *monster_attacking) {
     int playerX = st->playerX;
     int playerY = st->playerY;
     char monster = '&';
@@ -44,6 +44,7 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
         int distacia_raio = abs (monsters[i].x-st->playerX) + abs(monsters[i].y - st->playerY);
         
         if(distacia_raio <= raio){
+        *monster_attacking = 1;
         int monsterX = monsters[i].x;
         int monsterY = monsters[i].y;
         
@@ -78,6 +79,7 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
         }
 
         }else{
+          *monster_attacking = 0;
          int monsterX = monsters[i].x;
          int monsterY = monsters[i].y;
 
@@ -125,7 +127,7 @@ void spawn_player(STATE *st, MAPA *map) { // função que escolhe ateatóriament
 
 }
 
-void draw_light(STATE *s,MAPA *map){ // Função que desenhará a luz
+void draw_light(STATE *s,MAPA *map, int *monster_attacking){ // Função que desenhará a luz
 
 int centerX = s->playerX;
 int centerY = s->playerY;
@@ -187,10 +189,19 @@ double delta = 0.05; // Incremento do angulo
                 attroff(COLOR_PAIR(FLASHLIGHT));
             }
             else if (testch == enemy){
-             map-> matriz [(int)x][(int)y] = enemy;
-             attron(COLOR_PAIR(ENEMIE_COLOR));
-             mvaddch(y, x, '&' | A_BOLD);
-             attroff(COLOR_PAIR(ENEMIE_COLOR));
+              if(*monster_attacking){
+               map-> matriz [(int)x][(int)y] = enemy;
+               attron(COLOR_PAIR(TRAP_COLOR));
+               mvaddch(y, x, '&' | A_BOLD);
+               attroff(COLOR_PAIR(TRAP_COLOR));
+              }
+              else {
+               map-> matriz [(int)x][(int)y] = enemy;
+               attron(COLOR_PAIR(ENEMIE_COLOR));
+               mvaddch(y, x, '&' | A_BOLD);
+               attroff(COLOR_PAIR(ENEMIE_COLOR));
+              }
+             
             }
              else if (testch == damage){
               map->matriz [(int)x][(int)y] = damage;
@@ -738,10 +749,15 @@ int main() {
             MONSTERS *monster;
             WINDOW *wnd = initscr();
             int ncols, nrows;
-            int direction = NO_DIRECTION;
+            int direction = NO_DIRECTION, monster_attacking = 0;
             getmaxyx(wnd, nrows, ncols);
 
-            monster = malloc(sizeof(int) * num_enemies);
+            monster = malloc(sizeof(MONSTERS) * num_enemies); // alocamos espaço relativo ao num_enemies * (tamanho de 1 struct MONSTERS)
+
+            if(monster == NULL){ // caso não seja possível a alocação de memória, voltamos ao menu iniciar
+              in_game = 0;
+              break;
+            }
 
             srand48(time(NULL));
             start_color();
@@ -814,10 +830,10 @@ int main() {
               }
               
               lights_off(&map);
-              draw_light(&st, &map);
+              draw_light(&st, &map, &monster_attacking);
               move(st.playerY, st.playerX);
               update(&st,&map, &game_menu,monster,&direction,&num_enemies);
-              move_monsters(&st,&map,monster,&num_enemies);
+              move_monsters(&st,&map,monster,&num_enemies, &monster_attacking);
               enemy_attack(monster,&st,&num_enemies);
 
               if (game_menu) {
