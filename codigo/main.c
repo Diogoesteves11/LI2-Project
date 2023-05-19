@@ -8,7 +8,14 @@
 
 #include "state.h"
 #include "mapa.h"
+
+/*
+Esta opção nao funciona para todos os membros do grupo logo decidimos deixar em comentario, caso o jogo nao abra sem ela é so remover o comentario e deixar o #include "mapa.c"
+
 #include "mapa.c"
+
+*/
+
 
 #define BACKGROUND 0
 #define WALL_ILUMINATED 1
@@ -36,7 +43,7 @@
 #define NO_DIRECTION 27
 
 // Função responsavel pela movimentação aleatoria dos monstros pelo mapa
-void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies, int *monster_attacking) {
+void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
     int playerX = st->playerX;
     int playerY = st->playerY;
     char monster = '&';
@@ -47,7 +54,6 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies, i
         int distacia_raio = abs (monsters[i].x-st->playerX) + abs(monsters[i].y - st->playerY);
         
         if(distacia_raio <= raio){
-        *monster_attacking = 1;
         int monsterX = monsters[i].x;
         int monsterY = monsters[i].y;
         
@@ -82,7 +88,6 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies, i
         }
 
         }else{
-          *monster_attacking = 0;
          int monsterX = monsters[i].x;
          int monsterY = monsters[i].y;
 
@@ -130,7 +135,7 @@ void spawn_player(STATE *st, MAPA *map) { // função que escolhe ateatóriament
 
 }
 
-void draw_light(STATE *s,MAPA *map, int *monster_attacking){ // Função que desenhará a luz
+void draw_light(STATE *s,MAPA *map){ // Função que desenhará a luz
 
 int centerX = s->playerX;
 int centerY = s->playerY;
@@ -192,18 +197,10 @@ double delta = 0.05; // Incremento do angulo
                 attroff(COLOR_PAIR(FLASHLIGHT));
             }
             else if (testch == enemy){
-              if(*monster_attacking){
-               map-> matriz [(int)x][(int)y] = enemy;
-               attron(COLOR_PAIR(TRAP_COLOR));
-               mvaddch(y, x, '&' | A_BOLD);
-               attroff(COLOR_PAIR(TRAP_COLOR));
-              }
-              else {
                map-> matriz [(int)x][(int)y] = enemy;
                attron(COLOR_PAIR(ENEMIE_COLOR));
                mvaddch(y, x, '&' | A_BOLD);
                attroff(COLOR_PAIR(ENEMIE_COLOR));
-              }
              
             }
              else if (testch == damage){
@@ -797,7 +794,7 @@ int main() {
             MONSTERS *monster;
             WINDOW *wnd = initscr();
             int ncols, nrows;
-            int direction = NO_DIRECTION, monster_attacking = 0;
+            int direction = NO_DIRECTION;
             getmaxyx(wnd, nrows, ncols);
 
             monster = malloc(sizeof(MONSTERS) * num_enemies); // alocamos espaço relativo ao num_enemies * (tamanho de 1 struct MONSTERS)
@@ -884,10 +881,10 @@ int main() {
               }
               
               lights_off(&map);
-              draw_light(&st, &map, &monster_attacking);
+              draw_light(&st, &map);
               move(st.playerY, st.playerX);
               update(&st,&map, &game_menu,monster,&direction,&num_enemies,&jump_on);
-              move_monsters(&st,&map,monster,&num_enemies, &monster_attacking);
+              move_monsters(&st,&map,monster,&num_enemies);
               enemy_attack(monster,&st,&num_enemies);
 
               if (game_menu) {
@@ -926,13 +923,14 @@ int main() {
             mvprintw(starty+4,2,"2. O jogador tem a opção de não se mover numa jogada, se pressionar a tecla 5");
             mvprintw(starty+5,2,"3. O jogador não se move contra obstáculos, como paredes ou inimigos");
             mvprintw(starty+6,2,"4. Os inimigos movem-se de forma aleatória até entrarem em um determinado raio com centro no jogador. Nesse caso começam a mover-se em direção ao mesmo");
+            mvprintw(starty+7,2,"5. O jogador dispõe de uma opção de JUMP nas settings que o permite avançar duas casas,ou até mesmo uma parede se esta nao tiver outra na casa seguinte");
 
             mvprintw(starty+9,1,"ILUMINACAO: ");
             mvprintw(starty+10,2,"1.Com centro no jogador, são iluminadas dinamicamente todas as casas à sua volta, bem como as paredes. Permanecem iluminadas as paredes e o loot, representando assim a área explorada.");
 
             mvprintw(starty+13,1,"COMBATE: ");
             mvprintw(starty+14,2,"1. Cada dano infligido pelos inimigos ao jogador, diminui 1 de hp ao jogador");
-            mvprintw(starty+15,2,"2. Cada jogador começa com 4 de hp e zero balas. Cada inimigo tem 3 de hp");
+            mvprintw(starty+15,2,"2. Cada jogador começa com 4 de hp e zero balas. Cada inimigo tem 2 de hp");
             mvprintw(starty+16,2,"3. As vidas e as balas do jogador são recarregáveis no mapa ('+' aumenta 2 de hp e '-' recarregam 1 bala). Matar um inimigo recarrega 1 bala");
             mvprintw(starty+17,2,"4. Cada dano infligido pelo jogador aos inimigos com a espada, diminui 1 de hp ao inimigo");
             mvprintw(starty+18,2,"5. Cada dano infligido pelo jogador aos inimigos com a arma, diminui 2 de hp ao inimigo");
@@ -942,7 +940,7 @@ int main() {
             mvprintw(starty+22,2,"9. Os inimigos têm um alcance de 1 casa a toda a sua volta.");
  
            mvprintw(starty+25,2,"OUTRO");
-           mvprintw(starty+26,2,"O jogo dispões de um sistema de dificuldade que altera o número de inimigos no jogo e que pode ser alterada no menu 'GAME SETTINGS'");
+           mvprintw(starty+26,2,"O jogo dispõe de um sistema de dificuldade que altera o número de inimigos no jogo e que pode ser alterada no menu 'GAME SETTINGS'");
         
            int key = getch();
            switch(key){
@@ -987,6 +985,7 @@ int main() {
             mvprintw(starty + 10, startx, "3       -> move DOWN RIGHT");
             mvprintw(starty + 11, startx, "SPACE   -> USE WEAPON");
             mvprintw(starty + 12, startx, "5       -> NO MOVEMENT");
+            mvprintw(starty + 13, startx, "SHIFT   -> JUMP");
             attroff(COLOR_PAIR(LIGHT));
 
 
@@ -1019,7 +1018,7 @@ int main() {
             int starty = nrows/20;
 
             attron(COLOR_PAIR(LIGHT)); 
-            mvprintw(starty, (ncols - 7) / 2, "CHOSE DIFFICULTY");
+            mvprintw(starty, (ncols - 7) / 2, "CHOOSE DIFFICULTY");
 
             mvprintw(starty + 2, startx, "1.EASY: 5 enemies");
             mvprintw(starty + 3, startx, "2.MEDIUM: 15 enemies");
@@ -1028,8 +1027,10 @@ int main() {
 
             if(jump_on){
              mvprintw(starty + 7, startx, "5.Activate Jump: ON");
+             clrtoeol();
             }else {
               mvprintw(starty + 7, startx, "5.Activate Jump: OFF");
+              clrtoeol();
             }
              
 
@@ -1042,9 +1043,9 @@ int main() {
              case '4': num_enemies = 30;in_settings = 0;break;
              case '5': {
               if(jump_on){
-                jump_on = 0;in_settings = 0;break;
+                jump_on = 0;refresh();break;
               }else {
-                jump_on = 1;in_settings = 0;break;
+                jump_on = 1;refresh();break;
               }
              }
             }
