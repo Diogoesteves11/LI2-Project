@@ -33,14 +33,14 @@
 #define SE 26
 #define NO_DIRECTION 27
 
-void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters) {
+void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
     int playerX = st->playerX;
     int playerY = st->playerY;
     char monster = '&';
     int raio = 10;
     
 
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < (*num_enemies); i++) {
         int distacia_raio = abs (monsters[i].x-st->playerX) + abs(monsters[i].y - st->playerY);
         
         if(distacia_raio <= raio){
@@ -285,7 +285,7 @@ void kill_monster(MONSTERS *monster, int index, MAPA *map){
   map->matriz[newX][newY] = monsterch; 
 }
 
-void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
+void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_enemies){
   int x = s->playerX;
   int y = s->playerY;
   int dx = 0,dy = 0;
@@ -297,7 +297,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
       char testch = map->matriz[ix][iy];
       if(testch == casa || testch == casa_iluminada) map->matriz[ix][iy] = attack;
       else if (testch == monsterch){
-        for (int i = 0; i < 15; i++){
+        for (int i = 0; i < (*num_enemies); i++){
           if ((monster[i].x) == ix && (monster[i].y) == iy){
             if(monster[i].hp > 0){
               monster[i].hp--;
@@ -327,7 +327,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 15; i++){
+         for (int i = 0; i < (*num_enemies); i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -356,7 +356,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 15; i++){
+         for (int i = 0; i < (*num_enemies); i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -385,7 +385,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 15; i++){
+         for (int i = 0; i < (*num_enemies); i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -414,7 +414,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 15; i++){
+         for (int i = 0; i < (*num_enemies); i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -443,7 +443,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 15; i++){
+         for (int i = 0; i < (*num_enemies); i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -472,7 +472,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
         map->matriz[x][y] = attack;
       }
       else if (testch == monsterch){
-         for (int i = 0; i < 15; i++){
+         for (int i = 0; i < (*num_enemies); i++){
           if ((monster[i].x) == x && (monster[i].y) == y){
             if(monster[i].hp > 0){
               monster[i].hp-=2;
@@ -557,7 +557,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction){
 }
 }
 
-void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
+void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction, int *num_enemies){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
 	int key = getch();
 
 	switch (key)
@@ -622,7 +622,7 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction)
 	case 'd':
 		do_movement_action(st, +1, +0,map);*direction = E;
 		break;
-  case ' ': attack(st,map,monster,direction);break;
+  case ' ': attack(st,map,monster,direction,num_enemies);break;
 	}
 }
 
@@ -653,15 +653,16 @@ void show_menu() {
     mvprintw(start_y + 3, start_x, " 1. PLAY GAME");
     mvprintw(start_y + 4, start_x, " 2. GAME DYNAMICS");
     mvprintw(start_y + 5, start_x, " 3. COMMAND LIST");
-    mvprintw(start_y + 6, start_x, " 4. EXIT");
+    mvprintw(start_y + 6, start_x, " 4. SETTINGS");
+    mvprintw(start_y + 7, start_x, " 5. EXIT");
     attroff(COLOR_PAIR(2));
 
     attron(COLOR_PAIR(1));
-    mvprintw(start_y + 7, start_x, "====================");
+    mvprintw(start_y + 8, start_x, "====================");
     attroff(COLOR_PAIR(1));
 
     attron(COLOR_PAIR(2));
-    mvprintw(start_y + 8, start_x, "  CHOOSE AN OPTION ");
+    mvprintw(start_y + 9, start_x, "  CHOOSE AN OPTION ");
     attroff(COLOR_PAIR(2));
 
     refresh();
@@ -675,10 +676,10 @@ void refresh_GAME_STATUS(MAPA *map){
     }
 }
 
-void spawn_monsters(MONSTERS *monster, MAPA *map){
+void spawn_monsters(MONSTERS *monster, MAPA *map, int *num_enemies){
   char casa = ' ';
   int ix,iy;
-  for (int i = 0; i < 15; i++){
+  for (int i = 0; i < (*num_enemies); i++){
    do{
    ix = 1 + (rand() % (map-> x)-2);
    iy = 1 + (rand() % (map-> y) - 2);
@@ -690,8 +691,8 @@ void spawn_monsters(MONSTERS *monster, MAPA *map){
   }
 }
 
-void enemy_attack(MONSTERS *monster, STATE *s){
-  for(int i = 0; i < 15; i++){
+void enemy_attack(MONSTERS *monster, STATE *s, int *num_enemies){
+  for(int i = 0; i < (*num_enemies); i++){
     for (int ix = ((monster[i].x)-1); ix <= (monster[i].x+1); ix ++){
      for(int iy = ((monster[i].y)-1); iy <= ((monster[i].y)+1); iy ++){
        if (ix == s->playerX && iy == s->playerY){
@@ -707,6 +708,8 @@ int main() {
   int in_game = 0;
   int in_submenu = 0;
   int in_game_dynamics = 0;
+  int in_settings = 0;
+  int num_enemies = 15;
   MAPA map;
 
   while (1) {
@@ -732,11 +735,13 @@ int main() {
           while (in_game) {
             int game_menu = 0;
             STATE st = {20, 20, 3, 0, 1, 0};
-            MONSTERS monster[15];
+            MONSTERS *monster;
             WINDOW *wnd = initscr();
             int ncols, nrows;
             int direction = NO_DIRECTION;
             getmaxyx(wnd, nrows, ncols);
+
+            monster = malloc(sizeof(int) * num_enemies);
 
             srand48(time(NULL));
             start_color();
@@ -765,7 +770,7 @@ int main() {
 
             draw_map(&map);
             spawn_player(&st, &map);
-            spawn_monsters(monster,&map);
+            spawn_monsters(monster,&map, &num_enemies);
            
             while (in_game) {
               move(nrows - 1, 0);
@@ -784,6 +789,8 @@ int main() {
               } else {
                 printw(" GUN");
               }
+              clrtoeol();
+              printw("   ENEMIES: %d", num_enemies);
               attroff(COLOR_PAIR(SCORE));
 
               if (st.hp > 1) {
@@ -809,17 +816,17 @@ int main() {
               lights_off(&map);
               draw_light(&st, &map);
               move(st.playerY, st.playerX);
-              update(&st,&map, &game_menu,monster,&direction);
-              move_monsters(&st,&map,monster);
-              enemy_attack(monster,&st);
+              update(&st,&map, &game_menu,monster,&direction,&num_enemies);
+              move_monsters(&st,&map,monster,&num_enemies);
+              enemy_attack(monster,&st,&num_enemies);
 
               if (game_menu) {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
                 
               }
             }
+            free(monster);
           }
-
           break;
         }
         case '2':{
@@ -862,9 +869,11 @@ int main() {
             mvprintw(starty+19,2,"6. Sempre que um jogador cai numa trap, perde 1 de hp");
             mvprintw(starty+20,2,"7. A espada tem um alcance de 1 casa à volta do jogador e a arma dispara a bala na ultima direção que o jogador tomou, até encontrar um inimigo ou uma parede");
             mvprintw(starty+21,2,"8. Sempre que um inimigo morre, este volta a aparecer numa posição aleatória do mapa. Existem um total de 15 inimigos");
-             mvprintw(starty+22,2,"9. Os inimigos têm um alcance de 1 casa a toda a sua volta.");
-
-
+            mvprintw(starty+22,2,"9. Os inimigos têm um alcance de 1 casa a toda a sua volta.");
+ 
+           mvprintw(starty+25,2,"OUTRO");
+           mvprintw(starty+26,2,"O jogo dispões de um sistema de dificuldade que altera o número de inimigos no jogo e que pode ser alterada no menu 'GAME SETTINGS'");
+        
            int key = getch();
            switch(key){
             case 'q': in_game_dynamics = 0;break;
@@ -919,6 +928,47 @@ int main() {
            break;
         }
         case '4': {
+         in_settings = 1;
+         while(in_settings){
+          WINDOW *wnd = initscr();
+          int ncols, nrows;
+          getmaxyx(wnd, nrows, ncols);
+
+            srand48(time(NULL));
+            start_color();
+
+            cbreak();
+            noecho();
+            nonl();
+            intrflush(stdscr, false);
+            keypad(stdscr, true);
+
+            init_pair(LIGHT,COLOR_WHITE,COLOR_BLACK);
+
+            int startx = ncols /20;
+            int starty = nrows/20;
+
+            attron(COLOR_PAIR(LIGHT)); 
+            mvprintw(starty, (ncols - 7) / 2, "CHOSE DIFFICULTY");
+
+            
+            mvprintw(starty + 2, startx, "1.EASY: 5 enemies");
+            mvprintw(starty + 3, startx, "2.MEDIUM: 15 enemies");
+            mvprintw(starty + 4, startx, "3.HARD: 20 enemies");
+            mvprintw(starty + 5, startx, "4.IMPOSSIBLE: 30 enemies");
+
+            int key = getch();
+            switch(key){
+             case 'q': in_settings = 0;break;
+             case '1': num_enemies = 5;in_settings = 0;break;
+             case '2': num_enemies = 15;in_settings = 0;break;
+             case '3': num_enemies = 20;in_settings = 0;break;
+             case '4': num_enemies = 30;in_settings = 0;break;
+            }
+         }
+         break;
+        }
+        case '5': {
           endwin();
           printf("GAME CLOSED\n");
           exit(0);
