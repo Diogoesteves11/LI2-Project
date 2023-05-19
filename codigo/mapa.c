@@ -167,7 +167,7 @@ attroff(COLOR_PAIR(HEAL_OFF));
 
 // Função que desenha as recargas das munições (nº finito)
 attron (COLOR_PAIR(BULLET_OFF));
-for (int i = 0; i < casas_totais * 0.2; i++) {
+for (int i = 0; i < casas_totais * 0.01; i++) {
         int x1 = rand() % (map->x - 2) + 1;
         int y1 = rand() % (map->y - 1);
         if (map->matriz[x1][y1] == ' ') {
