@@ -8,6 +8,7 @@
 
 #include "state.h"
 #include "mapa.h"
+#include "mapa.c"
 
 /*
 Esta opção nao funciona para todos os membros do grupo logo decidimos deixar em comentario, caso o jogo nao abra sem ela é so remover o comentario e deixar o #include "mapa.c"
@@ -858,6 +859,8 @@ int main() {
               }else {
                 printw("   JUMP_STATUS: OFF");
               }
+              clrtoeol();
+              printw("                        PRESS 'q' TO RETURN");
               attroff(COLOR_PAIR(SCORE));
 
               if (st.hp > 1) {
@@ -939,9 +942,12 @@ int main() {
             mvprintw(starty+21,2,"8. Sempre que um inimigo morre, este volta a aparecer numa posição aleatória do mapa. Existem um total de 15 inimigos");
             mvprintw(starty+22,2,"9. Os inimigos têm um alcance de 1 casa a toda a sua volta.");
  
-           mvprintw(starty+25,2,"OUTRO");
-           mvprintw(starty+26,2,"O jogo dispõe de um sistema de dificuldade que altera o número de inimigos no jogo e que pode ser alterada no menu 'GAME SETTINGS'");
-        
+           mvprintw(starty+25,1,"OUTRO:");
+           mvprintw(starty+26,2,"1.O jogo dispõe de um sistema de dificuldade que altera o número de inimigos no jogo e que pode ser alterada no menu 'GAME SETTINGS'");
+           
+           mvprintw(starty+28,1,"PRESS 'q' TO RETURN");
+           attroff(COLOR_PAIR(LIGHT));
+
            int key = getch();
            switch(key){
             case 'q': in_game_dynamics = 0;break;
@@ -986,6 +992,9 @@ int main() {
             mvprintw(starty + 11, startx, "SPACE   -> USE WEAPON");
             mvprintw(starty + 12, startx, "5       -> NO MOVEMENT");
             mvprintw(starty + 13, startx, "SHIFT   -> JUMP");
+
+
+            mvprintw(starty+17,1,"PRESS 'q' TO RETURN");
             attroff(COLOR_PAIR(LIGHT));
 
 
@@ -1019,12 +1028,34 @@ int main() {
 
             attron(COLOR_PAIR(LIGHT)); 
             mvprintw(starty, (ncols - 7) / 2, "CHOOSE DIFFICULTY");
-
-            mvprintw(starty + 2, startx, "1.EASY: 5 enemies");
-            mvprintw(starty + 3, startx, "2.MEDIUM: 15 enemies");
-            mvprintw(starty + 4, startx, "3.HARD: 20 enemies");
-            mvprintw(starty + 5, startx, "4.IMPOSSIBLE: 30 enemies");
-
+            if (num_enemies == 5){
+             mvprintw(starty + 2, startx, "1.[x] EASY: 5 enemies");
+             mvprintw(starty + 3, startx, "2.[ ] MEDIUM: 15 enemies");
+             mvprintw(starty + 4, startx, "3.[ ] HARD: 20 enemies");
+             mvprintw(starty + 5, startx, "4.[ ] IMPOSSIBLE: 30 enemies");
+             clrtoeol();
+            }
+            else if (num_enemies == 15){
+             mvprintw(starty + 2, startx, "1.[ ] EASY: 5 enemies");
+             mvprintw(starty + 3, startx, "2.[x] MEDIUM: 15 enemies");
+             mvprintw(starty + 4, startx, "3.[ ] HARD: 20 enemies");
+             mvprintw(starty + 5, startx, "4.[ ] IMPOSSIBLE: 30 enemies");
+             clrtoeol();
+            }
+            else if (num_enemies == 20){
+             mvprintw(starty + 2, startx, "1.[ ] EASY: 5 enemies");
+             mvprintw(starty + 3, startx, "2.[ ] MEDIUM: 15 enemies");
+             mvprintw(starty + 4, startx, "3.[x] HARD: 20 enemies");
+             mvprintw(starty + 5, startx, "4.[ ] IMPOSSIBLE: 30 enemies");
+             clrtoeol();
+            }
+            else if (num_enemies == 30){
+             mvprintw(starty + 2, startx, "1.[ ] EASY: 5 enemies");
+             mvprintw(starty + 3, startx, "2.[ ] MEDIUM: 15 enemies");
+             mvprintw(starty + 4, startx, "3.[ ] HARD: 20 enemies");
+             mvprintw(starty + 5, startx, "4.[x] IMPOSSIBLE: 30 enemies");
+             clrtoeol();
+            }
             if(jump_on){
              mvprintw(starty + 7, startx, "5.Activate Jump: ON");
              clrtoeol();
@@ -1032,15 +1063,16 @@ int main() {
               mvprintw(starty + 7, startx, "5.Activate Jump: OFF");
               clrtoeol();
             }
-             
+            mvprintw(starty+10,1,"PRESS 'q' TO RETURN");
+            attroff(COLOR_PAIR(LIGHT));
 
             int key = getch();
             switch(key){
              case 'q': in_settings = 0;break;
-             case '1': num_enemies = 5;in_settings = 0;break;
-             case '2': num_enemies = 15;in_settings = 0;break;
-             case '3': num_enemies = 20;in_settings = 0;break;
-             case '4': num_enemies = 30;in_settings = 0;break;
+             case '1': num_enemies = 5;refresh();break;
+             case '2': num_enemies = 15;refresh();break;
+             case '3': num_enemies = 20;refresh();break;
+             case '4': num_enemies = 30;refresh();break;
              case '5': {
               if(jump_on){
                 jump_on = 0;refresh();break;
