@@ -767,7 +767,7 @@ int main() {
   int in_settings = 0;
   int num_enemies = 15;
   int jump_on = 0;
-  int explorer_mode = 1;
+  int developer_mode = 1;
   MAPA map;
 
   while (1) {
@@ -832,7 +832,7 @@ int main() {
             map.y = nrows;
             map.x = ncols;
 
-            draw_map(&map,&explorer_mode);
+            draw_map(&map,&developer_mode);
             spawn_player(&st, &map);
             spawn_monsters(monster,&map, &num_enemies);
            
@@ -861,10 +861,10 @@ int main() {
               }else {
                 printw("   JUMP_STATUS: OFF");
               }
-              if(explorer_mode){
-                printw("   EXPLORER MODE: ON");
+              if(developer_mode){
+                printw("   DEVELOPER MODE: OFF");
               }else {
-                printw("   EXPLORER MODE: OFF");
+                printw("   DEVELOPER MODE: ON");
               }
               clrtoeol();
               printw("    JOGADAS: %d", jogadas);
@@ -1073,11 +1073,11 @@ int main() {
               mvprintw(starty + 7, startx, "5.Activate Jump: OFF");
               clrtoeol();
             }
-            if(explorer_mode){
-             mvprintw(starty + 8, startx, "6.EXPLORER MODE: ON");
+            if(developer_mode){
+             mvprintw(starty + 8, startx, "6.DEVELOPER MODE: OFF");
              clrtoeol();
             }else {
-              mvprintw(starty + 8, startx, "6.EXPLORER MODE: OFF");
+              mvprintw(starty + 8, startx, "6.DEVELOPER MODE: ON");
               clrtoeol();
             }
             mvprintw(nrows-2,1,"PRESS 'q' TO RETURN");
@@ -1098,10 +1098,10 @@ int main() {
               }
              }
              case '6': {
-              if(explorer_mode){
-                explorer_mode = 0;refresh();break;
+              if(developer_mode){
+                developer_mode = 0;refresh();break;
               }else {
-                explorer_mode = 1;refresh();break;
+                developer_mode = 1;refresh();break;
               }
              }
             }
