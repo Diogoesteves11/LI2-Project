@@ -12,20 +12,25 @@
 #define WALL_COLOR 7
 #define HEAL_OFF 12
 #define BULLET_OFF 16
+#define WALL_COLOR2 30
 
 // Função que desenha o mapa
-void draw_map(MAPA* map) {
+void draw_map(MAPA* map, int *explorer_mode) {
     srand(time(NULL)); // Mapas aleatorios a cada jogo
     start_color();
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
     init_pair(WALL_COLOR, COLOR_BLACK, COLOR_BLACK);
     init_pair(HEAL_OFF,COLOR_BLACK,COLOR_BLACK);
     init_pair (BULLET_OFF, COLOR_BLACK,COLOR_BLACK);
+    init_pair(WALL_COLOR2,COLOR_CYAN,COLOR_BLUE);
 
    // Adiciona paredes nas bordas do mapa
     int count1 = 0;
+    
 
-    attron(COLOR_PAIR(WALL_COLOR));
+    if(*explorer_mode) attron(COLOR_PAIR(WALL_COLOR));
+    else attron(COLOR_PAIR(WALL_COLOR2));
+    
     for (int i = 0; i < map->x; i++) {
         map->matriz[i][0] = '#'; // Parede superior
         map->matriz[i][map->y - 2] = '#'; // Parede inferior (uma linha acima da última)
@@ -40,14 +45,24 @@ void draw_map(MAPA* map) {
         mvaddch(i, map->x - 1, map->matriz[map->x - 1][i]);
         count1++;
     }
-  
+    if (!(*explorer_mode)) {
+      attron(COLOR_PAIR(WALL_COLOR2));
+      attroff(COLOR_PAIR(WALL_COLOR));
+     }
 
     // Limpa a última linha (linha inferior)
+     if (!(*explorer_mode)) {
+      attroff(COLOR_PAIR(WALL_COLOR2));
+      attron(COLOR_PAIR(WALL_COLOR));
+     }
     for (int i = 1; i < map->x - 1; i++) {
         map->matriz[i][map->y - 1] = ' '; // Deixa a célula do canto inferior direito vazia
         mvaddch(map->y - 1, i, map->matriz[i][map->y - 1]);
     }
-
+    if (!(*explorer_mode)) {
+      attron(COLOR_PAIR(WALL_COLOR2));
+      attroff(COLOR_PAIR(WALL_COLOR));
+     }
     int casas_totais = ((map->x) * (map->y)) - count1; // Calcula-se o numero de paredes sem contar as bordas.
     int heal_percentage = casas_totais * 0.01;
     int heal_count = 0;
@@ -79,8 +94,16 @@ void draw_map(MAPA* map) {
                 }
                 if (map->matriz[x][y] == '#') {
                     if (count < 3) {
+                        if (!(*explorer_mode)) {
+                         attroff(COLOR_PAIR(WALL_COLOR2));
+                         attron(COLOR_PAIR(WALL_COLOR));
+                         } 
                         map->matriz[x][y] = ' ';
                         mvaddch(y,x,map->matriz[x][y]);
+                        if (!(*explorer_mode)) {
+                        attron(COLOR_PAIR(WALL_COLOR2));
+                        attroff(COLOR_PAIR(WALL_COLOR));
+                        }
                     }
                 } else {
                     if (count > 4) {
@@ -106,8 +129,16 @@ void draw_map(MAPA* map) {
                 }
                 if (map->matriz[x][y] == '#') {
                     if (count < 3) {
+                        if (!(*explorer_mode)) {
+                        attroff(COLOR_PAIR(WALL_COLOR2));
+                        attron(COLOR_PAIR(WALL_COLOR));
+                        }
                         map->matriz[x][y] = ' ';
                         mvaddch(y,x,map->matriz[x][y]);
+                       if (!(*explorer_mode)) {
+                       attron(COLOR_PAIR(WALL_COLOR2));
+                       attroff(COLOR_PAIR(WALL_COLOR));
+                        }
                     }
                 }
                 if (map->matriz[x][y]== ' ') {
@@ -131,13 +162,18 @@ void draw_map(MAPA* map) {
             if (map->matriz[i][j + 1] == '#') count2++; // Verifica parede abaixo
 
             if (count2 == 0) {
+                if (*explorer_mode) attroff(COLOR_PAIR(WALL_COLOR2));
+                attron(COLOR_PAIR(WALL_COLOR));
                 map->matriz[i][j] = ' '; // Remove a parede solta
                 mvaddch(j, i, map->matriz[i][j]);
+                attroff(COLOR_PAIR(WALL_COLOR));
+                if (*explorer_mode) attron(COLOR_PAIR(WALL_COLOR2));
             }
         }
     }
 }
-attroff(COLOR_PAIR(WALL_COLOR));
+if(*explorer_mode) attroff(COLOR_PAIR(WALL_COLOR));
+else attroff(COLOR_PAIR(WALL_COLOR2));
 
 
 // Função que desenha as traps do mapa logo no inicio (número de traps finito)

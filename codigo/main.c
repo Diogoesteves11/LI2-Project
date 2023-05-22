@@ -767,6 +767,7 @@ int main() {
   int in_settings = 0;
   int num_enemies = 15;
   int jump_on = 0;
+  int explorer_mode = 1;
   MAPA map;
 
   while (1) {
@@ -791,6 +792,7 @@ int main() {
           refresh_GAME_STATUS(&map);
           while (in_game) {
             int game_menu = 0;
+            int jogadas = 0;
             STATE st = {20, 20, 3, 0, 1, 0};
             MONSTERS *monster;
             WINDOW *wnd = initscr();
@@ -830,7 +832,7 @@ int main() {
             map.y = nrows;
             map.x = ncols;
 
-            draw_map(&map);
+            draw_map(&map,&explorer_mode);
             spawn_player(&st, &map);
             spawn_monsters(monster,&map, &num_enemies);
            
@@ -859,8 +861,15 @@ int main() {
               }else {
                 printw("   JUMP_STATUS: OFF");
               }
+              if(explorer_mode){
+                printw("   EXPLORER MODE: ON");
+              }else {
+                printw("   EXPLORER MODE: OFF");
+              }
               clrtoeol();
-              printw("                        PRESS 'q' TO RETURN");
+              printw("    JOGADAS: %d", jogadas);
+              clrtoeol();
+              mvprintw(nrows-1,ncols-19,"PRESS 'q' TO RETURN");
               attroff(COLOR_PAIR(SCORE));
 
               if (st.hp > 1) {
@@ -889,6 +898,7 @@ int main() {
               update(&st,&map, &game_menu,monster,&direction,&num_enemies,&jump_on);
               move_monsters(&st,&map,monster,&num_enemies);
               enemy_attack(monster,&st,&num_enemies);
+              jogadas++;
 
               if (game_menu) {
                 in_game = 0; // Sair do jogo atual e voltar ao menu principal
@@ -945,7 +955,7 @@ int main() {
            mvprintw(starty+25,1,"OUTRO:");
            mvprintw(starty+26,2,"1.O jogo dispõe de um sistema de dificuldade que altera o número de inimigos no jogo e que pode ser alterada no menu 'GAME SETTINGS'");
            
-           mvprintw(starty+28,1,"PRESS 'q' TO RETURN");
+           mvprintw(nrows-2,1,"PRESS 'q' TO RETURN");
            attroff(COLOR_PAIR(LIGHT));
 
            int key = getch();
@@ -994,7 +1004,7 @@ int main() {
             mvprintw(starty + 13, startx, "SHIFT   -> JUMP");
 
 
-            mvprintw(starty+17,1,"PRESS 'q' TO RETURN");
+            mvprintw(nrows-2,1,"PRESS 'q' TO RETURN");
             attroff(COLOR_PAIR(LIGHT));
 
 
@@ -1063,7 +1073,14 @@ int main() {
               mvprintw(starty + 7, startx, "5.Activate Jump: OFF");
               clrtoeol();
             }
-            mvprintw(starty+10,1,"PRESS 'q' TO RETURN");
+            if(explorer_mode){
+             mvprintw(starty + 8, startx, "6.EXPLORER MODE: ON");
+             clrtoeol();
+            }else {
+              mvprintw(starty + 8, startx, "6.EXPLORER MODE: OFF");
+              clrtoeol();
+            }
+            mvprintw(nrows-2,1,"PRESS 'q' TO RETURN");
             attroff(COLOR_PAIR(LIGHT));
 
             int key = getch();
@@ -1078,6 +1095,13 @@ int main() {
                 jump_on = 0;refresh();break;
               }else {
                 jump_on = 1;refresh();break;
+              }
+             }
+             case '6': {
+              if(explorer_mode){
+                explorer_mode = 0;refresh();break;
+              }else {
+                explorer_mode = 1;refresh();break;
               }
              }
             }
