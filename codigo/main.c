@@ -859,9 +859,9 @@ int main() {
               printw("    JOGADAS: %d", jogadas);
               clrtoeol();
               if(jump_on){
-                printw("   JUMP_STATUS: ON");
+                printw("   JUMP: ON");
               }else {
-                printw("   JUMP_STATUS: OFF");
+                printw("   JUMP: OFF");
               }
               if(map_visibility){
                 printw("   MAP VISIBILITY: ON");
