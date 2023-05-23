@@ -767,7 +767,7 @@ int main() {
   int in_settings = 0;
   int num_enemies = 15;
   int jump_on = 0;
-  int developer_mode = 1;
+  int map_visibility = 0;
   MAPA map;
 
   while (1) {
@@ -832,7 +832,7 @@ int main() {
             map.y = nrows;
             map.x = ncols;
 
-            draw_map(&map,&developer_mode);
+            draw_map(&map,&map_visibility);
             spawn_player(&st, &map);
             spawn_monsters(monster,&map, &num_enemies);
            
@@ -856,18 +856,18 @@ int main() {
               clrtoeol();
               printw("   ENEMIES: %d", num_enemies);
               clrtoeol();
+              printw("    JOGADAS: %d", jogadas);
+              clrtoeol();
               if(jump_on){
                 printw("   JUMP_STATUS: ON");
               }else {
                 printw("   JUMP_STATUS: OFF");
               }
-              if(developer_mode){
-                printw("   DEVELOPER MODE: OFF");
+              if(map_visibility){
+                printw("   MAP VISIBILITY: ON");
               }else {
-                printw("   DEVELOPER MODE: ON");
+                printw("   MAP VISIBILITY: OFF");
               }
-              clrtoeol();
-              printw("    JOGADAS: %d", jogadas);
               clrtoeol();
               mvprintw(nrows-1,ncols-19,"PRESS 'q' TO RETURN");
               attroff(COLOR_PAIR(SCORE));
@@ -936,7 +936,7 @@ int main() {
             mvprintw(starty+4,2,"2. O jogador tem a opção de não se mover numa jogada, se pressionar a tecla 5");
             mvprintw(starty+5,2,"3. O jogador não se move contra obstáculos, como paredes ou inimigos");
             mvprintw(starty+6,2,"4. Os inimigos movem-se de forma aleatória até entrarem em um determinado raio com centro no jogador. Nesse caso começam a mover-se em direção ao mesmo");
-            mvprintw(starty+7,2,"5. O jogador dispõe de uma opção de JUMP nas settings que o permite avançar duas casas,ou até mesmo uma parede se esta nao tiver outra na casa seguinte");
+            mvprintw(starty+7,2,"5. O jogador dispõe de uma opção de JUMP que permite avançar duas casas,ou até mesmo uma parede se esta nao tiver outra na casa seguinte");
 
             mvprintw(starty+9,1,"ILUMINACAO: ");
             mvprintw(starty+10,2,"1.Com centro no jogador, são iluminadas dinamicamente todas as casas à sua volta, bem como as paredes. Permanecem iluminadas as paredes e o loot, representando assim a área explorada.");
@@ -954,7 +954,7 @@ int main() {
  
            mvprintw(starty+25,1,"OUTRO:");
            mvprintw(starty+26,2,"1.O jogo dispõe de um sistema de dificuldade que altera o número de inimigos no jogo e que pode ser alterada no menu 'GAME SETTINGS'");
-           
+           mvprintw(starty+27,2,"2.Ainda dentro do menu 'GAME SETTINGS' é possivel alterar definições como o 'jump' e o modo de visibilidade do mapa");
            mvprintw(nrows-2,1,"PRESS 'q' TO RETURN");
            attroff(COLOR_PAIR(LIGHT));
 
@@ -1073,11 +1073,11 @@ int main() {
               mvprintw(starty + 7, startx, "5.Activate Jump: OFF");
               clrtoeol();
             }
-            if(developer_mode){
-             mvprintw(starty + 8, startx, "6.DEVELOPER MODE: OFF");
+            if(map_visibility){
+             mvprintw(starty + 8, startx, "6.Map visibility: ON");
              clrtoeol();
             }else {
-              mvprintw(starty + 8, startx, "6.DEVELOPER MODE: ON");
+              mvprintw(starty + 8, startx, "6.Map visibility: OFF");
               clrtoeol();
             }
             mvprintw(nrows-2,1,"PRESS 'q' TO RETURN");
@@ -1098,10 +1098,10 @@ int main() {
               }
              }
              case '6': {
-              if(developer_mode){
-                developer_mode = 0;refresh();break;
+              if(map_visibility){
+                map_visibility = 0;refresh();break;
               }else {
-                developer_mode = 1;refresh();break;
+                map_visibility = 1;refresh();break;
               }
              }
             }
