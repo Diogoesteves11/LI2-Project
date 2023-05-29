@@ -580,11 +580,11 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction,
 	{
      case 't':
         // se o jogador não tiver a espada equipada, equipa a espada
-        if (!st->sword) {
+        if (st->sword == 0) {
             st->sword = 1;
         } 
         // caso contrário, desequipa a espada e equipa a arma
-        else {
+        else if(st->sword == 1){
             st->sword = 0;
         }
         break;
@@ -666,7 +666,6 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction,
     do_movement_action(st, +0, +1,map);*direction = S;
 		break;
   }
-
 	case 'D': 
   if(*jump_on){
     do_movement_action(st, +2, +0,map);*direction = E;
@@ -678,7 +677,6 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction,
   break;
 	}
 }
-
 // Menu do jogo
 void show_menu() {
 	start_color();
