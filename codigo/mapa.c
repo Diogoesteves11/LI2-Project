@@ -14,6 +14,12 @@
 #define BULLET_OFF 16
 #define HOUSE_COLOR 30
 
+/*
+a104004- Diogo Esteves
+a104099- Bruno Rafael Gonçalves
+a104083- Ana Filipa Costa
+a104175- Rodrigo Fernandes
+*/
 // Função que desenha o mapa
 void draw_map(MAPA* map, int *map_visibility) {
     srand(time(NULL)); // Mapas aleatorios a cada jogo

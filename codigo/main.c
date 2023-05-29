@@ -8,7 +8,6 @@
 
 #include "state.h"
 #include "mapa.h"
-#include "mapa.c"
 
 /*
 Esta opção nao funciona para todos os membros do grupo logo decidimos deixar em comentario, caso o jogo nao abra sem ela é so remover o comentario e deixar o #include "mapa.c"
@@ -43,7 +42,13 @@ Esta opção nao funciona para todos os membros do grupo logo decidimos deixar e
 #define SE 26
 #define NO_DIRECTION 27
 
-// Função responsavel pela movimentação aleatoria dos monstros pelo mapa
+
+
+/*
+Função responsavel pela movimentação aleatoria dos monstros pelo mapa
+ a104083- Ana Filipa Costa
+ a104099- Bruno Rafael Gonçalves
+*/ 
 void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
     int playerX = st->playerX;
     int playerY = st->playerY;
@@ -119,6 +124,9 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
     }
 }
 
+/*
+a104099- Bruno Rafael Gonçalves
+*/
 void spawn_player(STATE *st, MAPA *map) { // função que escolhe ateatóriamente um local do mapa para o jogador aparecer, sem paredes imediatamente à sua volta
     int x, y;
     // Escolhe uma posição aleatória dentro do mapa sem paredes à volta
@@ -135,7 +143,9 @@ void spawn_player(STATE *st, MAPA *map) { // função que escolhe ateatóriament
     st->playerY = x;
 
 }
-
+/*
+a104004- Diogo Esteves
+*/
 void draw_light(STATE *s,MAPA *map){ // Função que desenhará a luz
 
 int centerX = s->playerX;
@@ -217,6 +227,9 @@ double delta = 0.05; // Incremento do angulo
     }
 }
 
+/*
+a104004- Diogo Esteves
+*/
 void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     char casa_iluminada = '.';
     char trap = 'x';
@@ -262,6 +275,10 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     
 }
 
+/*
+a104175- Rodrigo Fernandes
+a104004- Diogo Esteves
+*/
 void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
 	int nextX = st->playerX + dx;
 	int nextY = st->playerY + dy;
@@ -284,7 +301,10 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que d
 	st->playerY = nextY;
 }
 
-// Função que faz com que o monstro ao morrer spawne noutra posição aleatoria do mapa
+/*
+a104004- Diogo Esteves
+Função que faz com que o monstro ao morrer apareça noutra posição aleatoria do mapa
+*/
 void kill_monster(MONSTERS *monster, int index, MAPA *map){
   char casa = ' ',monsterch = '&';
   int newX = 0,newY = 0;
@@ -298,7 +318,11 @@ void kill_monster(MONSTERS *monster, int index, MAPA *map){
   map->matriz[newX][newY] = monsterch; 
 }
 
-// Função que faz com que o jogador possa atacar os monstros
+/*
+a104004- Diogo Esteves (Gun/sword)
+a104099- Bruno Rafael Gonçalves(Sword)
+Função que faz com que o jogador possa atacar os monstros
+*/
 void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_enemies){
   int x = s->playerX;
   int y = s->playerY;
@@ -573,7 +597,14 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
 }
 }
 
-void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction, int *num_enemies, int *jump_on){ // função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
+/*
+a104004- Diogo Esteves
+a104099- Bruno Rafael Gonçalves
+a104083- Ana Filipa Costa
+a104175- Rodrigo Fernandes
+função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
+*/
+void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction, int *num_enemies, int *jump_on){
 	int key = getch();
 
 	switch (key)
@@ -677,7 +708,13 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction,
   break;
 	}
 }
-// Menu do jogo
+
+/*
+a104004- Diogo Esteves
+a104083- Ana Filipa Costa
+a104175- Rodrigo Fernandes
+Menu do jogo
+*/
 void show_menu() {
 	start_color();
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);
@@ -720,7 +757,11 @@ void show_menu() {
     refresh();
 }
 
-void refresh_GAME_STATUS(MAPA *map){ // refresh ao mapa
+/*
+a104004- Diogo Esteves
+refresh ao mapa
+*/
+void refresh_GAME_STATUS(MAPA *map){
     for (int ix = 0; ix <= map->x; ix++){
         for (int iy = 0; iy <= map->y; iy++){
          map->matriz[ix][iy] = '\0';
@@ -728,7 +769,10 @@ void refresh_GAME_STATUS(MAPA *map){ // refresh ao mapa
     }
 }
 
-// Função responsavel pelo spawn dos monstros aleatoriamente.
+/*
+a104099- Bruno Rafael Gonçalves
+Função responsavel pelo spawn dos monstros aleatoriamente.
+*/
 void spawn_monsters(MONSTERS *monster, MAPA *map, int *num_enemies){
   char casa = ' ';
   int ix,iy;
@@ -744,7 +788,10 @@ void spawn_monsters(MONSTERS *monster, MAPA *map, int *num_enemies){
   }
 }
 
-// Função responsavel por fazer os monstros atacar o jogador
+/*
+a104004- Diogo Esteves
+Função responsavel por fazer os monstros atacar o jogador
+*/
 void enemy_attack(MONSTERS *monster, STATE *s, int *num_enemies){
   for(int i = 0; i < (*num_enemies); i++){
     for (int ix = ((monster[i].x)-1); ix <= (monster[i].x+1); ix ++){
@@ -758,6 +805,13 @@ void enemy_attack(MONSTERS *monster, STATE *s, int *num_enemies){
   }
 }
 
+
+/*
+a104004- Diogo Esteves
+a104099- Bruno Rafael Gonçalves
+a104083- Ana Filipa Costa
+a104175- Rodrigo Fernandes
+*/
 int main() {
   int in_game = 0;
   int in_submenu = 0;
