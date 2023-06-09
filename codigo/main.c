@@ -8,14 +8,7 @@
 
 #include "state.h"
 #include "mapa.h"
-
-/*
-Esta opção nao funciona para todos os membros do grupo logo decidimos deixar em comentario, caso o jogo nao abra sem ela é so remover o comentario e deixar o #include "mapa.c"
-
 #include "mapa.c"
-
-*/
-
 
 #define BACKGROUND 0
 #define WALL_ILUMINATED 1
@@ -27,12 +20,12 @@ Esta opção nao funciona para todos os membros do grupo logo decidimos deixar e
 #define MEDIUM_HP 11
 #define HEAL_ON 13
 #define BULLET_ON 17
-#define CASE_COLOR 18 // definições das "referências" das cores
+#define CASE_COLOR 18 
 #define ENEMIE_COLOR 19
 #define FLASHLIGHT 28
 #define LOW_HP 29
 
-#define N 19 // definição das "referências" das direções
+#define N 19 
 #define S 20
 #define E 21
 #define W 22
@@ -42,20 +35,12 @@ Esta opção nao funciona para todos os membros do grupo logo decidimos deixar e
 #define SE 26
 #define NO_DIRECTION 27
 
-
-
-/*
-Função responsavel pela movimentação aleatoria dos monstros pelo mapa
- a104083- Ana Filipa Costa
- a104099- Bruno Rafael Gonçalves
-*/ 
 void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
     int playerX = st->playerX;
     int playerY = st->playerY;
     char monster = '&';
-    int raio = 10; // Num raio de 10 casas o monstro move-se em direção ao jogador.
+    int raio = 10; 
     
-
     for (int i = 0; i < (*num_enemies); i++) {
         int distacia_raio = abs (monsters[i].x-st->playerX) + abs(monsters[i].y - st->playerY);
         
@@ -63,11 +48,9 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
         int monsterX = monsters[i].x;
         int monsterY = monsters[i].y;
         
-        // Calcula a distancia entre o monstro e o jogador
         int distanceX = abs(playerX - monsterX);
         int distanceY = abs(playerY - monsterY);
 
-        // Move o monstro em direção ao jogador pelo caminho mais curto possivel.
         if (distanceX > distanceY) {
             if (playerX < monsterX) {
                 monsterX--;
@@ -82,14 +65,10 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
             }
         }
 
-        // Verifica se a nova posição é valida
         if ((map->matriz[monsterX][monsterY] == '.' || map->matriz[monsterX][monsterY] == ' ') && (map->matriz[monsterX][monsterY] != '@' && (monsterX != playerX || monsterY != playerY) && map->matriz[monsterX][monsterY] != '&')) {
-            // Limpa a posição anterior do monstro para uma celula vazia
             map->matriz[monsters[i].x][monsters[i].y] = '.';
-            // Update ao monstro no state
             monsters[i].x = monsterX;
             monsters[i].y = monsterY;
-            // Update da posição do monstro no mapa
             map->matriz[monsterX][monsterY] = monster;
         }
 
@@ -97,56 +76,46 @@ void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
          int monsterX = monsters[i].x;
          int monsterY = monsters[i].y;
 
-         int rand_direction = rand() % 8; // direções aleatorias de movimentação do monstro
+         int rand_direction = rand() % 8; 
 
          switch (rand_direction){
-          case 0: monsterY--;break; // segue para norte(cima)
-          case 1: monsterY++; break; // segue para sul(baixo)
-          case 2: monsterX++; break; //segue para este(direita)
-          case 3: monsterX--; break; // segue para oeste (esquerda)
-          case 4: monsterX--; monsterY--; break; // segue Nordoeste (diganonal para cima e para a esquerda)
-          case 5: monsterX--; monsterY++;break; // segue para Sudoeste(diagonal para baixo e para a esquerda)
-          case 6: monsterX++; monsterY--;break;  //segue para Nordoeste (diagonal para cima e para a direita)
-          case 7: monsterX++; monsterY++;break; // segue para Sudoeste (diagonal para baixo e para a direita)
+          case 0: monsterY--;break; 
+          case 1: monsterY++; break; 
+          case 2: monsterX++; break; 
+          case 3: monsterX--; break;
+          case 4: monsterX--; monsterY--; break; 
+          case 5: monsterX--; monsterY++;break; 
+          case 6: monsterX++; monsterY--;break; 
+          case 7: monsterX++; monsterY++;break;
          }
 
-         // Verifica se a nova posição é valida
         if ((map->matriz[monsterX][monsterY] == '.' || map->matriz[monsterX][monsterY] == ' ') && (map->matriz[monsterX][monsterY] != '@' && (monsterX != playerX || monsterY != playerY) && map->matriz[monsterX][monsterY] != '&')) {
-            // Limpa a posição anterior do monstro para uma celula vazia
             map->matriz[monsters[i].x][monsters[i].y] = '.';
-            // Update à posição do monstro no state
             monsters[i].x = monsterX;
             monsters[i].y = monsterY;
-            // Update à posição do monstro no mapa
             map->matriz[monsterX][monsterY] = monster;
         }
         }
     }
 }
 
-/*
-a104099- Bruno Rafael Gonçalves
-*/
-void spawn_player(STATE *st, MAPA *map) { // função que escolhe ateatóriamente um local do mapa para o jogador aparecer, sem paredes imediatamente à sua volta
+void spawn_player(STATE *st, MAPA *map) {
     int x, y;
-    // Escolhe uma posição aleatória dentro do mapa sem paredes à volta
     do {
         x = (rand() % (map->x - 2)) + 1;
         y = (rand() % (map->y - 3)) + 2;
-    } while (map->matriz[y][x] !=' '|| // posição já ocupada
-             map->matriz[y-1][x] == '#' || // parede acima
-             map->matriz[y+1][x] == '#' || // parede abaixo
-             map->matriz[y][x-1] == '#' || // parede à esquerda
-             map->matriz[y][x+1] == '#'); // parede à direita
+    } while (map->matriz[y][x] !=' '||
+             map->matriz[y-1][x] == '#' || 
+             map->matriz[y+1][x] == '#' || 
+             map->matriz[y][x-1] == '#' || 
+             map->matriz[y][x+1] == '#'); 
 
     st->playerX = y;
     st->playerY = x;
 
 }
-/*
-a104004- Diogo Esteves
-*/
-void draw_light(STATE *s,MAPA *map){ // Função que desenhará a luz
+
+void draw_light(STATE *s,MAPA *map){ 
 
 int centerX = s->playerX;
 int centerY = s->playerY;
@@ -159,18 +128,16 @@ char casa = ' ';
 char enemy = '&';
 char damage = '*';
 
-double delta = 0.05; // Incremento do angulo
+double delta = 0.05; 
 
     for (double angle = 0; angle < 2 * M_PI; angle += delta) {
 
-         double dx = cos(angle);
-         double dy = sin(angle);
+        double dx = cos(angle);
+        double dy = sin(angle);
 
-        // posição inicial
-        double x = centerX + 0.5; // incrementa-se 0.5 para se arredondar o valor para cima
+        double x = centerX + 0.5; 
         double y = centerY + 0.5;
 
-        // percorre a direção dada pelo raio até à borda do mapa ou até encontrar um obstáculo (parede)
         while (x >= 0 && x < map->x && y >= 0 && y < map->y) {
             char testch = mvinch((int)y, (int)x) & A_CHARTEXT;
             if (testch == test) {
@@ -227,20 +194,17 @@ double delta = 0.05; // Incremento do angulo
     }
 }
 
-/*
-a104004- Diogo Esteves
-*/
-void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
+void lights_off(MAPA *map) { 
     char casa_iluminada = '.';
     char trap = 'x';
 	  char enemy = '&';
     char damage = '*';
 
     
-    for (int x = 1; x < map->x - 1; x++) { // ciclos for para percorrer todas as casas do mapa
+    for (int x = 1; x < map->x - 1; x++) {
         for (int y = 1; y < map->y - 1; y++) {
             char testch = map->matriz[x][y];
-            if (testch == casa_iluminada) {  //  se a casa estiver iluminada, é apagada para a mesma cor do background, bem como as traps (cor preta)
+            if (testch == casa_iluminada) {
                 map->matriz[x][y] = ' ';   
 				        attron(COLOR_PAIR(BACKGROUND));         
 				        mvaddch(y, x,map->matriz[x][y]);
@@ -249,7 +213,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
             else if (testch == trap) {
                 map->matriz[x][y] = 'x';
                 attron(COLOR_PAIR(BACKGROUND));
-                attron(A_BOLD);  // chama-se esta função para garantir que as traps sejam pintadas de preto
+                attron(A_BOLD);
                 mvaddch(y, x, 'x' | A_COLOR);
                 attroff(COLOR_PAIR(BACKGROUND));
                 attroff(A_BOLD);
@@ -257,7 +221,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
 			      else if (testch == enemy) {
                 map->matriz[x][y] = '&';
                 attron(COLOR_PAIR(BACKGROUND));
-                attron(A_BOLD);  // chama-se esta função para garantir que os inimigos sejam pintadas de preto
+                attron(A_BOLD);
                 mvaddch(y, x, enemy|A_COLOR);
                 attroff(COLOR_PAIR(BACKGROUND));
                 attroff(A_BOLD);
@@ -265,7 +229,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
             else if (testch == damage){
                 map->matriz[x][y] = '*';
                 attron(COLOR_PAIR(BACKGROUND));
-                attron(A_BOLD);  // chama-se esta função para garantir que os ataques sejam pintadas de preto
+                attron(A_BOLD);
                 mvaddch(y, x, map->matriz[x][y]|A_COLOR);
                 attroff(COLOR_PAIR(BACKGROUND));
                 attroff(A_BOLD);
@@ -275,11 +239,7 @@ void lights_off(MAPA *map) { // função que apaga a luz da jogada anterior
     
 }
 
-/*
-a104175- Rodrigo Fernandes
-a104004- Diogo Esteves
-*/
-void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que dará "fisica" ao jogador, fazendo com que ele interaja com os obstáculos que intersetar
+void do_movement_action(STATE *st, int dx, int dy,MAPA *map){
 	int nextX = st->playerX + dx;
 	int nextY = st->playerY + dy;
 	char testTrap = 'x';
@@ -288,23 +248,19 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){  // função que d
 	char bullet = '-';
 	char enemich = '&';
 	char testch = map->matriz[nextX][nextY];
-	if (testch == test) return; // se a próxima posição for uma parede, o jogador não se mexe e a função retorna 
-	else if (testch == testTrap) // se a próxima posição for uma trap, verificamos o hp do jogador e, se esta for maior do que zero, retiramos 1 de hp, caso contrário o jogador morre
+	if (testch == test) return; 
+	else if (testch == testTrap) 
 	{
 			st->hp/=2;
 	}
-	else if (testch == bullet) st->bullets ++; // cada recarga aumenta 5 balas, caso o jogador intersete a munição
-	else if (testch == heal) st->hp += 2; // cada cura aumenta 2 de hp, caso o jogador a intersete
+	else if (testch == bullet) st->bullets ++;
+	else if (testch == heal) st->hp += 2;
 	else if (testch == enemich) return;
 	mvaddch(st->playerY, st->playerX, ' ');
-	st->playerX = nextX; // atualizamos as novas coordenadas do jogador no state do mesmo
+	st->playerX = nextX;
 	st->playerY = nextY;
 }
 
-/*
-a104004- Diogo Esteves
-Função que faz com que o monstro ao morrer apareça noutra posição aleatoria do mapa
-*/
 void kill_monster(MONSTERS *monster, int index, MAPA *map){
   char casa = ' ',monsterch = '&';
   int newX = 0,newY = 0;
@@ -318,18 +274,12 @@ void kill_monster(MONSTERS *monster, int index, MAPA *map){
   map->matriz[newX][newY] = monsterch; 
 }
 
-/*
-a104004- Diogo Esteves (Gun/sword)
-a104099- Bruno Rafael Gonçalves(Sword)
-Função que faz com que o jogador possa atacar os monstros
-*/
 void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_enemies){
   int x = s->playerX;
   int y = s->playerY;
   int dx = 0,dy = 0;
   
   char casa = ' ', casa_iluminada = '.', attack = '*', monsterch = '&';
-  // Ataque com a espada
   if(s->sword){
     for (int ix = x-1; ix <= x+1; ix++){
      for (int iy = y-1; iy <= y+1; iy++){
@@ -342,7 +292,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
               monster[i].hp--;
               if(monster[i].hp <= 0){
                s->kills++;
-               s-> bullets++; // cada inimigo morto dá-nos 1 bala
+               s-> bullets++;
                kill_monster(monster,i,map);
                map->matriz[ix][iy] = attack;
               }
@@ -354,7 +304,6 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
     }
   }
  }
- // Ataque com a pistola nas diversas direções
  else if (s->sword == 0){
   if(s->bullets > 0){
     switch (*direction){
@@ -373,7 +322,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
               monster[i].hp-=2;
               if(monster[i].hp <= 0){
                s->kills++;
-               s-> bullets++; // cada inimigo morto dá-nos 1 bala
+               s-> bullets++;
                kill_monster(monster,i,map);
                map->matriz[x][y] = attack;
               }
@@ -402,7 +351,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
               monster[i].hp-=2;
               if(monster[i].hp <= 0){
                s->kills++;
-               s-> bullets++; // cada inimigo morto dá-nos 1 bala
+               s-> bullets++; 
                kill_monster(monster,i,map);
                map->matriz[x][y] = attack;
               }
@@ -431,7 +380,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
               monster[i].hp-=2;
               if(monster[i].hp <= 0){
                s->kills++;
-               s-> bullets++; // cada inimigo morto dá-nos 1 bala
+               s-> bullets++; 
                kill_monster(monster,i,map);
                map->matriz[x][y] = attack;
               }
@@ -460,7 +409,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
               monster[i].hp-=2;
               if(monster[i].hp <= 0){
                s->kills++;
-               s-> bullets++; // cada inimigo morto dá-nos 1 bala
+               s-> bullets++;
                kill_monster(monster,i,map);
                map->matriz[x][y] = attack;
               }
@@ -489,7 +438,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
               monster[i].hp-=2;
               if(monster[i].hp <= 0){
                s->kills++;
-               s-> bullets++; // cada inimigo morto dá-nos 1 bala
+               s-> bullets++;
                kill_monster(monster,i,map);
                map->matriz[x][y] = attack;
               }
@@ -518,7 +467,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
               monster[i].hp-=2;
               if(monster[i].hp <= 0){
                s->kills++;
-               s-> bullets++; // cada inimigo morto dá-nos 1 bala
+               s-> bullets++;
                kill_monster(monster,i,map);
                map->matriz[x][y] = attack;
               }
@@ -547,7 +496,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
               monster[i].hp-=2;
               if(monster[i].hp <= 0){
                s->kills++;
-               s-> bullets++; // cada inimigo morto dá-nos 1 bala
+               s-> bullets++;
                kill_monster(monster,i,map);
                map->matriz[x][y] = attack;
               }
@@ -576,7 +525,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
               monster[i].hp-=2;
               if(monster[i].hp == 0){
                s->kills++;
-               s-> bullets++; // cada inimigo morto dá-nos 1 bala
+               s-> bullets++; 
                kill_monster(monster,i,map);
                map->matriz[x][y] = attack;
               }
@@ -596,31 +545,20 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
  
 }
 }
-
-/*
-a104004- Diogo Esteves
-a104099- Bruno Rafael Gonçalves
-a104083- Ana Filipa Costa
-a104175- Rodrigo Fernandes
-função que fornecerá à "do_movement_action" as informações acerca da próxima jogador do jogador
-*/
 void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction, int *num_enemies, int *jump_on){
 	int key = getch();
 
 	switch (key)
 	{
      case 't':
-        // se o jogador não tiver a espada equipada, equipa a espada
         if (st->sword == 0) {
             st->sword = 1;
         } 
-        // caso contrário, desequipa a espada e equipa a arma
         else if(st->sword == 1){
             st->sword = 0;
         }
         break;
 
-  // Movimentação do jogador
 	case KEY_A1:
 	case '7':
 		do_movement_action(st, -1, -1,map);*direction = NW;
@@ -638,7 +576,7 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction,
 		do_movement_action(st, -1, +0,map);*direction = W;
 		break;
 	case KEY_B2:
-	case '5': *direction = NO_DIRECTION;break; // para fazer uma jogada parado
+	case '5': *direction = NO_DIRECTION;break; 
 	case KEY_RIGHT:
 	case '6':
 		do_movement_action(st, +1, +0,map);*direction = E;
@@ -709,12 +647,6 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction,
 	}
 }
 
-/*
-a104004- Diogo Esteves
-a104083- Ana Filipa Costa
-a104175- Rodrigo Fernandes
-Menu do jogo
-*/
 void show_menu() {
 	start_color();
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);
@@ -724,10 +656,10 @@ void show_menu() {
     clear();
     
     int rows, cols;
-    getmaxyx(stdscr, rows, cols);  // Obtém as dimensões da tela
+    getmaxyx(stdscr, rows, cols);
     
-    int menu_width = 20; // comprimento do menu
-    int menu_height = 6; // largura/tamanho do menu
+    int menu_width = 20;
+    int menu_height = 6;
     int start_x = (cols - menu_width) / 2;
     int start_y = (rows - menu_height) / 2;
     
@@ -757,10 +689,6 @@ void show_menu() {
     refresh();
 }
 
-/*
-a104004- Diogo Esteves
-refresh ao mapa
-*/
 void refresh_GAME_STATUS(MAPA *map){
     for (int ix = 0; ix <= map->x; ix++){
         for (int iy = 0; iy <= map->y; iy++){
@@ -769,10 +697,7 @@ void refresh_GAME_STATUS(MAPA *map){
     }
 }
 
-/*
-a104099- Bruno Rafael Gonçalves
-Função responsavel pelo spawn dos monstros aleatoriamente.
-*/
+
 void spawn_monsters(MONSTERS *monster, MAPA *map, int *num_enemies){
   char casa = ' ';
   int ix,iy;
@@ -788,10 +713,6 @@ void spawn_monsters(MONSTERS *monster, MAPA *map, int *num_enemies){
   }
 }
 
-/*
-a104004- Diogo Esteves
-Função responsavel por fazer os monstros atacar o jogador
-*/
 void enemy_attack(MONSTERS *monster, STATE *s, int *num_enemies){
   for(int i = 0; i < (*num_enemies); i++){
     for (int ix = ((monster[i].x)-1); ix <= (monster[i].x+1); ix ++){
@@ -805,13 +726,6 @@ void enemy_attack(MONSTERS *monster, STATE *s, int *num_enemies){
   }
 }
 
-
-/*
-a104004- Diogo Esteves
-a104099- Bruno Rafael Gonçalves
-a104083- Ana Filipa Costa
-a104175- Rodrigo Fernandes
-*/
 int main() {
   int in_game = 0;
   int in_submenu = 0;
@@ -832,7 +746,7 @@ int main() {
     init_pair(LIGHT, COLOR_WHITE, COLOR_BLACK);
 
     while (1) {
-      show_menu(); // Exibir menu inicial
+      show_menu(); 
 
       int choice = 0;
       choice = getch();
@@ -840,7 +754,7 @@ int main() {
 
       switch (choice) {
         case '1': {
-          in_game = 1; // Indica que o jogo está em execução
+          in_game = 1; 
           refresh_GAME_STATUS(&map);
           while (in_game) {
             int game_menu = 0;
@@ -852,9 +766,9 @@ int main() {
             int direction = NO_DIRECTION;
             getmaxyx(wnd, nrows, ncols);
 
-            monster = malloc(sizeof(MONSTERS) * num_enemies); // alocamos espaço relativo ao num_enemies * (tamanho de 1 struct MONSTERS)
+            monster = malloc(sizeof(MONSTERS) * num_enemies);
 
-            if(monster == NULL){ // caso não seja possível a alocação de memória, voltamos ao menu inicial
+            if(monster == NULL){
               in_game = 0;
               break;
             }
@@ -953,7 +867,7 @@ int main() {
               jogadas++;
 
               if (game_menu) {
-                in_game = 0; // Sair do jogo atual e voltar ao menu principal
+                in_game = 0;
                 
               }
             }

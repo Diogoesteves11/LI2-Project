@@ -6,7 +6,7 @@
 typedef struct mapa{
 	int x;
 	int y;
-	char matriz [MAX] [MAX]; // primeira matriz é a das colunas(x)
+	char matriz [MAX] [MAX];
 } MAPA;
 
 typedef struct state {

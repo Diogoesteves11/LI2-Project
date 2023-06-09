@@ -14,15 +14,9 @@
 #define BULLET_OFF 16
 #define HOUSE_COLOR 30
 
-/*
-a104004- Diogo Esteves
-a104099- Bruno Rafael Gonçalves
-a104083- Ana Filipa Costa
-a104175- Rodrigo Fernandes
-*/
-// Função que desenha o mapa
+
 void draw_map(MAPA* map, int *map_visibility) {
-    srand(time(NULL)); // Mapas aleatorios a cada jogo
+    srand(time(NULL));
     start_color();
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
     if(*map_visibility){
@@ -32,31 +26,29 @@ void draw_map(MAPA* map, int *map_visibility) {
     init_pair (BULLET_OFF, COLOR_BLACK,COLOR_BLACK);
     init_pair(HOUSE_COLOR,COLOR_BLACK,COLOR_BLACK);
 
-   // Adiciona paredes nas bordas do mapa
     int count1 = 0;
     
     attron(COLOR_PAIR(WALL_COLOR));
     for (int i = 0; i < map->x; i++) {
-        map->matriz[i][0] = '#'; // Parede superior
-        map->matriz[i][map->y - 2] = '#'; // Parede inferior (uma linha acima da última)
+        map->matriz[i][0] = '#'; 
+        map->matriz[i][map->y - 2] = '#';
         mvaddch(0, i, map->matriz[i][0]);
         mvaddch(map->y - 2, i, map->matriz[i][map->y - 2]);
         count1++;
     }
     for (int i = 0; i < map->y - 1; i++) {
-        map->matriz[0][i] = '#'; // Parede esquerda
-        map->matriz[map->x - 1][i] = '#'; // Parede direita
+        map->matriz[0][i] = '#'; 
+        map->matriz[map->x - 1][i] = '#'; 
         mvaddch(i, 0, map->matriz[0][i]);
         mvaddch(i, map->x - 1, map->matriz[map->x - 1][i]);
         count1++;
     }
    
-    // Limpa a última linha (linha inferior)
     for (int i = 1; i < map->x - 1; i++) {
-        map->matriz[i][map->y - 1] = ' '; // Deixa a célula do canto inferior direito vazia
+        map->matriz[i][map->y - 1] = ' '; 
         mvaddch(map->y - 1, i, map->matriz[i][map->y - 1]);
     }
-    int casas_totais = ((map->x) * (map->y)) - count1; // Calcula-se o numero de paredes sem contar as bordas.
+    int casas_totais = ((map->x) * (map->y)) - count1;
     int heal_percentage = casas_totais * 0.01;
     int heal_count = 0;
     int trap_count = 0;
@@ -72,9 +64,7 @@ void draw_map(MAPA* map, int *map_visibility) {
         mvaddch(y1, x1, map->matriz[x1][y1]);
     }
 
-
-    // Ciclos para deixar as paredes mais concentradas em forma de "cavernas"
-    for (int i = 0; i < 3; i++) { // fazem-se 3 passagens
+    for (int i = 0; i < 3; i++) { 
         for (int y = 1; y < (map->y-1) - 1; y++) {
             for (int x = 1; x < (map->x) - 1; x++) {
                 int count = 0;
@@ -104,8 +94,7 @@ void draw_map(MAPA* map, int *map_visibility) {
         }
     }
     
-// Ciclos para deixar o mapa mais "polido".
-    for (int i = 0; i < 4; i++) { // fazem-se 4 passagens
+    for (int i = 0; i < 4; i++) { 
         for (int y = 1; y < (map->y-1) - 1; y++) {
             for (int x = 1; x < (map->x) - 1; x++) {
                 int count = 0;
@@ -136,20 +125,20 @@ void draw_map(MAPA* map, int *map_visibility) {
         }
     }
 
-// Elimina algumas paredes soltas de forma a deixar um maior espaço livre para o jogador se movimentar pelo mapa
+
  for (int i = 1; i < map->x - 1; i++) {
     for (int j = 1; j < map->y - 1; j++) {
         if (map->matriz[i][j] == '#') {
             int count2 = 0;
-            if (map->matriz[i - 1][j] == '#') count2++; // Verifica parede esquerda
-            if (map->matriz[i + 1][j] == '#') count2++; // Verifica parede direita
-            if (map->matriz[i][j - 1] == '#') count2++; // Verifica parede acima
-            if (map->matriz[i][j + 1] == '#') count2++; // Verifica parede abaixo
+            if (map->matriz[i - 1][j] == '#') count2++; 
+            if (map->matriz[i + 1][j] == '#') count2++; 
+            if (map->matriz[i][j - 1] == '#') count2++; 
+            if (map->matriz[i][j + 1] == '#') count2++; 
 
             if (count2 == 0) {
                 attroff(COLOR_PAIR(WALL_COLOR));
                 attron (COLOR_PAIR(HOUSE_COLOR));
-                map->matriz[i][j] = ' '; // Remove a parede solta
+                map->matriz[i][j] = ' '; 
                 mvaddch(j, i, map->matriz[i][j]);
                 attroff(COLOR_PAIR(HOUSE_COLOR));
                 attron(COLOR_PAIR(WALL_COLOR));
@@ -160,7 +149,6 @@ void draw_map(MAPA* map, int *map_visibility) {
 attroff(COLOR_PAIR(WALL_COLOR));
 
 
-// Função que desenha as traps do mapa logo no inicio (número de traps finito)
 attron (COLOR_PAIR(TRAP_COLOR_2));
 while  (trap_count < trap_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
@@ -173,7 +161,6 @@ while  (trap_count < trap_percentage) {
  }
 attroff(COLOR_PAIR(TRAP_COLOR_2));
 
-// Função que desenha as curas (nº finito de curas)
 attron (COLOR_PAIR(HEAL_OFF));
 while  (heal_count < heal_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
@@ -186,8 +173,6 @@ while  (heal_count < heal_percentage) {
  }
 attroff(COLOR_PAIR(HEAL_OFF));
 
-
-// Função que desenha as recargas das munições (nº finito de munições)
 attron (COLOR_PAIR(BULLET_OFF));
 while  (bullet_count < bullet_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
