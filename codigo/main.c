@@ -35,6 +35,7 @@
 #define SE 26
 #define NO_DIRECTION 27
 
+//#region FUNCTIONS
 void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
     int playerX = st->playerX;
     int playerY = st->playerY;
@@ -725,6 +726,7 @@ void enemy_attack(MONSTERS *monster, STATE *s, int *num_enemies){
     }
   }
 }
+//#endregion
 
 int main() {
   int in_game = 0;

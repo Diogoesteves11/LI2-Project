@@ -16,6 +16,7 @@
 
 
 void draw_map(MAPA* map, int *map_visibility) {
+    //#region MAP_GENERATOR
     srand(time(NULL));
     start_color();
     init_pair(TRAP_COLOR_2, COLOR_BLACK, COLOR_BLACK);
@@ -147,8 +148,9 @@ void draw_map(MAPA* map, int *map_visibility) {
     }
 }
 attroff(COLOR_PAIR(WALL_COLOR));
+//#endregion
 
-
+// #region MAP_ITEMS 
 attron (COLOR_PAIR(TRAP_COLOR_2));
 while  (trap_count < trap_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
@@ -184,4 +186,5 @@ while  (bullet_count < bullet_percentage) {
  bullet_count ++;
  }
 attroff(COLOR_PAIR(BULLET_OFF));
+// #endregion
 }
