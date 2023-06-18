@@ -31,23 +31,23 @@ void draw_map(MAPA* map, int *map_visibility) {
     
     attron(COLOR_PAIR(WALL_COLOR));
     for (int i = 0; i < map->x; i++) {
-        map->matriz[i][0] = '#'; 
-        map->matriz[i][map->y - 2] = '#';
-        mvaddch(0, i, map->matriz[i][0]);
-        mvaddch(map->y - 2, i, map->matriz[i][map->y - 2]);
+        map->matrix[i][0] = '#'; 
+        map->matrix[i][map->y - 2] = '#';
+        mvaddch(0, i, map->matrix[i][0]);
+        mvaddch(map->y - 2, i, map->matrix[i][map->y - 2]);
         count1++;
     }
     for (int i = 0; i < map->y - 1; i++) {
-        map->matriz[0][i] = '#'; 
-        map->matriz[map->x - 1][i] = '#'; 
-        mvaddch(i, 0, map->matriz[0][i]);
-        mvaddch(i, map->x - 1, map->matriz[map->x - 1][i]);
+        map->matrix[0][i] = '#'; 
+        map->matrix[map->x - 1][i] = '#'; 
+        mvaddch(i, 0, map->matrix[0][i]);
+        mvaddch(i, map->x - 1, map->matrix[map->x - 1][i]);
         count1++;
     }
    
     for (int i = 1; i < map->x - 1; i++) {
-        map->matriz[i][map->y - 1] = ' '; 
-        mvaddch(map->y - 1, i, map->matriz[i][map->y - 1]);
+        map->matrix[i][map->y - 1] = ' '; 
+        mvaddch(map->y - 1, i, map->matrix[i][map->y - 1]);
     }
     int casas_totais = ((map->x) * (map->y)) - count1;
     int heal_percentage = casas_totais * 0.01;
@@ -61,8 +61,8 @@ void draw_map(MAPA* map, int *map_visibility) {
     for (int i = 0; i < casas_totais * 0.4; i++) {
         int x1 = 2 + rand() % (map->x - 2); 
         int y1 = 2 + rand() % (map->y - 2);
-        map->matriz[x1][y1] = '#';
-        mvaddch(y1, x1, map->matriz[x1][y1]);
+        map->matrix[x1][y1] = '#';
+        mvaddch(y1, x1, map->matrix[x1][y1]);
     }
 
     for (int i = 0; i < 3; i++) { 
@@ -71,24 +71,24 @@ void draw_map(MAPA* map, int *map_visibility) {
                 int count = 0;
                 for (int yy = y - 1; yy <= y + 1; yy++) {
                     for (int xx = x - 1; xx <= x + 1; xx++) {
-                        if (map->matriz[xx][yy] == '#') {
+                        if (map->matrix[xx][yy] == '#') {
                             count++;
                         }
                     }
                 }
-                if (map->matriz[x][y] == '#') {
+                if (map->matrix[x][y] == '#') {
                     if (count < 3) {
                          attroff(COLOR_PAIR(WALL_COLOR));
                          attron (COLOR_PAIR(HOUSE_COLOR));
-                        map->matriz[x][y] = ' ';
-                        mvaddch(y,x,map->matriz[x][y]);
+                        map->matrix[x][y] = ' ';
+                        mvaddch(y,x,map->matrix[x][y]);
                          attroff(COLOR_PAIR(HOUSE_COLOR));
                          attron (COLOR_PAIR(WALL_COLOR));
                     }
                 } else {
                     if (count > 4) {
-                        map->matriz[x][y] = '#';
-                        mvaddch(y,x,map->matriz[x][y]);
+                        map->matrix[x][y] = '#';
+                        mvaddch(y,x,map->matrix[x][y]);
                     }
                 }
             }
@@ -101,25 +101,25 @@ void draw_map(MAPA* map, int *map_visibility) {
                 int count = 0;
                 for (int iy = y - 1; iy <= y + 1; iy++) {
                     for (int ix = x - 1; ix <= x + 1; ix++) {
-                        if (map->matriz[ix][iy] == '#' && (iy != y || ix != x)) {
+                        if (map->matrix[ix][iy] == '#' && (iy != y || ix != x)) {
                             count++;
                         }
                     }
                 }
-                if (map->matriz[x][y] == '#') {
+                if (map->matrix[x][y] == '#') {
                     if (count < 3) {
                          attroff(COLOR_PAIR(WALL_COLOR));
                          attron (COLOR_PAIR(HOUSE_COLOR));
-                        map->matriz[x][y] = ' ';
-                        mvaddch(y,x,map->matriz[x][y]);
+                        map->matrix[x][y] = ' ';
+                        mvaddch(y,x,map->matrix[x][y]);
                          attroff(COLOR_PAIR(HOUSE_COLOR));
                          attron (COLOR_PAIR(WALL_COLOR));
                     }
                 }
-                if (map->matriz[x][y]== ' ') {
+                if (map->matrix[x][y]== ' ') {
                     if (count > 4) {
-                        map->matriz[x][y] = '#';
-                        mvaddch(y,x,map->matriz[x][y]);
+                        map->matrix[x][y] = '#';
+                        mvaddch(y,x,map->matrix[x][y]);
                     }
                 }
             }
@@ -129,18 +129,18 @@ void draw_map(MAPA* map, int *map_visibility) {
 
  for (int i = 1; i < map->x - 1; i++) {
     for (int j = 1; j < map->y - 1; j++) {
-        if (map->matriz[i][j] == '#') {
+        if (map->matrix[i][j] == '#') {
             int count2 = 0;
-            if (map->matriz[i - 1][j] == '#') count2++; 
-            if (map->matriz[i + 1][j] == '#') count2++; 
-            if (map->matriz[i][j - 1] == '#') count2++; 
-            if (map->matriz[i][j + 1] == '#') count2++; 
+            if (map->matrix[i - 1][j] == '#') count2++; 
+            if (map->matrix[i + 1][j] == '#') count2++; 
+            if (map->matrix[i][j - 1] == '#') count2++; 
+            if (map->matrix[i][j + 1] == '#') count2++; 
 
             if (count2 == 0) {
                 attroff(COLOR_PAIR(WALL_COLOR));
                 attron (COLOR_PAIR(HOUSE_COLOR));
-                map->matriz[i][j] = ' '; 
-                mvaddch(j, i, map->matriz[i][j]);
+                map->matrix[i][j] = ' '; 
+                mvaddch(j, i, map->matrix[i][j]);
                 attroff(COLOR_PAIR(HOUSE_COLOR));
                 attron(COLOR_PAIR(WALL_COLOR));
             }
@@ -155,9 +155,9 @@ attron (COLOR_PAIR(TRAP_COLOR_2));
 while  (trap_count < trap_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
  int y1 = rand() % (map->y - 1);
- if (map->matriz [x1] [y1] != '#') {
-  map->matriz[x1][y1] = 'x';
-  mvaddch(y1, x1, map->matriz[x1][y1]);
+ if (map->matrix [x1] [y1] != '#') {
+  map->matrix[x1][y1] = 'x';
+  mvaddch(y1, x1, map->matrix[x1][y1]);
  }
  trap_count ++;
  }
@@ -167,9 +167,9 @@ attron (COLOR_PAIR(HEAL_OFF));
 while  (heal_count < heal_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
  int y1 = rand() % (map->y - 1);
- if (map->matriz [x1] [y1] != '#') {
-  map->matriz[x1][y1] = '+';
-  mvaddch(y1, x1, map->matriz[x1][y1]);
+ if (map->matrix [x1] [y1] != '#') {
+  map->matrix[x1][y1] = '+';
+  mvaddch(y1, x1, map->matrix[x1][y1]);
  }
  heal_count ++;
  }
@@ -179,9 +179,9 @@ attron (COLOR_PAIR(BULLET_OFF));
 while  (bullet_count < bullet_percentage) {
  int x1 = rand() % (map->x - 2) + 1;
  int y1 = rand() % (map->y - 1);
- if (map->matriz [x1] [y1] != '#') {
-  map->matriz[x1][y1] = '-';
-  mvaddch(y1, x1, map->matriz[x1][y1]);
+ if (map->matrix [x1] [y1] != '#') {
+  map->matrix[x1][y1] = '-';
+  mvaddch(y1, x1, map->matrix[x1][y1]);
  }
  bullet_count ++;
  }
