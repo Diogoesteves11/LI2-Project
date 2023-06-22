@@ -24,6 +24,7 @@
 #define ENEMIE_COLOR 19
 #define FLASHLIGHT 28
 #define LOW_HP 29
+#define EXPLOSION 30
 
 #define N 19 
 #define S 20
@@ -128,6 +129,7 @@ char bullet = '-';
 char empty_block = ' ';
 char enemy = '&';
 char damage = '*';
+char explosion = '^';
 
 double delta = 0.05; 
 
@@ -190,6 +192,13 @@ double delta = 0.05;
              attroff(COLOR_PAIR(TRAP_COLOR));
              map->matrix[(int)x][(int)y] = '.';
             }
+            else if (testch == explosion){
+             map->matrix [(int)x][(int)y] = explosion;
+             attron(COLOR_PAIR(EXPLOSION));
+             mvaddch(y, x, '^' | A_BOLD);
+             attroff(COLOR_PAIR(EXPLOSION));
+             map->matrix[(int)x][(int)y] = ' ';
+           }
            
             x += dx;
             y += dy;
@@ -202,6 +211,8 @@ void lights_off(MAPA *map) { // this function sets all the map colors to black a
     char trap = 'x';
 	  char enemy = '&';
     char damage = '*';
+    char explosion = '^';
+    char empty_block = ' ';
 
     
     for (int x = 1; x < map->x - 1; x++) {
@@ -237,9 +248,29 @@ void lights_off(MAPA *map) { // this function sets all the map colors to black a
                 attroff(COLOR_PAIR(BACKGROUND));
                 attroff(A_BOLD);
             }
+            else if (testch == explosion){
+              map->matrix [x][y] = '^';
+              attron(COLOR_PAIR(BACKGROUND));
+              attron(A_BOLD);
+              mvaddch(y, x, explosion|A_COLOR);
+              attroff(COLOR_PAIR(BACKGROUND));
+              attroff(A_BOLD);
+            }
         }
     }
     
+}
+
+void draw_explosion (int x, int y, MAPA *map){ // needs to be improved
+  map->matrix [x-1][y-1] = '^';
+  map->matrix [x-1][y+1] = '^';
+  map->matrix [x-1][y] = '^';
+  map->matrix [x][y-1] = '^';
+  map->matrix [x][y+1] = '^';
+  map->matrix [x-1][y+1] = '^';
+  map->matrix [x+1][y-1] = '^';
+  map->matrix [x+1][y+1] = '^';
+  map->matrix [x+1][y] = '^';
 }
 
 void do_movement_action(STATE *st, int dx, int dy,MAPA *map){
@@ -255,6 +286,7 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){
 	else if (testch == trap) 
 	{
 			st->hp/=2;
+      draw_explosion (nextX, nextY, map);
 	}
 	else if (testch == bullet) st->bullets ++;
 	else if (testch == heal) st->hp += 2;
@@ -731,6 +763,7 @@ void enemy_attack(MONSTERS *monster, STATE *s, int *num_enemies){
 //#endregion
 
 int main() {
+  int map_layer = 1 + (rand() % 3); // RANDOM NUMBER OF FLOORS GENERATOR (FUTURE FEATURE)
   int in_game = 0;
   int in_submenu = 0;
   int in_game_dynamics = 0;
@@ -798,6 +831,7 @@ int main() {
             init_pair(ENEMIE_COLOR, COLOR_BLACK, COLOR_MAGENTA);
             init_pair(FLASHLIGHT, COLOR_WHITE, COLOR_BLACK);
             init_pair(LOW_HP,COLOR_BLACK,COLOR_RED);
+            init_pair(EXPLOSION,COLOR_RED,COLOR_RED);
 
             map.y = nrows;
             map.x = ncols;
