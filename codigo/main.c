@@ -267,21 +267,41 @@ void lights_off(MAPA *map) { // this function sets all the map colors to black a
     
 }
 
-void draw_explosion (int x, int y, MAPA *map){
+void kill_monster(MONSTERS *monster, int index, MAPA *map){
+  char empty_block = ' ',monsterch = '&';
+  int newX = 0,newY = 0;
+  do{
+    newX = 1 + (rand()% map->x - 2);
+    newY = 1 + (rand()% map->y - 2); 
+  }while(map->matrix[newX][newY] != empty_block);
+  monster[index].x = newX;
+  monster[index].y = newY;
+  monster[index].hp = 2;
+  map->matrix[newX][newY] = monsterch; 
+}
+
+void draw_explosion (int x, int y, MAPA *map, MONSTERS *monsters, int *num_enemies){
   for (int ix = x-1; ix <= x +1; ix++){
     for (int iy= y - 1 ;iy<= y + 1; iy++){
       char testch = map->matrix[ix][iy];
-      if (testch != '@' || testch != 'x') {
+      if (testch != '@' || testch != 'x' || testch != '&') {
         map->matrix [ix][iy] = '^';
       }
       else if (testch == 'x'){
-        draw_explosion(ix,iy,map);
+        draw_explosion(ix,iy,map,monsters,num_enemies);
+      }
+      else if(testch == '&'){
+        for (int i = 0; i < (*num_enemies); i++){
+          if(monsters[i].x == ix&& monsters[i].y == iy){
+           kill_monster(ix,i,iy);
+          } 
+        }
       }
     }
   }
 }
 
-void do_movement_action(STATE *st, int dx, int dy,MAPA *map){
+void do_movement_action(STATE *st, int dx, int dy,MAPA *map,MONSTERS *monsters, int *num_enemies){
 	int nextX = st->playerX + dx;
 	int nextY = st->playerY + dy;
 	char trap = 'x';
@@ -294,7 +314,7 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){
 	else if (testch == trap) 
 	{
 			st->hp/=2;
-      draw_explosion (nextX, nextY, map);
+      draw_explosion (nextX, nextY, map,monsters, num_enemies);
 	}
 	else if (testch == bullet) st->bullets ++;
 	else if (testch == heal) st->hp += 2;
@@ -302,19 +322,6 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map){
 	mvaddch(st->playerY, st->playerX, ' ');
 	st->playerX = nextX;
 	st->playerY = nextY;
-}
-
-void kill_monster(MONSTERS *monster, int index, MAPA *map){
-  char empty_block = ' ',monsterch = '&';
-  int newX = 0,newY = 0;
-  do{
-    newX = 1 + (rand()% map->x - 2);
-    newY = 1 + (rand()% map->y - 2); 
-  }while(map->matrix[newX][newY] != empty_block);
-  monster[index].x = newX;
-  monster[index].y = newY;
-  monster[index].hp = 2;
-  map->matrix[newX][newY] = monsterch; 
 }
 
 void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_enemies){
@@ -604,86 +611,86 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction,
 
 	case KEY_A1:
 	case '7':
-		do_movement_action(st, -1, -1,map);*direction = NW;
+		do_movement_action(st, -1, -1,map, monster, num_enemies);*direction = NW;
 		break;
 	case KEY_UP:
 	case '8':
-		do_movement_action(st, +0, -1,map);*direction = N;
+		do_movement_action(st, +0, -1,map, monster, num_enemies);*direction = N;
 		break;
 	case KEY_A3:
 	case '9':
-		do_movement_action(st, +1, -1,map);*direction = NE;
+		do_movement_action(st, +1, -1,map, monster, num_enemies);*direction = NE;
 		break;
 	case KEY_LEFT:
 	case '4':
-		do_movement_action(st, -1, +0,map);*direction = W;
+		do_movement_action(st, -1, +0,map, monster, num_enemies);*direction = W;
 		break;
 	case KEY_B2:
 	case '5': *direction = NO_DIRECTION;break; 
 	case KEY_RIGHT:
 	case '6':
-		do_movement_action(st, +1, +0,map);*direction = E;
+		do_movement_action(st, +1, +0,map, monster, num_enemies);*direction = E;
 		break;
 	case KEY_C1:
 	case '1':
-		do_movement_action(st, -1, +1,map);*direction = SW;
+		do_movement_action(st, -1, +1,map, monster, num_enemies);*direction = SW;
 		break;
 	case KEY_DOWN:
 	case '2':
-		do_movement_action(st, +0, +1,map);*direction = S;
+		do_movement_action(st, +0, +1,map, monster, num_enemies);*direction = S;
 		break;
 	case KEY_C3:
 	case '3':
-		do_movement_action(st, +1, +1,map);*direction = SE;
+		do_movement_action(st, +1, +1,map, monster, num_enemies);*direction = SE;
 		break;
 	case 'q':
         *game_menu = 1;
 		break;
 	case 'w':
-		do_movement_action(st, +0, -1,map);*direction = N;
+		do_movement_action(st, +0, -1,map, monster, num_enemies);*direction = N;
 		break;
 	case 'a':
-		do_movement_action(st, -1, +0,map);*direction = W;
+		do_movement_action(st, -1, +0,map, monster, num_enemies);*direction = W;
 		break;
 	case 's':
-		do_movement_action(st, +0, +1,map);*direction = S;
+		do_movement_action(st, +0, +1,map, monster, num_enemies);*direction = S;
 		break;
 	case 'd':
-		do_movement_action(st, +1, +0,map);*direction = E;
+		do_movement_action(st, +1, +0,map, monster, num_enemies);*direction = E;
 		break;
   case ' ': attack(st,map,monster,direction,num_enemies);break;
   case 'W':
   if(*jump_on){
-   do_movement_action(st, +0, -2,map);*direction = N;
+   do_movement_action(st, +0, -2,map, monster, num_enemies);*direction = N;
 	 break;
   }else {
-    do_movement_action(st, +0, -1,map);*direction = N;
+    do_movement_action(st, +0, -1,map, monster, num_enemies);*direction = N;
 	 break;
   }
   
 	case 'A':
   if(*jump_on){
-   do_movement_action(st, -2, +0,map);*direction = W;
+   do_movement_action(st, -2, +0,map, monster, num_enemies);*direction = W;
 	 break;
   }else {
-    do_movement_action(st, -1, +0,map);*direction = W;
+    do_movement_action(st, -1, +0,map, monster, num_enemies);*direction = W;
 	 break;
   }
   
 	case 'S':
   if(*jump_on){
-   do_movement_action(st, +0, +2,map);*direction = S;
+   do_movement_action(st, +0, +2,map, monster, num_enemies);*direction = S;
 		break;
   }else{
-    do_movement_action(st, +0, +1,map);*direction = S;
+    do_movement_action(st, +0, +1,map, monster, num_enemies);*direction = S;
 		break;
   }
 	case 'D': 
   if(*jump_on){
-    do_movement_action(st, +2, +0,map);*direction = E;
+    do_movement_action(st, +2, +0,map, monster, num_enemies);*direction = E;
 		break;
   }else {
-    do_movement_action(st, +1, +0,map);*direction = E;
+    do_movement_action(st, +1, +0,map, monster, num_enemies);*direction = E;
 		break;
   }
   break;
