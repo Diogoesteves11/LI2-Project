@@ -190,13 +190,13 @@ double delta = 0.05;
              attron(COLOR_PAIR(TRAP_COLOR));
              mvaddch(y, x, '.' | A_BOLD);
              attroff(COLOR_PAIR(TRAP_COLOR));
-             map->matrix[(int)x][(int)y] = '.';
+             map->matrix[(int)x][(int)y] = ' ';
             }
             else if (testch == explosion){
              map->matrix [(int)x][(int)y] = explosion;
-             attron(COLOR_PAIR(EXPLOSION));
+             attron(COLOR_PAIR(TRAP_COLOR));
              mvaddch(y, x, '^' | A_BOLD);
-             attroff(COLOR_PAIR(EXPLOSION));
+             attroff(COLOR_PAIR(TRAP_COLOR));
              map->matrix[(int)x][(int)y] = ' ';
            }
            
@@ -249,28 +249,36 @@ void lights_off(MAPA *map) { // this function sets all the map colors to black a
                 attroff(A_BOLD);
             }
             else if (testch == explosion){
-              map->matrix [x][y] = '^';
-              attron(COLOR_PAIR(BACKGROUND));
-              attron(A_BOLD);
-              mvaddch(y, x, explosion|A_COLOR);
-              attroff(COLOR_PAIR(BACKGROUND));
-              attroff(A_BOLD);
+               map->matrix[x][y] = '^';
+                attron(COLOR_PAIR(BACKGROUND));
+                attron(A_BOLD);
+                mvaddch(y, x, map->matrix[x][y]|A_COLOR);
+                attroff(COLOR_PAIR(BACKGROUND));
+                attroff(A_BOLD);
+            }
+            else if(testch == empty_block) {
+              map->matrix[x][y] = ' ';   
+				      attron(COLOR_PAIR(BACKGROUND));         
+				      mvaddch(y, x,map->matrix[x][y]);
+			        attroff(COLOR_PAIR(BACKGROUND));
             }
         }
     }
     
 }
 
-void draw_explosion (int x, int y, MAPA *map){ // needs to be improved
-  map->matrix [x-1][y-1] = '^';
-  map->matrix [x-1][y+1] = '^';
-  map->matrix [x-1][y] = '^';
-  map->matrix [x][y-1] = '^';
-  map->matrix [x][y+1] = '^';
-  map->matrix [x-1][y+1] = '^';
-  map->matrix [x+1][y-1] = '^';
-  map->matrix [x+1][y+1] = '^';
-  map->matrix [x+1][y] = '^';
+void draw_explosion (int x, int y, MAPA *map){
+  for (int ix = x-1; ix <= x +1; ix++){
+    for (int iy= y - 1 ;iy<= y + 1; iy++){
+      char testch = map->matrix[ix][iy];
+      if (testch != '@' || testch != 'x') {
+        map->matrix [ix][iy] = '^';
+      }
+      else if (testch == 'x'){
+        draw_explosion(ix,iy,map);
+      }
+    }
+  }
 }
 
 void do_movement_action(STATE *st, int dx, int dy,MAPA *map){
