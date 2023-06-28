@@ -329,7 +329,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
   int y = s->playerY;
   int dx = 0,dy = 0;
   
-  char empty_block = ' ', casa_iluminada = '.', attack = '*', monsterch = '&';
+  char empty_block = ' ', casa_iluminada = '.', attack = '*', monsterch = '&', trap = 'x';
   if(s->sword){
     for (int ix = x-1; ix <= x+1; ix++){
      for (int iy = y-1; iy <= y+1; iy++){
@@ -381,6 +381,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
       }
      }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
      x += dx;
      y += dy;
      }
@@ -409,6 +412,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
             }
           }
       }
+     }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
      }
       x += dx;
       y += dy;
@@ -439,6 +445,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
       }
      }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
       x += dx;
       y += dy;
      }
@@ -467,6 +476,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
             }
           }
       }
+     }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
      }
       x += dx;
       y += dy;
@@ -497,6 +509,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
       }
      }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
       x += dx;
       y += dy;
      }
@@ -525,6 +540,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
             }
           }
       }
+     }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
      }
       x += dx;
       y += dy;
@@ -555,6 +573,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
       }
      }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
       x += dx;
       y += dy;
      }
@@ -583,6 +604,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
             }
           }
       }
+     }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
      }
       x += dx;
       y += dy;
