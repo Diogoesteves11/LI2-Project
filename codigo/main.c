@@ -289,11 +289,13 @@ void draw_explosion (int x, int y, MAPA *map, MONSTERS *monsters, int *num_enemi
       }
       else if (testch == 'x'){
         draw_explosion(ix,iy,map,monsters,num_enemies);
+        map->matrix[ix][iy] = '^';
       }
       else if(testch == '&'){
         for (int i = 0; i < (*num_enemies); i++){
           if(monsters[i].x == ix&& monsters[i].y == iy){
            kill_monster(ix,i,iy);
+           map->matrix[ix][iy] = '^';
           } 
         }
       }
