@@ -293,9 +293,10 @@ void draw_explosion (int x, int y, MAPA *map, MONSTERS *monsters, int *num_enemi
       }
       else if(testch == '&'){ // enemie
         for (int i = 0; i < (*num_enemies); i++){
-          if(monsters[i].x == ix&& monsters[i].y == iy){
-           kill_monster(ix,i,iy);
+          if(monsters[i].x == ix && monsters[i].y == iy){
+           kill_monster(monsters,i,map);
            map->matrix[ix][iy] = '^';
+           break;
           } 
         }
       }
@@ -353,6 +354,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
         }
       }
+      else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
     }
   }
  }
