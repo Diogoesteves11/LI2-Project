@@ -284,7 +284,7 @@ void draw_explosion (int x, int y, MAPA *map, MONSTERS *monsters, int *num_enemi
   for (int ix = x-1; ix <= x +1; ix++){
     for (int iy= y - 1 ;iy<= y + 1; iy++){
       char testch = map->matrix[ix][iy];
-      if (testch != '@' || testch != 'x' || testch != '&') {
+      if (testch == ' ' || testch == '.' || testch == '#') {
         map->matrix [ix][iy] = '^';
       }
       else if (testch == 'x'){
@@ -355,7 +355,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
         }
       }
       else if(testch == trap){
-       draw_explosion(x,y,map,monster,num_enemies);
+       draw_explosion(ix,iy,map,monster,num_enemies);
      }
     }
   }
