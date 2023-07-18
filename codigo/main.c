@@ -280,29 +280,26 @@ void kill_monster(MONSTERS *monster, int index, MAPA *map){
   map->matrix[newX][newY] = monsterch; 
 }
 
-void draw_explosion (int x, int y, MAPA *map, MONSTERS *monsters, int *num_enemies){
-  for (int ix = x-1; ix <= x +1; ix++){
-    for (int iy= y - 1 ;iy<= y + 1; iy++){
+void draw_explosion(int x, int y, MAPA *map, MONSTERS *monsters, int *num_enemies) {
+  int i = 0;
+  for (int ix = x - 1; ix <= x + 1; ix++) {
+    for (int iy = y - 1; iy <= y + 1; iy++) {
       char testch = map->matrix[ix][iy];
-      if (testch == ' ' || testch == '.' || testch == '#') {
+       if (testch != '@' || testch != 'x' || testch != '&') map->matrix[ix][iy] = '^';
+      else if(testch == 'x'){
         map->matrix [ix][iy] = '^';
-      }
-      else if (testch == 'x'){
         draw_explosion(ix,iy,map,monsters,num_enemies);
-        map->matrix[ix][iy] = '^';
       }
-      else if(testch == '&'){ // enemie
-        for (int i = 0; i < (*num_enemies); i++){
-          if(monsters[i].x == ix && monsters[i].y == iy){
-           kill_monster(monsters,i,map);
-           map->matrix[ix][iy] = '^';
-           break;
-          } 
-        }
+      else if(testch == '&'){
+        do{
+          i++;
+        }while (monsters[i].x != ix && monsters[i].y != iy);
+        kill_monster(monsters,i,map);
       }
     }
   }
 }
+
 
 void do_movement_action(STATE *st, int dx, int dy,MAPA *map,MONSTERS *monsters, int *num_enemies){
 	int nextX = st->playerX + dx;
@@ -314,8 +311,7 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map,MONSTERS *monsters, 
 	char enemich = '&';
 	char testch = map->matrix[nextX][nextY];
 	if (testch == wall) return; 
-	else if (testch == trap) 
-	{
+	else if (testch == trap) {
 			st->hp/=2;
       draw_explosion (nextX, nextY, map,monsters, num_enemies);
 	}
@@ -325,6 +321,7 @@ void do_movement_action(STATE *st, int dx, int dy,MAPA *map,MONSTERS *monsters, 
 	mvaddch(st->playerY, st->playerX, ' ');
 	st->playerX = nextX;
 	st->playerY = nextY;
+  map->matrix [nextX][nextY] = '@';
 }
 
 void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_enemies){
