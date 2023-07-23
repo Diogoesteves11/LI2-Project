@@ -281,20 +281,13 @@ void kill_monster(MONSTERS *monster, int index, MAPA *map){
 }
 
 void draw_explosion(int x, int y, MAPA *map, MONSTERS *monsters, int *num_enemies) {
-  int i = 0;
   for (int ix = x - 1; ix <= x + 1; ix++) {
     for (int iy = y - 1; iy <= y + 1; iy++) {
       char testch = map->matrix[ix][iy];
-       if (testch != '@' || testch != 'x' || testch != '&') map->matrix[ix][iy] = '^';
+      if (testch != '@' && testch != 'x' && testch != '&') map->matrix[ix][iy] = '^';
       else if(testch == 'x'){
         map->matrix [ix][iy] = '^';
         draw_explosion(ix,iy,map,monsters,num_enemies);
-      }
-      else if(testch == '&'){
-        do{
-          i++;
-        }while (monsters[i].x != ix && monsters[i].y != iy);
-        kill_monster(monsters,i,map);
       }
     }
   }
