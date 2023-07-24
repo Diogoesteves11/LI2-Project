@@ -24,6 +24,7 @@
 #define ENEMIE_COLOR 19
 #define FLASHLIGHT 28
 #define LOW_HP 29
+#define EXPLOSION 30
 
 #define N 19 
 #define S 20
@@ -35,7 +36,17 @@
 #define SE 26
 #define NO_DIRECTION 27
 
+
+
+
 //#region FUNCTIONS
+
+void display (int x, int y, int color, char character){
+  attron(COLOR_PAIR(color) | A_BOLD);
+  mvaddch(y, x, character);
+  attroff(COLOR_PAIR(color) | A_BOLD);
+}
+
 void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
     int playerX = st->playerX; // PlayerX
     int playerY = st->playerY; // PlayerY
@@ -128,6 +139,7 @@ char bullet = '-';
 char empty_block = ' ';
 char enemy = '&';
 char damage = '*';
+char explosion = '^';
 
 double delta = 0.05; 
 
@@ -140,56 +152,44 @@ double delta = 0.05;
         double y = centerY + 0.5;
 
         while (x >= 0 && x < map->x && y >= 0 && y < map->y) {
-            char testch = mvinch((int)y, (int)x) & A_CHARTEXT;
-            
+            char testch = mvinch((int)y, (int)x) & A_CHARTEXT;           
              if (testch == wall) {
-                map-> matrix [(int)x][(int)y] = wall;
-                attron(COLOR_PAIR(WALL_ILUMINATED));
-                mvaddch(y, x, '#');
-                attroff(COLOR_PAIR(WALL_ILUMINATED));
-                break;
+              map-> matrix [(int)x][(int)y] = wall;
+              display(x,y,WALL_ILUMINATED, '#');
+              break;
             }
             else if (testch == trap) {
                 map-> matrix [(int)x][(int)y] = trap;
-                attron(COLOR_PAIR(TRAP_COLOR));
-                mvaddch(y, x, 'x' | A_BOLD);
-                attroff(COLOR_PAIR(TRAP_COLOR));
-                
+                display(x,y,TRAP_COLOR,trap);
             }
             else if (testch == heal) {
                 map-> matrix [(int)x][(int)y] = heal;
-                attron(COLOR_PAIR(HEAL_ON));
-                mvaddch(y, x, '+' | A_BOLD);
-                attroff(COLOR_PAIR(HEAL_ON));
+                display(x,y,HEAL_ON,heal);
                 
             }
             else if (testch == bullet) {
                 map-> matrix [(int)x][(int)y] = bullet;
-                attron(COLOR_PAIR(BULLET_ON));
-                mvaddch(y, x, '-' | A_BOLD);
-                attroff(COLOR_PAIR(BULLET_ON));
-                
+                display(x,y,BULLET_ON,bullet);
             }
             else if (testch == empty_block) {
                 map->matrix[(int)x][(int)y] = '.';
-                attron(COLOR_PAIR(FLASHLIGHT)); 
-                mvaddch(y, x, '.' | A_BOLD);
-                attroff(COLOR_PAIR(FLASHLIGHT));
+                display(x,y,FLASHLIGHT,'.');
             }
             else if (testch == enemy){
                map-> matrix [(int)x][(int)y] = enemy;
-               attron(COLOR_PAIR(ENEMIE_COLOR));
-               mvaddch(y, x, '&' | A_BOLD);
-               attroff(COLOR_PAIR(ENEMIE_COLOR));
+               display(x,y,ENEMIE_COLOR,enemy);
              
             }
              else if (testch == damage){
-              map->matrix [(int)x][(int)y] = damage;
-             attron(COLOR_PAIR(TRAP_COLOR));
-             mvaddch(y, x, '.' | A_BOLD);
-             attroff(COLOR_PAIR(TRAP_COLOR));
-             map->matrix[(int)x][(int)y] = '.';
+             map->matrix [(int)x][(int)y] = damage;
+             display(x,y,TRAP_COLOR,'.');
+             map->matrix[(int)x][(int)y] = ' ';
             }
+            else if (testch == explosion){
+             map->matrix [(int)x][(int)y] = explosion;
+             display(x,y,TRAP_COLOR,'^');
+             map->matrix[(int)x][(int)y] = ' ';
+           }
            
             x += dx;
             y += dy;
@@ -202,6 +202,8 @@ void lights_off(MAPA *map) { // this function sets all the map colors to black a
     char trap = 'x';
 	  char enemy = '&';
     char damage = '*';
+    char explosion = '^';
+    char empty_block = ' ';
 
     
     for (int x = 1; x < map->x - 1; x++) {
@@ -237,32 +239,24 @@ void lights_off(MAPA *map) { // this function sets all the map colors to black a
                 attroff(COLOR_PAIR(BACKGROUND));
                 attroff(A_BOLD);
             }
+            else if (testch == explosion){
+               map->matrix[x][y] = '^';
+                attron(COLOR_PAIR(BACKGROUND));
+                attron(A_BOLD);
+                mvaddch(y, x, map->matrix[x][y]|A_COLOR);
+                attroff(COLOR_PAIR(BACKGROUND));
+                attroff(A_BOLD);
+            }
+            else if(testch == empty_block) {
+              map->matrix[x][y] = ' ';   
+				      attron(COLOR_PAIR(BACKGROUND));         
+				      mvaddch(y, x,map->matrix[x][y]);
+			        attroff(COLOR_PAIR(BACKGROUND));
+            }
         }
     }
-    
 }
 
-void do_movement_action(STATE *st, int dx, int dy,MAPA *map){
-	int nextX = st->playerX + dx;
-	int nextY = st->playerY + dy;
-	char trap = 'x';
-	char wall = '#';
-	char heal = '+';
-	char bullet = '-';
-	char enemich = '&';
-	char testch = map->matrix[nextX][nextY];
-	if (testch == wall) return; 
-	else if (testch == trap) 
-	{
-			st->hp/=2;
-	}
-	else if (testch == bullet) st->bullets ++;
-	else if (testch == heal) st->hp += 2;
-	else if (testch == enemich) return;
-	mvaddch(st->playerY, st->playerX, ' ');
-	st->playerX = nextX;
-	st->playerY = nextY;
-}
 
 void kill_monster(MONSTERS *monster, int index, MAPA *map){
   char empty_block = ' ',monsterch = '&';
@@ -277,12 +271,49 @@ void kill_monster(MONSTERS *monster, int index, MAPA *map){
   map->matrix[newX][newY] = monsterch; 
 }
 
+void draw_explosion(int x, int y, MAPA *map, MONSTERS *monsters, int *num_enemies) {
+  for (int ix = x - 1; ix <= x + 1; ix++) {
+    for (int iy = y - 1; iy <= y + 1; iy++) {
+      char testch = map->matrix[ix][iy];
+      if (testch != '@' && testch != 'x' && testch != '&') map->matrix[ix][iy] = '^';
+      else if(testch == 'x'){
+        map->matrix [ix][iy] = '^';
+        draw_explosion(ix,iy,map,monsters,num_enemies);
+      }
+    }
+  }
+}
+
+
+void do_movement_action(STATE *st, int dx, int dy,MAPA *map,MONSTERS *monsters, int *num_enemies){
+	int nextX = st->playerX + dx;
+	int nextY = st->playerY + dy;
+	char trap = 'x';
+	char wall = '#';
+	char heal = '+';
+	char bullet = '-';
+	char enemich = '&';
+	char testch = map->matrix[nextX][nextY];
+	if (testch == wall) return; 
+	else if (testch == trap) {
+			st->hp/=2;
+      draw_explosion (nextX, nextY, map,monsters, num_enemies);
+	}
+	else if (testch == bullet) st->bullets ++;
+	else if (testch == heal) st->hp += 2;
+	else if (testch == enemich) return;
+	mvaddch(st->playerY, st->playerX, ' ');
+	st->playerX = nextX;
+	st->playerY = nextY;
+  map->matrix [nextX][nextY] = '@';
+}
+
 void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_enemies){
   int x = s->playerX;
   int y = s->playerY;
   int dx = 0,dy = 0;
   
-  char empty_block = ' ', casa_iluminada = '.', attack = '*', monsterch = '&';
+  char empty_block = ' ', casa_iluminada = '.', attack = '*', monsterch = '&', trap = 'x';
   if(s->sword){
     for (int ix = x-1; ix <= x+1; ix++){
      for (int iy = y-1; iy <= y+1; iy++){
@@ -304,6 +335,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
         }
       }
+      else if(testch == trap){
+       draw_explosion(ix,iy,map,monster,num_enemies);
+     }
     }
   }
  }
@@ -334,6 +368,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
       }
      }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
      x += dx;
      y += dy;
      }
@@ -362,6 +399,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
             }
           }
       }
+     }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
      }
       x += dx;
       y += dy;
@@ -392,6 +432,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
       }
      }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
       x += dx;
       y += dy;
      }
@@ -420,6 +463,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
             }
           }
       }
+     }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
      }
       x += dx;
       y += dy;
@@ -450,6 +496,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
       }
      }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
       x += dx;
       y += dy;
      }
@@ -478,6 +527,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
             }
           }
       }
+     }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
      }
       x += dx;
       y += dy;
@@ -508,6 +560,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
       }
      }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
       x += dx;
       y += dy;
      }
@@ -537,6 +592,9 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
           }
       }
      }
+     else if(testch == trap){
+       draw_explosion(x,y,map,monster,num_enemies);
+     }
       x += dx;
       y += dy;
      }
@@ -564,86 +622,86 @@ void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction,
 
 	case KEY_A1:
 	case '7':
-		do_movement_action(st, -1, -1,map);*direction = NW;
+		do_movement_action(st, -1, -1,map, monster, num_enemies);*direction = NW;
 		break;
 	case KEY_UP:
 	case '8':
-		do_movement_action(st, +0, -1,map);*direction = N;
+		do_movement_action(st, +0, -1,map, monster, num_enemies);*direction = N;
 		break;
 	case KEY_A3:
 	case '9':
-		do_movement_action(st, +1, -1,map);*direction = NE;
+		do_movement_action(st, +1, -1,map, monster, num_enemies);*direction = NE;
 		break;
 	case KEY_LEFT:
 	case '4':
-		do_movement_action(st, -1, +0,map);*direction = W;
+		do_movement_action(st, -1, +0,map, monster, num_enemies);*direction = W;
 		break;
 	case KEY_B2:
 	case '5': *direction = NO_DIRECTION;break; 
 	case KEY_RIGHT:
 	case '6':
-		do_movement_action(st, +1, +0,map);*direction = E;
+		do_movement_action(st, +1, +0,map, monster, num_enemies);*direction = E;
 		break;
 	case KEY_C1:
 	case '1':
-		do_movement_action(st, -1, +1,map);*direction = SW;
+		do_movement_action(st, -1, +1,map, monster, num_enemies);*direction = SW;
 		break;
 	case KEY_DOWN:
 	case '2':
-		do_movement_action(st, +0, +1,map);*direction = S;
+		do_movement_action(st, +0, +1,map, monster, num_enemies);*direction = S;
 		break;
 	case KEY_C3:
 	case '3':
-		do_movement_action(st, +1, +1,map);*direction = SE;
+		do_movement_action(st, +1, +1,map, monster, num_enemies);*direction = SE;
 		break;
 	case 'q':
         *game_menu = 1;
 		break;
 	case 'w':
-		do_movement_action(st, +0, -1,map);*direction = N;
+		do_movement_action(st, +0, -1,map, monster, num_enemies);*direction = N;
 		break;
 	case 'a':
-		do_movement_action(st, -1, +0,map);*direction = W;
+		do_movement_action(st, -1, +0,map, monster, num_enemies);*direction = W;
 		break;
 	case 's':
-		do_movement_action(st, +0, +1,map);*direction = S;
+		do_movement_action(st, +0, +1,map, monster, num_enemies);*direction = S;
 		break;
 	case 'd':
-		do_movement_action(st, +1, +0,map);*direction = E;
+		do_movement_action(st, +1, +0,map, monster, num_enemies);*direction = E;
 		break;
   case ' ': attack(st,map,monster,direction,num_enemies);break;
   case 'W':
   if(*jump_on){
-   do_movement_action(st, +0, -2,map);*direction = N;
+   do_movement_action(st, +0, -2,map, monster, num_enemies);*direction = N;
 	 break;
   }else {
-    do_movement_action(st, +0, -1,map);*direction = N;
+    do_movement_action(st, +0, -1,map, monster, num_enemies);*direction = N;
 	 break;
   }
   
 	case 'A':
   if(*jump_on){
-   do_movement_action(st, -2, +0,map);*direction = W;
+   do_movement_action(st, -2, +0,map, monster, num_enemies);*direction = W;
 	 break;
   }else {
-    do_movement_action(st, -1, +0,map);*direction = W;
+    do_movement_action(st, -1, +0,map, monster, num_enemies);*direction = W;
 	 break;
   }
   
 	case 'S':
   if(*jump_on){
-   do_movement_action(st, +0, +2,map);*direction = S;
+   do_movement_action(st, +0, +2,map, monster, num_enemies);*direction = S;
 		break;
   }else{
-    do_movement_action(st, +0, +1,map);*direction = S;
+    do_movement_action(st, +0, +1,map, monster, num_enemies);*direction = S;
 		break;
   }
 	case 'D': 
   if(*jump_on){
-    do_movement_action(st, +2, +0,map);*direction = E;
+    do_movement_action(st, +2, +0,map, monster, num_enemies);*direction = E;
 		break;
   }else {
-    do_movement_action(st, +1, +0,map);*direction = E;
+    do_movement_action(st, +1, +0,map, monster, num_enemies);*direction = E;
 		break;
   }
   break;
@@ -731,6 +789,7 @@ void enemy_attack(MONSTERS *monster, STATE *s, int *num_enemies){
 //#endregion
 
 int main() {
+  int map_layer = 1 + (rand() % 3); // RANDOM NUMBER OF FLOORS GENERATOR (FUTURE FEATURE)
   int in_game = 0;
   int in_submenu = 0;
   int in_game_dynamics = 0;
@@ -798,6 +857,7 @@ int main() {
             init_pair(ENEMIE_COLOR, COLOR_BLACK, COLOR_MAGENTA);
             init_pair(FLASHLIGHT, COLOR_WHITE, COLOR_BLACK);
             init_pair(LOW_HP,COLOR_BLACK,COLOR_RED);
+            init_pair(EXPLOSION,COLOR_RED,COLOR_RED);
 
             map.y = nrows;
             map.x = ncols;
@@ -872,7 +932,6 @@ int main() {
 
               if (game_menu) {
                 in_game = 0;
-                
               }
             }
             free(monster);
