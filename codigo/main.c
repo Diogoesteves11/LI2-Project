@@ -36,7 +36,17 @@
 #define SE 26
 #define NO_DIRECTION 27
 
+
+
+
 //#region FUNCTIONS
+
+void display (int x, int y, int color, char character){
+  attron(COLOR_PAIR(color) | A_BOLD);
+  mvaddch(y, x, character);
+  attroff(COLOR_PAIR(color) | A_BOLD);
+}
+
 void move_monsters(STATE* st, MAPA* map, MONSTERS* monsters, int *num_enemies) {
     int playerX = st->playerX; // PlayerX
     int playerY = st->playerY; // PlayerY
@@ -142,61 +152,42 @@ double delta = 0.05;
         double y = centerY + 0.5;
 
         while (x >= 0 && x < map->x && y >= 0 && y < map->y) {
-            char testch = mvinch((int)y, (int)x) & A_CHARTEXT;
-            
+            char testch = mvinch((int)y, (int)x) & A_CHARTEXT;           
              if (testch == wall) {
-                map-> matrix [(int)x][(int)y] = wall;
-                attron(COLOR_PAIR(WALL_ILUMINATED));
-                mvaddch(y, x, '#');
-                attroff(COLOR_PAIR(WALL_ILUMINATED));
-                break;
+              map-> matrix [(int)x][(int)y] = wall;
+              display(x,y,WALL_ILUMINATED, '#');
+              break;
             }
             else if (testch == trap) {
                 map-> matrix [(int)x][(int)y] = trap;
-                attron(COLOR_PAIR(TRAP_COLOR));
-                mvaddch(y, x, 'x' | A_BOLD);
-                attroff(COLOR_PAIR(TRAP_COLOR));
-                
+                display(x,y,TRAP_COLOR,trap);
             }
             else if (testch == heal) {
                 map-> matrix [(int)x][(int)y] = heal;
-                attron(COLOR_PAIR(HEAL_ON));
-                mvaddch(y, x, '+' | A_BOLD);
-                attroff(COLOR_PAIR(HEAL_ON));
+                display(x,y,HEAL_ON,heal);
                 
             }
             else if (testch == bullet) {
                 map-> matrix [(int)x][(int)y] = bullet;
-                attron(COLOR_PAIR(BULLET_ON));
-                mvaddch(y, x, '-' | A_BOLD);
-                attroff(COLOR_PAIR(BULLET_ON));
-                
+                display(x,y,BULLET_ON,bullet);
             }
             else if (testch == empty_block) {
                 map->matrix[(int)x][(int)y] = '.';
-                attron(COLOR_PAIR(FLASHLIGHT)); 
-                mvaddch(y, x, '.' | A_BOLD);
-                attroff(COLOR_PAIR(FLASHLIGHT));
+                display(x,y,FLASHLIGHT,'.');
             }
             else if (testch == enemy){
                map-> matrix [(int)x][(int)y] = enemy;
-               attron(COLOR_PAIR(ENEMIE_COLOR));
-               mvaddch(y, x, '&' | A_BOLD);
-               attroff(COLOR_PAIR(ENEMIE_COLOR));
+               display(x,y,ENEMIE_COLOR,enemy);
              
             }
              else if (testch == damage){
-              map->matrix [(int)x][(int)y] = damage;
-             attron(COLOR_PAIR(TRAP_COLOR));
-             mvaddch(y, x, '.' | A_BOLD);
-             attroff(COLOR_PAIR(TRAP_COLOR));
+             map->matrix [(int)x][(int)y] = damage;
+             display(x,y,TRAP_COLOR,'.');
              map->matrix[(int)x][(int)y] = ' ';
             }
             else if (testch == explosion){
              map->matrix [(int)x][(int)y] = explosion;
-             attron(COLOR_PAIR(TRAP_COLOR));
-             mvaddch(y, x, '^' | A_BOLD);
-             attroff(COLOR_PAIR(TRAP_COLOR));
+             display(x,y,TRAP_COLOR,'^');
              map->matrix[(int)x][(int)y] = ' ';
            }
            
@@ -264,8 +255,8 @@ void lights_off(MAPA *map) { // this function sets all the map colors to black a
             }
         }
     }
-    
 }
+
 
 void kill_monster(MONSTERS *monster, int index, MAPA *map){
   char empty_block = ' ',monsterch = '&';
@@ -941,7 +932,6 @@ int main() {
 
               if (game_menu) {
                 in_game = 0;
-                
               }
             }
             free(monster);
