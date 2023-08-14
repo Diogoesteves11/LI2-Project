@@ -16,6 +16,7 @@ typedef struct state {
 	int bullets;
 	int sword;
 	int kills;
+	int room;
 } STATE;
 
 typedef struct monsters

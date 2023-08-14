@@ -606,7 +606,7 @@ void attack(STATE *s, MAPA *map, MONSTERS *monster, int *direction, int *num_ene
  
 }
 }
-void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction, int *num_enemies, int *jump_on){
+void update(STATE *st,MAPA *map,int *game_menu,MONSTERS *monster,int *direction, int *num_enemies, int *jump_on, int rooms){
 	int key = getch();
 
 	switch (key)
@@ -750,24 +750,28 @@ void show_menu() {
     refresh();
 }
 
-void refresh_GAME_STATUS(MAPA *map){
-    for (int ix = 0; ix <= map->x; ix++){
-        for (int iy = 0; iy <= map->y; iy++){
-         map->matrix[ix][iy] = '\0';
+void refresh_GAME_STATUS(MAPA *map, int rooms){
+  for (int i = 0; i < rooms; i++){
+    for (int ix = 0; ix <= map[i].x; ix++){
+        for (int iy = 0; iy <= map[i].y; iy++){
+         map[i].matrix[ix][iy] = '\0';
         }
     }
+  }
 }
 
 
-void spawn_monsters(MONSTERS *monster, MAPA *map, int *num_enemies){
+void spawn_monsters(MONSTERS *monster, MAPA *map, int *num_enemies, STATE *s){
   char empty_block = ' ';
-  int ix,iy;
+  int ix,iy,roomNum;
+  roomNum = s->room;
+
   for (int i = 0; i < (*num_enemies); i++){
    do{
    ix = 1 + (rand() % (map-> x)-2);
    iy = 1 + (rand() % (map-> y) - 2);
    }while(map->matrix[ix][iy]!= empty_block);
-   map->matrix[ix][iy] = '&';
+   map[roomNum].matrix[ix][iy] = '&';
    monster[i].y = iy;
    monster[i].x = ix;
    monster[i].hp = 2;
@@ -789,7 +793,6 @@ void enemy_attack(MONSTERS *monster, STATE *s, int *num_enemies){
 //#endregion
 
 int main() {
-  int map_layer = 1 + (rand() % 3); // RANDOM NUMBER OF FLOORS GENERATOR (FUTURE FEATURE)
   int in_game = 0;
   int in_submenu = 0;
   int in_game_dynamics = 0;
@@ -797,7 +800,6 @@ int main() {
   int num_enemies = 15;
   int jump_on = 0;
   int map_visibility = 0;
-  MAPA map;
 
   while (1) {
     initscr();
@@ -817,17 +819,22 @@ int main() {
 
       switch (choice) {
         case '1': {
-          in_game = 1; 
-          refresh_GAME_STATUS(&map);
+          int rooms = 1 + (rand() % 5); // RANDOM NUMBER OF FLOORS GENERATOR (FUTURE FEATURE)
+          in_game = 1;
+          MAPA *maps;
+          STATE st = {20, 20, 3, 0, 1, 0, 0};
+          maps = malloc(sizeof(MAPA) * rooms);
+          refresh_GAME_STATUS(maps, rooms);
+
           while (in_game) {
             int game_menu = 0;
             int plays = 0;
-            STATE st = {20, 20, 3, 0, 1, 0};
             MONSTERS *monster;
             WINDOW *wnd = initscr();
             int ncols, nrows;
             int direction = NO_DIRECTION;
             getmaxyx(wnd, nrows, ncols);
+            st.room = 1 + (rand() % rooms); // starting room
 
             monster = malloc(sizeof(MONSTERS) * num_enemies);
 
@@ -859,12 +866,11 @@ int main() {
             init_pair(LOW_HP,COLOR_BLACK,COLOR_RED);
             init_pair(EXPLOSION,COLOR_RED,COLOR_RED);
 
-            map.y = nrows;
-            map.x = ncols;
+            
 
-            draw_map(&map,&map_visibility);
-            spawn_player(&st, &map);
-            spawn_monsters(monster,&map, &num_enemies);
+            draw_map(maps,&map_visibility, rooms, nrows, ncols);
+            spawn_player(&st, maps);
+            spawn_monsters(monster, maps, &num_enemies);
            
             while (in_game) {
               move(nrows - 1, 0);
@@ -899,21 +905,23 @@ int main() {
                 printw("   MAP VISIBILITY: OFF");
               }
               clrtoeol();
+              printw("   ROOM %d/%d", st.room, rooms);
+
               mvprintw(nrows-1,ncols-19,"PRESS 'q' TO RETURN");
               attroff(COLOR_PAIR(SCORE));
 
               if (st.hp > 1) {
-                map.matrix[st.playerX][st.playerY] = '@';
+                maps[st.room].matrix[st.playerX][st.playerY] = '@';
                 attron(COLOR_PAIR(PLAYER));
                 mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
                 attroff(COLOR_PAIR(PLAYER));
               } else if (st.hp == 1) {
-                map.matrix[st.playerX][st.playerY] = '@';
+                maps[st.room].matrix[st.playerX][st.playerY] = '@';
                 attron(COLOR_PAIR(MEDIUM_HP));
                 mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
                 attroff(COLOR_PAIR(MEDIUM_HP));
               } else if (st.hp == 0){
-                map.matrix[st.playerX][st.playerY] = '@';
+                maps[st.room].matrix[st.playerX][st.playerY] = '@';
                 attron(COLOR_PAIR(LOW_HP));
                 mvaddch(st.playerY, st.playerX, '@' | A_BOLD);
                 attroff(COLOR_PAIR(LOW_HP));
@@ -922,11 +930,11 @@ int main() {
                 break;
               }
               
-              lights_off(&map);
-              draw_light(&st, &map);
+              lights_off(maps);
+              draw_light(&st, maps);
               move(st.playerY, st.playerX);
-              update(&st,&map, &game_menu,monster,&direction,&num_enemies,&jump_on);
-              move_monsters(&st,&map,monster,&num_enemies);
+              update(&st,maps, &game_menu,monster,&direction,&num_enemies,&jump_on, rooms);
+              move_monsters(&st,maps,monster,&num_enemies);
               enemy_attack(monster,&st,&num_enemies);
               plays++;
 
@@ -936,6 +944,7 @@ int main() {
             }
             free(monster);
           }
+          free(maps);
           break;
         }
         case '2':{

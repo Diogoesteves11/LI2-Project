@@ -1,4 +1,4 @@
 #include "state.h"
 
-void draw_map(MAPA *map, int *map_visibility);
+void draw_map(MAPA *map, int *map_visibility, int rooms, int nrows, int ncols);
 
